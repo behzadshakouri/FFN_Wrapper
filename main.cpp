@@ -6,7 +6,7 @@ using namespace mlpack;
 using namespace std;
 
 int main()
-{
+{/*
     // Load the training set and testing set.
     arma::mat trainData;
     data::Load("thyroid_train.csv", trainData, true);
@@ -49,7 +49,7 @@ int main()
     In predictionsTemp, the 3 dimensions for each data point correspond to the
     probabilities of belonging to the three possible classes.
   */
-    arma::mat prediction = arma::zeros<arma::mat>(1, predictionTemp.n_cols);
+    /*arma::mat prediction = arma::zeros<arma::mat>(1, predictionTemp.n_cols); COMMENTED OUT
 
     // Find index of max prediction for each data point and store in "prediction"
     for (size_t i = 0; i < predictionTemp.n_cols; ++i)
@@ -62,10 +62,11 @@ int main()
     Compute the error between predictions and testLabels,
     now that we have the desired predictions.
   */
-    size_t correct = arma::accu(prediction == testLabels);
+    /*size_t correct = arma::accu(prediction == testLabels); COMMENTED OUT
     double classificationError = 1 - double(correct) / testData.n_cols;
 
     // Print out the classification error for the testing dataset.
     std::cout << "Classification Error for the Test set: " << classificationError << std::endl;
     return 0;
+*/
 }
