@@ -33,14 +33,15 @@ bool Train()
 {
 
     // Load the training set and testing set.
+    arma::mat Data;
+    data::Load("output.txt", Data, true);
+
+
     arma::mat trainData;
     data::Load("thyroid_train.csv", trainData, true);
     arma::mat testData;
     data::Load("thyroid_test.csv", testData, true);
 
-    FFNWrapper F;
-    FFNWrapper F1 = F;
-    FFNWrapper F2(F1);
     // Split the labels from the training set and testing set respectively.
     // Decrement the labels by 1, so they are in the range 0 to (numClasses - 1).
     arma::mat trainLabels = trainData.row(trainData.n_rows - 1) - 1;
@@ -92,7 +93,7 @@ bool Train()
 
     // Print out the classification error for the testing dataset.
     std::cout << "Classification Error for the Test set: " << classificationError << std::endl;
-    //return 0;
+    return 0;
 
     return true;
 }

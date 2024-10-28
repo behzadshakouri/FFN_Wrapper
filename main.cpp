@@ -6,16 +6,19 @@ using namespace mlpack;
 using namespace std;
 
 int main()
-{/*
+{
     // Load the training set and testing set.
+    arma::mat Data;
+    data::Load("test.txt", Data, true);
+
     arma::mat trainData;
     data::Load("thyroid_train.csv", trainData, true);
     arma::mat testData;
     data::Load("thyroid_test.csv", testData, true);
 
-    FFNWrapper F;
-    FFNWrapper F1 = F;
-    FFNWrapper F2(F1);
+    //FFNWrapper F;
+    //FFNWrapper F1 = F;
+    //FFNWrapper F2(F1);
     // Split the labels from the training set and testing set respectively.
     // Decrement the labels by 1, so they are in the range 0 to (numClasses - 1).
     arma::mat trainLabels = trainData.row(trainData.n_rows - 1) - 1;
@@ -49,7 +52,7 @@ int main()
     In predictionsTemp, the 3 dimensions for each data point correspond to the
     probabilities of belonging to the three possible classes.
   */
-    /*arma::mat prediction = arma::zeros<arma::mat>(1, predictionTemp.n_cols); COMMENTED OUT
+    arma::mat prediction = arma::zeros<arma::mat>(1, predictionTemp.n_cols);
 
     // Find index of max prediction for each data point and store in "prediction"
     for (size_t i = 0; i < predictionTemp.n_cols; ++i)
@@ -62,11 +65,10 @@ int main()
     Compute the error between predictions and testLabels,
     now that we have the desired predictions.
   */
-    /*size_t correct = arma::accu(prediction == testLabels); COMMENTED OUT
+    size_t correct = arma::accu(prediction == testLabels);
     double classificationError = 1 - double(correct) / testData.n_cols;
 
     // Print out the classification error for the testing dataset.
     std::cout << "Classification Error for the Test set: " << classificationError << std::endl;
     return 0;
-*/
 }
