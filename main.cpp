@@ -1,6 +1,8 @@
 #include <iostream>
 #include <mlpack.hpp>
 #include "ffnwrapper.h"
+#include <BTCSet.h>
+
 
 using namespace mlpack;
 using namespace std;
@@ -8,15 +10,27 @@ using namespace std;
 int main()
 {
     // Load the training set and testing set.
-    arma::mat Data;
-    data::Load("test.txt", Data, true);
+    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output.txt",true);
+
+    vector<int> columns;
+    columns.push_back(1);
+    columns.push_back(2);
+    columns.push_back(3);
+    columns.push_back(5);
+    columns.push_back(8);
+    arma::mat Data = InputTimeSeries.ToArmaMat(columns);
+    Data.save("Data.csv", arma::file_type::raw_ascii);
+    //data::Load("/home/behzad/Projects/FFNWrapper/test.txt", Data, true);
 
     arma::mat trainData;
     data::Load("thyroid_train.csv", trainData, true);
     arma::mat testData;
     data::Load("thyroid_test.csv", testData, true);
 
-    //FFNWrapper F;
+    FFNWrapper F;
+    //F.input_data = &InputTimeSeries;
+    //F.output_data = &OutputTimeSeries;
+    //F.Train();
     //FFNWrapper F1 = F;
     //FFNWrapper F2(F1);
     // Split the labels from the training set and testing set respectively.

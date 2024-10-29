@@ -14,7 +14,7 @@ EQ            = =
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DBehzad -DARMA_USE_LAPACK -DARMA_USE_BLAS -Duse_VTK -DARMA_USE_SUPERLU -DQT_QML_DEBUG
+DEFINES       = -DBehzad -DARMA_USE_LAPACK -DARMA_USE_BLAS -D_ARMA -Duse_VTK -DARMA_USE_SUPERLU -DQT_QML_DEBUG
 CFLAGS        = -pipe -g -Wall -Wextra -fPIC $(DEFINES)
 CXXFLAGS      = -pipe -g -std=gnu++1z -Wall -Wextra -fPIC $(DEFINES)
 INCPATH       = -I../../../FFNWrapper -I. -I../../../OpenHydroQual/aquifolium/include -I../../../OpenHydroQual/aquifolium/include/GA -I../../../OpenHydroQual/aquifolium/src -I../../../../Qt/5.15.2/gcc_64/mkspecs/linux-g++
@@ -52,9 +52,11 @@ OBJECTS_DIR   = ./
 
 ####### Files
 
-SOURCES       = ../../ffnwrapper.cpp \
+SOURCES       = ../../../OpenHydroQual/aquifolium/src/Utilities.cpp \
+		../../ffnwrapper.cpp \
 		../../main.cpp 
-OBJECTS       = ffnwrapper.o \
+OBJECTS       = Utilities.o \
+		ffnwrapper.o \
 		main.o
 DIST          = /Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
 		/Qt/5.15.2/gcc_64/mkspecs/common/unix.conf \
@@ -264,7 +266,8 @@ DIST          = /Qt/5.15.2/gcc_64/mkspecs/features/spec_pre.prf \
 		/Qt/5.15.2/gcc_64/mkspecs/features/exceptions.prf \
 		/Qt/5.15.2/gcc_64/mkspecs/features/yacc.prf \
 		/Qt/5.15.2/gcc_64/mkspecs/features/lex.prf \
-		../../../../FFNWrapper.pro ffnwrapper.h ../../ffnwrapper.cpp \
+		../../../../FFNWrapper.pro ffnwrapper.h ../../../OpenHydroQual/aquifolium/src/Utilities.cpp \
+		../../ffnwrapper.cpp \
 		../../main.cpp
 QMAKE_TARGET  = FFNWrapper
 DESTDIR       = 
@@ -738,6 +741,9 @@ compiler_lex_clean:
 compiler_clean: 
 
 ####### Compile
+
+Utilities.o: ../../../OpenHydroQual/aquifolium/src/Utilities.cpp ../../../OpenHydroQual/aquifolium/include/Utilities.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o Utilities.o ../../../OpenHydroQual/aquifolium/src/Utilities.cpp
 
 ffnwrapper.o: ../../ffnwrapper.cpp ../../ffnwrapper.h \
 		../../../OpenHydroQual/aquifolium/include/BTCSet.h \

@@ -24,8 +24,8 @@ public:
     virtual ~FFNWrapper();
     bool Train();
     model_structure ModelStructure;
-    CTimeSeriesSet<double> input_data;
-    CTimeSeriesSet<double> output_data;
+    CTimeSeriesSet<double> *input_data;
+    CTimeSeriesSet<double> *output_data;
 
 private:
 

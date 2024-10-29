@@ -34,7 +34,7 @@ bool Train()
 
     // Load the training set and testing set.
     arma::mat Data;
-    data::Load("output.txt", Data, true);
+    data::Load("output.csv", Data, true);
 
 
     arma::mat trainData;

@@ -9,10 +9,11 @@ CONFIG += Behzad
 DEFINES += Behzad
 
 SOURCES += \
+        ../OpenHydroQual/aquifolium/src/Utilities.cpp \
         ffnwrapper.cpp \
         main.cpp
 
-DEFINES += ARMA_USE_LAPACK ARMA_USE_BLAS
+DEFINES += ARMA_USE_LAPACK ARMA_USE_BLAS _ARMA
 
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
