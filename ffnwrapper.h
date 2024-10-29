@@ -22,10 +22,13 @@ public:
     FFNWrapper(const FFNWrapper &F);
     FFNWrapper& operator=(const FFNWrapper& rhs);
     virtual ~FFNWrapper();
+    bool DataProcess();
     bool Train();
-    model_structure ModelStructure;
-    CTimeSeriesSet<double> *input_data;
-    CTimeSeriesSet<double> *output_data;
+    bool Test();
+    model_structure ModelStructure;    
+    CTimeSeriesSet<double> *data;
+    vector<int> inputcolumns;
+    vector<int> outputcolumns;
 
 private:
 
