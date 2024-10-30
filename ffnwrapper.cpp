@@ -5,6 +5,14 @@ using namespace mlpack;
 using namespace std;
 using namespace arma;
 
+#include <mlpack/core.hpp>
+#include <mlpack/methods/ann/ffn.hpp>
+#include <mlpack/methods/ann/layer/layer.hpp>
+#include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
+#include <armadillo>
+using namespace mlpack::ann;
+
+
 FFNWrapper::FFNWrapper():FFN<>()
 {
 
@@ -33,7 +41,7 @@ FFNWrapper::~FFNWrapper()
 bool FFNWrapper::DataProcess()
 {
     // Load the whole data (OpenHydroQual output).
-    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output.txt",true);
+    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output_c.txt",true);
 
     //columns.push_back(1); // A: //t It's not reading this column!!!
     inputcolumns.push_back(0); // Input 1: D(4): Settling element (1)_Coagulant:external_mass_flow_timeseries
@@ -53,10 +61,9 @@ bool FFNWrapper::Train()
     mat TrainOutputData = data->ToArmaMat(outputcolumns);
 
     // Initialize the network
-    model.Add<Linear>(2); // Connection Layer: InputData to Hidden Layer with 8 Neurons
-    model.Add<Sigmoid>(); // Activation Function
-    model.Add<Linear>(1); // Connection Layer: Hidden Layer to OutputData with 1 Neuron
-    model.Add<Sigmoid>(); // Activation Funchion
+    model.Add<Linear>(2); // Connection Layer: InputData to Hidden Layer with 2 Neurons
+    model.Add<ReLU>(); // Activation Funchion
+    model.Add<Linear>(1); // Output Layer with 1 Neuron
 
     // Train the model
     model.Train(TrainInputData, TrainOutputData);
@@ -95,28 +102,4 @@ bool FFNWrapper::Test()
     std::cout << "Classification Error for the Test set: " << classificationError << std::endl;*/
 
     return true;
-}
-
-void FFNWrapper::Test2()
-{
-    arma::mat X = arma::randu<arma::mat>(1, 100);
-    arma::mat y = arma::sin(X);
-
-    // Create an FFN model.
-    FFN<MeanSquaredError<>, RandomInitialization> model;
-
-    // Add layers to the model.
-    model.Add<Linear<> >(1, 32);
-    model.Add<ReLULayer<> >();
-    model.Add<Linear<> >(32, 1);
-
-    // Train the model.
-    model.Train(X, y);
-
-    // Make predictions on new data.
-    arma::mat X_test = arma::randu<arma::mat>(1, 10);
-    arma::mat y_pred;
-    model.Predict(X_test, y_pred);
-
-    return 0;
 }
