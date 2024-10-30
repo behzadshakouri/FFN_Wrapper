@@ -16,9 +16,8 @@ int main()
     FFNWrapper F;
     F.DataProcess();
     F.Train();
-
-    //F.Test();
-
+    F.Test();
+    F.Prediction.save("prediction.txt",arma::file_type::raw_ascii);
     // Split the labels from the training set and testing set respectively.
     // Decrement the labels by 1, so they are in the range 0 to (numClasses - 1).
 
