@@ -44,11 +44,16 @@ bool FFNWrapper::DataProcess()
     CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output_c.txt",true);
 
     //columns.push_back(1); // A: //t It's not reading this column!!!
-    inputcolumns.push_back(0); // Input 1: D(4): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
     inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
     outputcolumns.push_back(10); // Output: V(11): Settling element (1)_Solids:concentration
 
     data = new CTimeSeriesSet<double>(InputTimeSeries);
+    data->writetofile("data.csv");
+
+    //Working with arma
+    A.load("/home/behzad/Projects/FFNWrapper/output_c.txt",arma::file_type::auto_detect);
+    A.save("A.csv", arma::file_type::raw_ascii);
 
     return true;
 }
@@ -59,6 +64,9 @@ bool FFNWrapper::Train()
     // Getting data
     mat TrainInputData = data->ToArmaMat(inputcolumns);
     mat TrainOutputData = data->ToArmaMat(outputcolumns);
+
+    TrainInputData.save("TrainInputData.csv", arma::file_type::raw_ascii);
+    TrainOutputData.save("TrainOutputData.csv", arma::file_type::raw_ascii);
 
     // Initialize the network
     model.Add<Linear>(2); // Connection Layer: InputData to Hidden Layer with 2 Neurons

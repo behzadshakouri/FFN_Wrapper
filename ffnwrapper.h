@@ -23,6 +23,7 @@ public:
     FFNWrapper& operator=(const FFNWrapper& rhs);
     virtual ~FFNWrapper();
     bool DataProcess();
+    mat A;
     FFN <MeanSquaredError> model;
     bool Train();
     bool Test();
