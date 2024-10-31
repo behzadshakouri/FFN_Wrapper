@@ -27,6 +27,7 @@ public:
     FFN <MeanSquaredError> model;
     bool Train();
     bool Test();
+    bool Shifter();
     model_structure ModelStructure;    
     CTimeSeriesSet<double> *data;
     vector<int> inputcolumns;

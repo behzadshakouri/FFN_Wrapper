@@ -16,41 +16,8 @@ int main()
     F.DataProcess();
     F.Train();
     F.Test();
-    F.Prediction.save("prediction.txt",arma::file_type::raw_ascii);
-    CTimeSeriesSet<double> PredictionTS(F.Prediction,0.01);
-    PredictionTS.writetofile("PredictionTS.csv");
+    F.Shifter();
 
-    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output_c.txt",true);
-
-    vector<int> inputcolumns;
-    vector<vector<int>> lags;
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(2);
-    vector<int> lag2; lag1.push_back(1); lag1.push_back(3);
-    lags.push_back(lag1);
-    lags.push_back(lag2);
-    inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
-
-
-
-    arma::mat x = InputTimeSeries.ToArmaMatShifter(inputcolumns, lags);
-
-    CTimeSeriesSet<double> output(x,0.01);
-    output.writetofile("Shifted.tx");
-
-    // Split the labels from the training set and testing set respectively.
-    // Decrement the labels by 1, so they are in the range 0 to (numClasses - 1).
-
-    /*
-    arma::mat trainLabels = trainData.row(trainData.n_rows - 1) - 1;
-    arma::mat testLabels = testData.row(testData.n_rows - 1) - 1;
-    trainData.shed_row(trainData.n_rows - 1);
-    testData.shed_row(testData.n_rows - 1);
-    */
-    /*arma::mat trainLabels = trainData.row(trainData.n_rows - 1) - 1;
-    arma::mat testLabels = testData.row(testData.n_rows - 1) - 1;
-    trainData.shed_row(trainData.n_rows - 1);
-    testData.shed_row(testData.n_rows - 1);*/
 
     return 0;
 }
