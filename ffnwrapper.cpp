@@ -72,8 +72,8 @@ bool FFNWrapper::Train()
 
 
     // Initialize the network
-    model.Add<Linear>(2); // Connection Layer: InputData to Hidden Layer with 2 Neurons
-    model.Add<ReLU>(); // Activation Funchion
+    model.Add<Linear>(4); // Connection Layer: InputData to Hidden Layer with 2 Neurons
+    model.Add<Sigmoid>(); // Activation Funchion
     model.Add<Linear>(1); // Output Layer with 1 Neuron
 
     // Train the model
