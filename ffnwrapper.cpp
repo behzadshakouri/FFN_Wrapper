@@ -118,20 +118,20 @@ bool FFNWrapper::Shifter()
     //Lags definition
     vector<vector<int>> lags;
     vector<int> lag1; lag1.push_back(0); lag1.push_back(2);
-    vector<int> lag2; lag1.push_back(1); lag1.push_back(3);
+    vector<int> lag2; lag2.push_back(1); lag2.push_back(3);
     lags.push_back(lag1);
     lags.push_back(lag2);
 
     //Shifting by lags definition (Inputs)
     mat x = InputTimeSeries.ToArmaMatShifter(inputcolumns, lags);
 
-    CTimeSeriesSet<double> ShiftedInputs(x,0.01);
+    CTimeSeriesSet<double> ShiftedInputs(x,0.01,lags);
     ShiftedInputs.writetofile("ShiftedInputs.txt");
 
     //Shifting by lags definition (Outputs)
-    mat y = InputTimeSeries.ToArmaMatShifter(outputcolumns, lags);
+    mat y = InputTimeSeries.ToArmaMatShifterOutput(outputcolumns, lags);
 
-    CTimeSeriesSet<double> ShiftedOutputs(y,0.01);
+    CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::ShiftOutput(y,0.01,lags);
     ShiftedOutputs.writetofile("ShiftedOutputs.txt");
 
     return true;
