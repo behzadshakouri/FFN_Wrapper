@@ -10,9 +10,16 @@ using namespace std;
 
 struct model_structure
 {
+    double dt;
+    int n_input_layers;
+    string activation_function;
+    int n_output_layers;
     int n_layers;
     vector<int> n_nodes;
     vector<string> node_type;
+    vector<vector<int>> lags;
+    vector<int> inputcolumns;
+    vector<int> outputcolumns;
 };
 
 class FFNWrapper : FFN<>
@@ -25,15 +32,18 @@ public:
     bool DataProcess();
     mat A;
     FFN <MeanSquaredError> model;
+    bool Shifter();
     bool Train();
     bool Test();
-    bool Shifter();
     model_structure ModelStructure;    
     CTimeSeriesSet<double> *data;
-    vector<int> inputcolumns;
-    vector<int> outputcolumns;
+    CTimeSeriesSet<double> *data2;
+    CTimeSeriesSet<double> *data3;
+    bool Initiate();
     mat Prediction;
 private:
+    mat TrainInputData;
+    mat TrainOutputData;
 
 
 };

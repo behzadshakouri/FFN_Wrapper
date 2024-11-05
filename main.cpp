@@ -11,13 +11,19 @@ using namespace std;
 
 int main()
 {
+    model_structure mymodelstruct;
 
+    /*
+    mymodelstruct.inputcolumns.push_back(1);
+    mymodelstruct.n_input_layers=4;
+    mymodelstruct.activation_function="Sigmoid";
+    mymodelstruct.n_output_layers=1;
+    */
     FFNWrapper F;
-    F.DataProcess();
+    //F.ModelStructure = mymodelstruct;
+    F.Initiate();
     F.Train();
     F.Test();
-    F.Shifter();
-
 
     return 0;
 }
