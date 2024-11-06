@@ -41,23 +41,13 @@ FFNWrapper::~FFNWrapper()
 
 bool FFNWrapper::DataProcess()
 {
-    ModelStructure.dt=0.01;
 
     // Load the whole data (OpenHydroQual output).
-    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output_c.txt",true);
 
-    ModelStructure.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    ModelStructure.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
-    ModelStructure.outputcolumns.push_back(10); // Output: V(11): Settling element (1)_Solids:concentration
+    ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
 
-    data = new CTimeSeriesSet<double>(InputTimeSeries);
-    data->writetofile("data.csv");
-
-    //Lags definition
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag1.push_back(30);
-    ModelStructure.lags.push_back(lag1);
-    ModelStructure.lags.push_back(lag2);
+    // Writing the data for checking
+    data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
 
     Shifter();
 
@@ -66,29 +56,19 @@ bool FFNWrapper::DataProcess()
 
 bool FFNWrapper::Shifter()
 {
-    CTimeSeriesSet<double> InputTimeSeries("/home/behzad/Projects/FFNWrapper/output_c.txt",true);
+    CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress,true);
 
     //Shifting by lags definition (Inputs)
     TrainInputData = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
 
     CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
-    ShiftedInputs.writetofile("ShiftedInputs.txt");
+    //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
     //Shifting by lags definition (Outputs)
     TrainOutputData = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
     CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-    ShiftedOutputs.writetofile("ShiftedOutputs.txt");
-
-    //Data Checking
-    TrainInputData.save("TrainInputData.csv", arma::file_type::raw_ascii);
-    TrainOutputData.save("TrainOutputData.csv", arma::file_type::raw_ascii);
-
-    CTimeSeriesSet<double> TrainInputDataTS(TrainInputData,ModelStructure.dt);
-    TrainInputDataTS.writetofile("TrainInputDataTS.txt");
-
-    CTimeSeriesSet<double> TrainOutputDataTS(TrainOutputData,ModelStructure.dt);
-    TrainOutputDataTS.writetofile("TrainOutputDataTS.txt");
+    //ShiftedOutputs.writetofile("ShiftedOutputs.txt");
 
     return true;
 }
@@ -120,13 +100,73 @@ bool FFNWrapper::Test()
 {
     // Use the Predict method to get the predictions.
 
-    model.Predict(TrainInputData, Prediction);
+    ModelStructure.TestTimeSeries = new CTimeSeriesSet<double>(ModelStructure.testaddress,true);
+
+    // Writing the data for checking
+    data2 = new CTimeSeriesSet<double>(*ModelStructure.TestTimeSeries);
+
+    TestInputData = ModelStructure.TestTimeSeries->ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+
+    CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags);
+
+    TestOutputData = ModelStructure.TestTimeSeries->ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+
+    CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
+
+    model.Predict(TestInputData, Prediction);
     cout << "Prediction:" << Prediction;
 
-    Prediction.save("Prediction.txt",arma::file_type::raw_ascii);
+    return true;
+}
+
+bool FFNWrapper::PerformanceMetrics()
+{
+    CTimeSeriesSet<double> PredictionData (Prediction,ModelStructure.dt,ModelStructure.lags);
+    PredictionData.writetofile("Prediction.txt");
+    CTimeSeriesSet<double> TargetData = GetOutputData();
+    TargetData.writetofile("Target.txt");
+    double nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
+    double _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
+    cout<<"nMSE = "<<nMSE<<endl;
+    cout<<"R2 = "<<_R2<<endl;
+
+    return true;
+}
+
+
+bool FFNWrapper::DataSave()
+{
+    //Input data checking
+    data->writetofile("data.csv");
+
+    // Input/Output matrix checking
+    TrainInputData.save("TrainInputData.csv", arma::file_type::raw_ascii);
+    TrainOutputData.save("TrainOutputData.csv", arma::file_type::raw_ascii);
+
+    CTimeSeriesSet<double> TrainInputDataTS(TrainInputData,ModelStructure.dt);
+    TrainInputDataTS.writetofile("TrainInputDataTS.csv");
+
+    CTimeSeriesSet<double> TrainOutputDataTS(TrainOutputData,ModelStructure.dt);
+    TrainOutputDataTS.writetofile("TrainOutputDataTS.csv");
+
+    //Prediction results
+    Prediction.save("Prediction.csv",arma::file_type::raw_ascii);
 
     CTimeSeriesSet<double> PredictionTS(Prediction,ModelStructure.dt);
     PredictionTS.writetofile("PredictionTS.csv");
 
+    TestInputData.save("TestInputData.txt",arma::file_type::raw_ascii);
+    TestOutputData.save("TestOutputData.txt",arma::file_type::raw_ascii);
+
+    CTimeSeriesSet<double> TestInputDataTS(TestInputData,ModelStructure.dt);
+    TestInputDataTS.writetofile("TestInputDataTS.csv");
+
+    CTimeSeriesSet<double> TestOutputDataTS(TestOutputData,ModelStructure.dt);
+    TestOutputDataTS.writetofile("TestOutputDataTS.csv");
+
+    //Performance metrics
+
+
     return true;
 }
+

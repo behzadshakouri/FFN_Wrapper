@@ -10,7 +10,11 @@ using namespace std;
 
 struct model_structure
 {
+    CTimeSeriesSet<double> *InputTimeSeries; //(string& address, bool& tf);
+    CTimeSeriesSet<double> *TestTimeSeries; //(string& address, bool& tf);
     double dt;
+    string inputaddress;
+    string testaddress;
     int n_input_layers;
     string activation_function;
     int n_output_layers;
@@ -33,17 +37,28 @@ public:
     mat A;
     FFN <MeanSquaredError> model;
     bool Shifter();
+    bool Initiate();
     bool Train();
     bool Test();
+    bool PerformanceMetrics();
+    bool DataSave();
     model_structure ModelStructure;    
     CTimeSeriesSet<double> *data;
     CTimeSeriesSet<double> *data2;
-    CTimeSeriesSet<double> *data3;
-    bool Initiate();
+    CTimeSeriesSet<double> GetInputData()
+    {
+        return CTimeSeriesSet<double>(TestInputData,ModelStructure.dt,ModelStructure.lags);
+    }
+    CTimeSeriesSet<double> GetOutputData()
+    {
+        return CTimeSeriesSet<double>(TestOutputData,ModelStructure.dt,ModelStructure.lags);
+    }
     mat Prediction;
 private:
     mat TrainInputData;
     mat TrainOutputData;
+    mat TestInputData;
+    mat TestOutputData;
 
 
 };
