@@ -9,11 +9,13 @@ bool ModelCreator::CreateModel(model_structure *modelstructure)
 {
     vector<int> columns = convertToBase(parameters[0],2);
 
+    //column selection
     for (unsigned int i=0; i<columns.size(); i++)
     {
         if (columns[i]==1) modelstructure->inputcolumns.push_back(i);
     }
     modelstructure->input_lag_multiplier = parameters[1];
+    //lag selection
     for (int i=0; i<total_number_of_columns; i++)
     {
         vector<int> lags_onoff = convertToBase(parameters[i+2],lag_frequency);
@@ -24,6 +26,14 @@ bool ModelCreator::CreateModel(model_structure *modelstructure)
         }
         if (lags.size()!=0)
             modelstructure->lags.push_back(lags);
+    }
+    // nodes in hidden layers;
+    vector<int> nodes = convertToBase(parameters[2+total_number_of_columns],max_number_of_nodes_in_layers);
+    modelstructure->n_layers = nodes.size();
+    modelstructure->n_nodes.resize(nodes.size());
+    for (unsigned int i=0; i<nodes.size(); i++)
+    {
+        modelstructure->n_nodes[i] = nodes[i]+1;
     }
     return true;
 }
@@ -45,11 +55,13 @@ bool ModelCreator::SetParameters(model_structure *modelstructure)
     }
 
     parameters.resize(ParametersSize());
+
+    // column selection
     for (unsigned int i=0; i<modelstructure->inputcolumns.size(); i++)
         parameters[0]+=pow(2,modelstructure->inputcolumns[i]);
     parameters[1]=modelstructure->input_lag_multiplier;
 
-
+    //lag selection
     int counter = 0;
     for (int i=0; i<total_number_of_columns; i++)
     {
@@ -61,8 +73,12 @@ bool ModelCreator::SetParameters(model_structure *modelstructure)
             }
             counter++;
         }
-
     }
+
+    //nodes in hidden layers
+    for (int i=0; i<modelstructure->n_layers; i++)
+        parameters[2+total_number_of_columns]+=(modelstructure->n_nodes[i]-1) * pow(max_number_of_nodes_in_layers,i);
+
     return true;
 
 }
@@ -71,6 +87,7 @@ int ModelCreator::ParametersSize()
 {
     int out = 2;
     out+=total_number_of_columns;
+    out++;
     return out;
 }
 

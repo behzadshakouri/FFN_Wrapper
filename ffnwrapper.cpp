@@ -78,8 +78,10 @@ bool FFNWrapper::Initiate()
     DataProcess();
 
     // Initialize the network
-    model.Add<Linear>(6); // Connection Layer : ModelStructure.n_input_layers
-    model.Add<Sigmoid>(); // Activation Funchion
+    for (int i=0; i<ModelStructure.n_layers; i++)
+    {   model.Add<Linear>(ModelStructure.n_nodes[i]); // Connection Layer : ModelStructure.n_input_layers
+        model.Add<Sigmoid>(); // Activation Funchion
+    }
    //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
     //model.Add<Sigmoid>(); // Activation Funchion 2
     model.Add<Linear>(1); // Output Layer : ModelStructure.n_output_layers

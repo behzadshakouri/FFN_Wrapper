@@ -19,6 +19,7 @@ public:
     int total_number_of_columns = 0;
     int maximum_superficial_lag = 0;
     int lag_frequency = 0;
+    int max_number_of_nodes_in_layers;
 private:
     vector<long int> parameters;
 
