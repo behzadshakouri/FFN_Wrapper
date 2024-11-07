@@ -29,18 +29,18 @@ int main()
     mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/output_c(manually mag).txt";
 
     // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+    //mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    //mymodelstruct.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
 
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(10); // Output: V(11): Settling element (1)_Solids:concentration
 
 
     //Lags definition
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag1.push_back(30);
-    mymodelstruct.lags.push_back(lag1);
-    mymodelstruct.lags.push_back(lag2);
+    //vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
+    //vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag1.push_back(30);
+    //mymodelstruct.lags.push_back(lag1);
+    //mymodelstruct.lags.push_back(lag2);
 
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
