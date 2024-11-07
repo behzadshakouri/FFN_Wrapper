@@ -10,8 +10,8 @@ using namespace std;
 
 struct model_structure
 {
-    CTimeSeriesSet<double> *InputTimeSeries; //(string& address, bool& tf);
-    CTimeSeriesSet<double> *TestTimeSeries; //(string& address, bool& tf);
+    CTimeSeriesSet<double> *InputTimeSeries = nullptr; //(string& address, bool& tf);
+    CTimeSeriesSet<double> *TestTimeSeries = nullptr; //(string& address, bool& tf);
     double dt;
     string inputaddress;
     string testaddress;
@@ -24,6 +24,8 @@ struct model_structure
     vector<vector<int>> lags;
     vector<int> inputcolumns;
     vector<int> outputcolumns;
+    int input_lag_multiplier;
+
 };
 
 class FFNWrapper : FFN<>
