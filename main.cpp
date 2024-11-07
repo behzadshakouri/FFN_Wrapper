@@ -4,6 +4,7 @@
 #include <mlpack.hpp>
 #include "ffnwrapper.h"
 #include <BTCSet.h>
+#include "modelcreator.h"
 
 using namespace mlpack;
 using namespace std;
@@ -24,21 +25,28 @@ int main()
 
     mymodelstruct.dt=0.01;
 
-    mymodelstruct.inputaddress="/home/behzad/Projects/FFNWrapper/output_c.txt";
-    mymodelstruct.testaddress="/home/behzad/Projects/FFNWrapper/output_c(manually mag).txt";
+    mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/output_c.txt";
+    mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/output_c(manually mag).txt";
 
     // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+    //mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    //mymodelstruct.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
 
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(10); // Output: V(11): Settling element (1)_Solids:concentration
 
+    ModelCreator modelCreator;
+    modelCreator.maximum_superficial_lag = 10;
+    modelCreator.lag_frequency = 3;
+    modelCreator.total_number_of_columns = 2;
+    vector<int> parameters = {2,5,29524, 12002};
+    modelCreator.SetParameters(parameters);
+    modelCreator.CreateModel(&mymodelstruct);
     //Lags definition
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag1.push_back(30);
-    mymodelstruct.lags.push_back(lag1);
-    mymodelstruct.lags.push_back(lag2);
+    //vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
+    //vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag1.push_back(30);
+    //mymodelstruct.lags.push_back(lag1);
+    //mymodelstruct.lags.push_back(lag2);
 
     // Running FFNWrapper
     FFNWrapper F;
