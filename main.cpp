@@ -30,8 +30,8 @@ int main()
     mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/output_c.txt";
     mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/output_c(manually mag).txt";
 #else
-    mymodelstruct.inputaddress="/home/behzad/Projects/FFNWrapper/output_c.txt";
-    mymodelstruct.testaddress="/home/behzad/Projects/FFNWrapper/output_c(manually mag).txt";
+    mymodelstruct.inputaddress="/home/behzad/Projects/FFNWrapper2/output_c.txt";
+    mymodelstruct.testaddress="/home/behzad/Projects/FFNWrapper2/output_c(manually mag).txt";
 #endif
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
