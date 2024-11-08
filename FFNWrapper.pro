@@ -8,17 +8,27 @@ CONFIG -= qt
 CONFIG += Behzad
 DEFINES += Behzad
 
-SOURCES += \
-        ../OpenHydroQual/aquifolium/src/Utilities.cpp \
-        ffnwrapper.cpp \
-        main.cpp
-
-DEFINES += ARMA_USE_LAPACK ARMA_USE_BLAS _ARMA
+#CONFIG += Arash
+#DEFINES += Arash
 
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
 
 }
+
+Arash {
+    OHQPATH = /home/arash/Projects/QAquifolium/aquifolium
+
+}
+
+SOURCES += \
+        $$OHQPATH/src/Utilities.cpp \
+        ffnwrapper.cpp \
+        main.cpp \
+        modelcreator.cpp
+
+DEFINES += ARMA_USE_LAPACK ARMA_USE_BLAS _ARMA
+
 
 
 
@@ -28,8 +38,10 @@ CONFIG += use_VTK
 INCLUDEPATH += $$OHQPATH/include
 INCLUDEPATH += $$OHQPATH/include/GA
 INCLUDEPATH += $$OHQPATH/src
+INCLUDEPATH += /usr/local/include
 
 LIBS += -larmadillo -llapack -lblas -lgsl
 
 HEADERS += \
-    ffnwrapper.h
+    ffnwrapper.h \
+    modelcreator.h

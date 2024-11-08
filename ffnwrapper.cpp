@@ -13,12 +13,12 @@ using namespace arma;
 using namespace mlpack::ann;
 
 
-FFNWrapper::FFNWrapper():FFN<>()
+FFNWrapper::FFNWrapper():FFN<MeanSquaredError>()
 {
 
 }
 
-FFNWrapper::FFNWrapper(const FFNWrapper &rhs):FFN<>(rhs)
+FFNWrapper::FFNWrapper(const FFNWrapper &rhs):FFN<MeanSquaredError>(rhs)
 {
     ModelStructure = rhs.ModelStructure;
     data = rhs.data;
@@ -27,7 +27,7 @@ FFNWrapper::FFNWrapper(const FFNWrapper &rhs):FFN<>(rhs)
 
 FFNWrapper& FFNWrapper::operator=(const FFNWrapper& rhs)
 {
-    FFN<>::operator=(rhs);
+    FFN<MeanSquaredError>::operator=(rhs);
     ModelStructure = rhs.ModelStructure;
     data = rhs.data;
 
@@ -78,25 +78,29 @@ bool FFNWrapper::Initiate()
     DataProcess();
 
     // Initialize the network
-    model.Add<Linear>(6); // Connection Layer : ModelStructure.n_input_layers
-    model.Add<Sigmoid>(); // Activation Funchion
+    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
+    {
+        Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
+        Add<Sigmoid>(); // Activation Funchion
+    }
+
    //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
     //model.Add<Sigmoid>(); // Activation Funchion 2
-    model.Add<Linear>(1); // Output Layer : ModelStructure.n_output_layers
+    Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
 
     return true;
 }
 
-bool FFNWrapper::Train()
+bool FFNWrapper::Training()
 {
 
     // Train the model
-    model.Train(TrainInputData, TrainOutputData);
+    Train(TrainInputData, TrainOutputData);
 
     return true;
 }
 
-bool FFNWrapper::Test()
+bool FFNWrapper::Testing()
 {
     // Use the Predict method to get the predictions.
 
@@ -113,7 +117,7 @@ bool FFNWrapper::Test()
 
     CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
 
-    model.Predict(TestInputData, Prediction);
+    Predict(TestInputData, Prediction);
     cout << "Prediction:" << Prediction;
 
     return true;
