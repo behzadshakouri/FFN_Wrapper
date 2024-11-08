@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "ffnwrapper.h"
+#include <gsl/gsl_rng.h>
 
 using namespace std;
 class ModelCreator
@@ -16,12 +17,18 @@ public:
     int ParametersSize();
     bool SetParameters(model_structure *modelstructure);
     bool CreateModel(model_structure *modelstructure);
+    bool CreateRandomModelStructure(model_structure *modelstructure);
+    bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
     int maximum_superficial_lag = 0;
     int lag_frequency = 0;
-    int max_number_of_nodes_in_layers;
+    int max_number_of_nodes_in_layers = 10;
+    int max_number_of_layers = 4;
+    int max_lag_multiplier = 6;
+    void clear(model_structure *modelstructure);
 private:
     vector<long int> parameters;
+    gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
 
 
 };

@@ -5,6 +5,29 @@ ModelCreator::ModelCreator()
 
 }
 
+void ModelCreator::clear(model_structure *modelstructure)
+{
+    modelstructure->lags.clear();
+    modelstructure->inputcolumns.clear();
+    modelstructure->n_nodes.clear();
+}
+
+bool ModelCreator::CreateRandomModelStructure(model_structure *modelstructure)
+{
+    long unsigned int max_column_selection = pow(2,total_number_of_columns);
+    long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
+    long unsigned int max_node_selection = pow(max_number_of_layers,max_number_of_layers+1)-1;
+    parameters.resize(ParametersSize());
+    parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1;
+    parameters[1] = gsl_rng_uniform_int(r, max_lag_multiplier-1)+1;
+    for (int i=0; i<total_number_of_columns; i++)
+        parameters[i+2] = gsl_rng_uniform_int(r, max_lag_selection-1)+1;
+    parameters[total_number_of_columns+2] = gsl_rng_uniform_int(r, max_node_selection-1)+1;
+    clear(modelstructure);
+    CreateModel(modelstructure);
+    return true;
+}
+
 bool ModelCreator::CreateModel(model_structure *modelstructure)
 {
     vector<int> columns = convertToBase(parameters[0],2);
