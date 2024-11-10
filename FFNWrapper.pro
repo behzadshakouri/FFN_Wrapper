@@ -1,7 +1,7 @@
 TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
-CONFIG -= qt
+CONFIG += core
 
 #DEFINES += GSL
 
@@ -23,6 +23,7 @@ Arash {
 
 SOURCES += \
         $$OHQPATH/src/Utilities.cpp \
+        cmodelstructure.cpp \
         ffnwrapper.cpp \
         main.cpp \
         modelcreator.cpp
@@ -43,5 +44,6 @@ INCLUDEPATH += /usr/local/include
 LIBS += -larmadillo -llapack -lblas -lgsl
 
 HEADERS += \
+    cmodelstructure.h \
     ffnwrapper.h \
     modelcreator.h

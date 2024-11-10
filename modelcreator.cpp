@@ -1,18 +1,20 @@
 #include "modelcreator.h"
+#include <QFile>
+#include <QTextStream>
 
 ModelCreator::ModelCreator()
 {
 
 }
 
-void ModelCreator::clear(model_structure *modelstructure)
+void ModelCreator::clear(CModelStructure *modelstructure)
 {
     modelstructure->lags.clear();
     modelstructure->inputcolumns.clear();
     modelstructure->n_nodes.clear();
 }
 
-bool ModelCreator::CreateRandomModelStructure(model_structure *modelstructure)
+bool ModelCreator::CreateRandomModelStructure(CModelStructure *modelstructure)
 {
     long unsigned int max_column_selection = pow(2,total_number_of_columns);
     long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
@@ -28,7 +30,7 @@ bool ModelCreator::CreateRandomModelStructure(model_structure *modelstructure)
     return true;
 }
 
-bool ModelCreator::CreateModel(model_structure *modelstructure) const
+bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
 {
     vector<int> columns = convertToBase(parameters[0],2);
 
@@ -61,7 +63,7 @@ bool ModelCreator::CreateModel(model_structure *modelstructure) const
     return true;
 }
 
-bool ModelCreator::SetParameters(model_structure *modelstructure)
+bool ModelCreator::SetParameters(CModelStructure *modelstructure)
 {
     if (modelstructure->InputTimeSeries==nullptr && total_number_of_columns==0)
     {
@@ -132,3 +134,5 @@ std::vector<int> convertToBase(unsigned long int number, int base) {
 
     return result;
 }
+
+
