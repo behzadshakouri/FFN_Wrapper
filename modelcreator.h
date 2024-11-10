@@ -16,7 +16,7 @@ public:
     }
     int ParametersSize();
     bool SetParameters(model_structure *modelstructure);
-    bool CreateModel(model_structure *modelstructure);
+    bool CreateModel(model_structure *modelstructure) const;
     bool CreateRandomModelStructure(model_structure *modelstructure);
     bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
@@ -34,5 +34,17 @@ private:
 };
 
 std::vector<int> convertToBase(unsigned long int number, int base);
+bool operator==(const ModelCreator &m1, const ModelCreator &m2)
+{
+    model_structure modstruct1;
+    model_structure modstruct2;
+    m1.CreateModel(&modstruct1);
+    m2.CreateModel(&modstruct2);
+    return (modstruct1==modstruct2);
+}
+bool operator!=(const ModelCreator &m1, const ModelCreator &m2)
+{
+    return (!(m1==m2));
+}
 
 #endif // MODELCREATOR_H

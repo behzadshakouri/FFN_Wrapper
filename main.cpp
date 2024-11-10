@@ -62,7 +62,8 @@ int main()
 */
     model_structure mymodelstruct2;
     modelCreator.CreateModel(&mymodelstruct2);
-
+    bool a = (mymodelstruct2==mymodelstruct);
+    cout<<a;
     // Running FFNWrapper
     FFNWrapper F;
     F.ModelStructure = mymodelstruct;

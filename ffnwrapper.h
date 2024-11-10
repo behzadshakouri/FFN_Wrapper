@@ -65,4 +65,23 @@ private:
 
 };
 
+bool operator==(const model_structure& m1, const model_structure &m2)
+{
+    if (m1.input_lag_multiplier!=m2.input_lag_multiplier)
+        return false;
+    if (m1.inputcolumns != m2.inputcolumns)
+        return false;
+    if (m1.n_layers != m2.n_layers)
+        return false;
+    for (unsigned int i=0; i<m1.lags.size(); i++)
+        if (m1.lags[i]!=m2.lags[i])
+            return false;
+    return true;
+}
+
+bool operator!=(const model_structure& m1, const model_structure &m2)
+{
+    return (!(m1==m2));
+}
+
 #endif // FFNWRAPPER_H

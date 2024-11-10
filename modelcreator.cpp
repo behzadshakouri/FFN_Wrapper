@@ -28,7 +28,7 @@ bool ModelCreator::CreateRandomModelStructure(model_structure *modelstructure)
     return true;
 }
 
-bool ModelCreator::CreateModel(model_structure *modelstructure)
+bool ModelCreator::CreateModel(model_structure *modelstructure) const
 {
     vector<int> columns = convertToBase(parameters[0],2);
 
