@@ -5,6 +5,7 @@
 #include "ffnwrapper.h"
 #include <BTCSet.h>
 #include "modelcreator.h"
+#include <QDebug>
 
 using namespace mlpack;
 using namespace std;
@@ -14,7 +15,7 @@ int main()
 {
 
     // Defining Model Structure
-    model_structure mymodelstruct;
+    CModelStructure mymodelstruct;
     mymodelstruct.n_layers = 1;
     mymodelstruct.n_nodes = {4};
     /*
@@ -49,17 +50,22 @@ int main()
 //model creator
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
-    modelCreator.maximum_superficial_lag = 10;
-    modelCreator.total_number_of_columns = 50;
-    mymodelstruct.input_lag_multiplier = 5;
+    modelCreator.maximum_superficial_lag = 3;
+    modelCreator.total_number_of_columns = 2;
+    modelCreator.max_number_of_layers = 2;
+    modelCreator.CreateRandomModelStructure(&mymodelstruct);
+
+    /*mymodelstruct.input_lag_multiplier = 5;
     modelCreator.max_number_of_nodes_in_layers = 7;
     mymodelstruct.n_layers = 2;
     mymodelstruct.n_nodes = {3,2};
     modelCreator.SetParameters(&mymodelstruct);
-
-    model_structure mymodelstruct2;
-    modelCreator.CreateModel(&mymodelstruct2);
-
+*/
+    CModelStructure mymodelstruct2;
+    modelCreator.CreateRandomModelStructure(&mymodelstruct2);
+    bool a = (mymodelstruct2==mymodelstruct);
+    qDebug()<<mymodelstruct.ParametersToString();
+    qDebug()<<mymodelstruct2.ParametersToString();
     // Running FFNWrapper
     FFNWrapper F;
     F.ModelStructure = mymodelstruct;

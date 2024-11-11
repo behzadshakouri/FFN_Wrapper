@@ -1,11 +1,36 @@
 #include "modelcreator.h"
+#include <QFile>
+#include <QTextStream>
 
 ModelCreator::ModelCreator()
 {
 
 }
 
-bool ModelCreator::CreateModel(model_structure *modelstructure)
+void ModelCreator::clear(CModelStructure *modelstructure)
+{
+    modelstructure->lags.clear();
+    modelstructure->inputcolumns.clear();
+    modelstructure->n_nodes.clear();
+}
+
+bool ModelCreator::CreateRandomModelStructure(CModelStructure *modelstructure)
+{
+    long unsigned int max_column_selection = pow(2,total_number_of_columns);
+    long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
+    long unsigned int max_node_selection = pow(max_number_of_layers,max_number_of_layers+1)-1;
+    parameters.resize(ParametersSize());
+    parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1;
+    parameters[1] = gsl_rng_uniform_int(r, max_lag_multiplier-1)+1;
+    for (int i=0; i<total_number_of_columns; i++)
+        parameters[i+2] = gsl_rng_uniform_int(r, max_lag_selection-1)+1;
+    parameters[total_number_of_columns+2] = gsl_rng_uniform_int(r, max_node_selection-1)+1;
+    clear(modelstructure);
+    CreateModel(modelstructure);
+    return true;
+}
+
+bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
 {
     vector<int> columns = convertToBase(parameters[0],2);
 
@@ -38,7 +63,7 @@ bool ModelCreator::CreateModel(model_structure *modelstructure)
     return true;
 }
 
-bool ModelCreator::SetParameters(model_structure *modelstructure)
+bool ModelCreator::SetParameters(CModelStructure *modelstructure)
 {
     if (modelstructure->InputTimeSeries==nullptr && total_number_of_columns==0)
     {
@@ -109,3 +134,5 @@ std::vector<int> convertToBase(unsigned long int number, int base) {
 
     return result;
 }
+
+

@@ -1,15 +1,15 @@
 TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
-CONFIG -= qt
+CONFIG += core
 
 #DEFINES += GSL
 
-CONFIG += Behzad
-DEFINES += Behzad
+#CONFIG += Behzad
+#DEFINES += Behzad
 
-#CONFIG += Arash
-#DEFINES += Arash
+CONFIG += Arash
+DEFINES += Arash
 
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
@@ -23,6 +23,7 @@ Arash {
 
 SOURCES += \
         $$OHQPATH/src/Utilities.cpp \
+        cmodelstructure.cpp \
         ffnwrapper.cpp \
         main.cpp \
         modelcreator.cpp
@@ -43,5 +44,6 @@ INCLUDEPATH += /usr/local/include
 LIBS += -larmadillo -llapack -lblas -lgsl
 
 HEADERS += \
+    cmodelstructure.h \
     ffnwrapper.h \
     modelcreator.h
