@@ -3,13 +3,13 @@ CONFIG += console c++17
 CONFIG -= app_bundle
 CONFIG += core
 
-#DEFINES += GSL
+DEFINES += GSL
 
-CONFIG += Behzad
-DEFINES += Behzad
+#CONFIG += Behzad
+#DEFINES += Behzad
 
-#CONFIG += Arash
-#DEFINES += Arash
+CONFIG += Arash
+DEFINES += Arash
 
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium

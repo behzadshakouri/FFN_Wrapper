@@ -6,7 +6,13 @@
 
 ModelCreator::ModelCreator()
 {
+    #ifdef GSL
+    const gsl_rng_type *A = gsl_rng_default;
+    r = gsl_rng_alloc( A);
 
+    unsigned long seed = static_cast<unsigned long>(std::time(nullptr));
+    gsl_rng_set(r, seed);
+    #endif
 }
 
 void ModelCreator::clear(CModelStructure *modelstructure)
@@ -22,13 +28,7 @@ bool ModelCreator::CreateRandomModelStructure(CModelStructure *modelstructure)
     long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
     long unsigned int max_node_selection = pow(max_number_of_layers,max_number_of_layers+1)-1;
 
-    #ifdef GSL
-    A = gsl_rng_default;
-    r = gsl_rng_alloc(A);
 
-    unsigned long seed = static_cast<unsigned long>(std::time(nullptr));
-    gsl_rng_set(r, seed);
-    #endif
 
     parameters.resize(ParametersSize());
     parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1; // Selected Columns
@@ -60,11 +60,9 @@ bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
         {
             if (lags_onoff[j]==1 && columns[i]==1) lags.push_back(j*modelstructure->input_lag_multiplier);
         }
-        if (lags.size()!=0)
-            modelstructure->lags.push_back(lags);
-        else
+        if (columns[i]==1) modelstructure->lags.push_back(lags);
+        if (lags.size()==0)
         {
-            modelstructure->lags.push_back(lags);
             cout<<"Zero lags"<<endl;
         }
     }

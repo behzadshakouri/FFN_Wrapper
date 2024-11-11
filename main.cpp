@@ -37,8 +37,8 @@ int main()
     */
 
 #ifdef Arash
-    mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/output_c.txt";
-    mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/output_c(manually mag).txt";
+    mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/observedoutput.txt";
+    mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/observedoutput.txt";
 #else
     mymodelstruct.inputaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
     mymodelstruct.testaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
