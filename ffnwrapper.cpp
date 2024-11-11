@@ -118,7 +118,7 @@ bool FFNWrapper::Testing()
     CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
 
     Predict(TestInputData, Prediction);
-    cout << "Prediction:" << Prediction;
+    //cout << "Prediction:" << Prediction;
 
     return true;
 }
@@ -129,8 +129,8 @@ bool FFNWrapper::PerformanceMetrics()
     PredictionData.writetofile("Prediction.txt");
     CTimeSeriesSet<double> TargetData = GetOutputData();
     TargetData.writetofile("Target.txt");
-    double nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
-    double _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
+    nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
+    _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
     cout<<"nMSE = "<<nMSE<<endl;
     cout<<"R2 = "<<_R2<<endl;
 

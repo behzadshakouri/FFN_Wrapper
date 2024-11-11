@@ -2,12 +2,12 @@
 #include <QFile>
 #include <QTextStream>
 
-CModelStructure::CModelStructure()
+CModelStructure::CModelStructure() //Default constructor
 {
 
 }
 
-CModelStructure::CModelStructure(const CModelStructure &rhs)
+CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
 {
     InputTimeSeries = rhs.InputTimeSeries;
     TestTimeSeries = rhs.TestTimeSeries;
@@ -28,7 +28,7 @@ CModelStructure::CModelStructure(const CModelStructure &rhs)
 
 
 }
-CModelStructure& CModelStructure::operator = (const CModelStructure &rhs)
+CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Operator =
 {
     InputTimeSeries = rhs.InputTimeSeries;
     TestTimeSeries = rhs.TestTimeSeries;
@@ -67,7 +67,7 @@ bool CModelStructure::WriteToFile(const QString &filename)
 QString CModelStructure::ParametersToString()
 {
     QString out;
-    out+="Number of hidden hayers:" + QString::number(n_layers);
+    out+="Number of hidden layers:" + QString::number(n_layers);
     out+=", Number of nodes: [";
     for (int i=0; i<n_nodes.size(); i++)
     {

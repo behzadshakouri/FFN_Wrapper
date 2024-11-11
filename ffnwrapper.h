@@ -39,7 +39,8 @@ public:
         return CTimeSeriesSet<double>(TestOutputData,ModelStructure.dt,ModelStructure.lags);
     }
     mat Prediction;
-
+    double nMSE = -999;
+    double _R2 = -999;
 
 private:
     mat TrainInputData;

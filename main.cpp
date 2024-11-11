@@ -19,62 +19,82 @@ int main()
     mymodelstruct.n_layers = 1;
     mymodelstruct.n_nodes = {4};
     /*
+    mymodelstruct.dt=0.01;
+    */
+
+    /*
     mymodelstruct.inputcolumns.push_back(1);
     mymodelstruct.n_input_layers=4;
     mymodelstruct.activation_function="Sigmoid";
     mymodelstruct.n_output_layers=1;
     */
 
-    mymodelstruct.dt=0.01;
+    /*mymodelstruct.input_lag_multiplier = 5;
+    modelCreator.max_number_of_nodes_in_layers = 7;
+    mymodelstruct.n_layers = 2;
+    mymodelstruct.n_nodes = {3,2};
+    modelCreator.SetParameters(&mymodelstruct);
+    */
 
 #ifdef Arash
     mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/output_c.txt";
     mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/output_c(manually mag).txt";
 #else
-    mymodelstruct.inputaddress="/home/behzad/Projects/FFNWrapper2/output_c.txt";
-    mymodelstruct.testaddress="/home/behzad/Projects/FFNWrapper2/output_c(manually mag).txt";
+    mymodelstruct.inputaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
+    mymodelstruct.testaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
 #endif
+
     // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(1); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(49); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+    mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(10); // Output: V(11): Settling element (1)_Solids:concentration
-
+    mymodelstruct.outputcolumns.push_back(2); // Output: V(11): Settling element (1)_Solids:concentration
 
     //Lags definition
     vector<int> lag1; lag1.push_back(0); lag1.push_back(20); lag1.push_back(50);
     vector<int> lag2; lag2.push_back(0); lag2.push_back(10); lag2.push_back(30);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
-//model creator
+
+    //Model creator
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 3;
     modelCreator.total_number_of_columns = 2;
     modelCreator.max_number_of_layers = 2;
+    modelCreator.max_lag_multiplier = 6;
+
+    for (int i=0; i<10; i++)
+
+    {
+
     modelCreator.CreateRandomModelStructure(&mymodelstruct);
 
-    /*mymodelstruct.input_lag_multiplier = 5;
-    modelCreator.max_number_of_nodes_in_layers = 7;
-    mymodelstruct.n_layers = 2;
-    mymodelstruct.n_nodes = {3,2};
-    modelCreator.SetParameters(&mymodelstruct);
-*/
     CModelStructure mymodelstruct2;
+    CModelStructure mymodelstruct3(mymodelstruct);
     modelCreator.CreateRandomModelStructure(&mymodelstruct2);
-    bool a = (mymodelstruct2==mymodelstruct);
-    qDebug()<<mymodelstruct.ParametersToString();
+
+    qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
+    qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
+
     qDebug()<<mymodelstruct2.ParametersToString();
+
     // Running FFNWrapper
-    FFNWrapper F;
-    F.ModelStructure = mymodelstruct;
-    F.Initiate();
-    F.Training();
-    F.Testing();
-    F.PerformanceMetrics();
-    F.DataSave();
-    //data::Save("model.xml","model", F);
+    if (mymodelstruct.ValidLags())
+    {   FFNWrapper F;
+        F.ModelStructure = mymodelstruct;
+        F.Initiate();
+        F.Training();
+        F.Testing();
+        F.PerformanceMetrics();
+        qDebug()<<mymodelstruct.ParametersToString() << "MSE = " << F.nMSE << "R2 = " << F._R2;
+        F.DataSave();
+        //data::Save("model.xml","model", F);
+    }
+    else
+        i--;
+    }
 
     return 0;
 }

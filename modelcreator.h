@@ -5,6 +5,7 @@
 #include "ffnwrapper.h"
 #include <gsl/gsl_rng.h>
 #include <QString>
+#include <BTCSet.h>
 
 using namespace std;
 class ModelCreator

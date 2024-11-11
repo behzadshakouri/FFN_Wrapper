@@ -52,6 +52,15 @@ public:
         return !(operator==(m2));
     }
 
+    bool ValidLags()
+    {
+        for (int i=0; i<lags.size(); i++)
+            if (lags[i].size()>0)
+                return true;
+
+        return false;
+    }
+
 };
 
 #endif // CMODELSTRUCTURE_H

@@ -1,6 +1,8 @@
 #include "modelcreator.h"
 #include <QFile>
 #include <QTextStream>
+#include <gsl/gsl_rng.h>
+#include <BTCSet.h>
 
 ModelCreator::ModelCreator()
 {
@@ -19,9 +21,18 @@ bool ModelCreator::CreateRandomModelStructure(CModelStructure *modelstructure)
     long unsigned int max_column_selection = pow(2,total_number_of_columns);
     long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
     long unsigned int max_node_selection = pow(max_number_of_layers,max_number_of_layers+1)-1;
+
+    #ifdef GSL
+    A = gsl_rng_default;
+    r = gsl_rng_alloc(A);
+
+    unsigned long seed = static_cast<unsigned long>(std::time(nullptr));
+    gsl_rng_set(r, seed);
+    #endif
+
     parameters.resize(ParametersSize());
-    parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1;
-    parameters[1] = gsl_rng_uniform_int(r, max_lag_multiplier-1)+1;
+    parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1; // Selected Columns
+    parameters[1] = gsl_rng_uniform_int(r, max_lag_multiplier-1)+1; // Lag Multiplier
     for (int i=0; i<total_number_of_columns; i++)
         parameters[i+2] = gsl_rng_uniform_int(r, max_lag_selection-1)+1;
     parameters[total_number_of_columns+2] = gsl_rng_uniform_int(r, max_node_selection-1)+1;
@@ -51,6 +62,11 @@ bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
         }
         if (lags.size()!=0)
             modelstructure->lags.push_back(lags);
+        else
+        {
+            modelstructure->lags.push_back(lags);
+            cout<<"Zero lags"<<endl;
+        }
     }
     // nodes in hidden layers;
     vector<int> nodes = convertToBase(parameters[2+total_number_of_columns],max_number_of_nodes_in_layers);
