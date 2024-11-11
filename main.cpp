@@ -6,6 +6,8 @@
 #include <BTCSet.h>
 #include "modelcreator.h"
 #include <QDebug>
+#include <QFile>
+#include <QTextStream>
 
 using namespace mlpack;
 using namespace std;
@@ -65,7 +67,7 @@ int main()
     modelCreator.max_number_of_layers = 2;
     modelCreator.max_lag_multiplier = 6;
 
-    for (int i=0; i<10; i++)
+    for (int i=0; i<5; i++)
 
     {
 
@@ -75,10 +77,10 @@ int main()
     CModelStructure mymodelstruct3(mymodelstruct);
     modelCreator.CreateRandomModelStructure(&mymodelstruct2);
 
-    qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
-    qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
+    //qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
+    //qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
 
-    qDebug()<<mymodelstruct2.ParametersToString();
+    //qDebug()<<mymodelstruct2.ParametersToString();
 
     // Running FFNWrapper
     if (mymodelstruct.ValidLags())
@@ -88,8 +90,25 @@ int main()
         F.Training();
         F.Testing();
         F.PerformanceMetrics();
-        qDebug()<<mymodelstruct.ParametersToString() << "MSE = " << F.nMSE << "R2 = " << F._R2;
+
+        qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2;
+
+         QFile file("modelresults.txt");
+
+        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QTextStream out(&file);
+
+            out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
+
+            file.close();
+        } else {
+            // Handle file open error
+            qDebug() << "Error opening file!";
+        }
+
         F.DataSave();
+
+
         //data::Save("model.xml","model", F);
     }
     else

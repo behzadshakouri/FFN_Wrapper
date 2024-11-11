@@ -131,8 +131,8 @@ bool FFNWrapper::PerformanceMetrics()
     TargetData.writetofile("Target.txt");
     nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
     _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
-    cout<<"nMSE = "<<nMSE<<endl;
-    cout<<"R2 = "<<_R2<<endl;
+    //cout<<"nMSE = "<<nMSE<<endl;
+    //cout<<"R2 = "<<_R2<<endl;
 
     return true;
 }
@@ -169,7 +169,6 @@ bool FFNWrapper::DataSave()
     TestOutputDataTS.writetofile("TestOutputDataTS.csv");
 
     //Performance metrics
-
 
     return true;
 }
