@@ -16,14 +16,6 @@ using namespace std;
 int main()
 {
 
-    // Defining Model Structure
-    CModelStructure mymodelstruct;
-    mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {2};
-    /*
-    mymodelstruct.dt=0.01;
-    */
-
     string path;
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
@@ -31,20 +23,30 @@ int main()
     path = "/home/behzad/Projects/FFNWrapper2/";
 #endif
 
+    // Defining Model Structure
+    CModelStructure mymodelstruct;
+    mymodelstruct.n_layers = 1;
+    mymodelstruct.n_nodes = {2};
+
+    mymodelstruct.dt=0.01;
+
     mymodelstruct.inputaddress = path + "observedoutput.txt";
     mymodelstruct.testaddress = path + "observedoutput.txt";
+
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
     mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
 
     //Lags definition
-    vector<int> lag1; lag1.push_back(27); //lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(13); //lag2.push_back(10); lag2.push_back(30);
+    vector<int> lag1; lag1.push_back(28); //lag1.push_back(20); lag1.push_back(50);
+    vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
 
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(2); // Output: V(11): Settling element (1)_Solids:concentration
+
+    /*
 
     FFNWrapper F;
     F.ModelStructure = mymodelstruct;
@@ -54,7 +56,45 @@ int main()
     F.PerformanceMetrics();
     F.DataSave();
 
+    */
+
     /*
+     *
+    // NEW MODEL
+
+    // Defining Model Structure
+    CModelStructure mymodelstruct2;
+
+    mymodelstruct2.n_layers = 1;
+    mymodelstruct2.n_nodes = {2};
+
+    mymodelstruct2.dt=0.01;
+
+    mymodelstruct2.inputaddress = path + "observedoutput.txt";
+    mymodelstruct2.testaddress = path + "observedoutput.txt";
+
+    // Defining Inputs
+    mymodelstruct2.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    mymodelstruct2.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+
+    //Lags definition
+    vector<int> lag11; lag11.push_back(28); //lag1.push_back(20); lag1.push_back(50);
+    vector<int> lag22; lag22.push_back(1); //lag2.push_back(10); lag2.push_back(30);
+    mymodelstruct2.lags.push_back(lag11);
+    mymodelstruct2.lags.push_back(lag22);
+
+    // Defining Output(s)
+    mymodelstruct2.outputcolumns.push_back(2); // Output: V(11): Settling element (1)_Solids:concentration
+
+    FFNWrapper F2;
+    F2.ModelStructure = mymodelstruct2;
+    F2.Initiate();
+    F2.Training();
+    F2.Testing();
+    F2.PerformanceMetrics();
+    F2.DataSave();
+
+    */
 
     //Model creator
     ModelCreator modelCreator;
@@ -108,8 +148,6 @@ int main()
     }
 
     results.close();
-
-    */
 
     return 0;
 }
