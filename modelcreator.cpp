@@ -63,7 +63,7 @@ bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
         if (columns[i]==1) modelstructure->lags.push_back(lags);
         if (lags.size()==0)
         {
-            cout<<"Zero lags"<<endl;
+            //cout<<"Zero lags"<<endl;
         }
     }
     // nodes in hidden layers;

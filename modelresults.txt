@@ -1,0 +1,5 @@
+i = 0, Number of hidden layers:1, Number of nodes: [6], Columns: [0,1], Lags: [[3,6],[]], MSE = 0.120854, R2 = 0.739931
+i = 1, Number of hidden layers:1, Number of nodes: [3], Columns: [0], Lags: [[4,8]], MSE = 0.111575, R2 = 0.758378
+i = 2, Number of hidden layers:1, Number of nodes: [3], Columns: [0], Lags: [[0,5]], MSE = 0.140509, R2 = 0.709921
+i = 3, Number of hidden layers:1, Number of nodes: [7], Columns: [0], Lags: [[0]], MSE = 0.196154, R2 = 0.568816
+i = 4, Number of hidden layers:1, Number of nodes: [4], Columns: [0], Lags: [[0,4]], MSE = 0.13851, R2 = 0.696835

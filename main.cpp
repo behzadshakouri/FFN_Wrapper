@@ -38,14 +38,14 @@ int main()
     modelCreator.SetParameters(&mymodelstruct);
     */
 
+    string path;
 #ifdef Arash
-    mymodelstruct.inputaddress="/home/arash/Projects/FFNWrapper/observedoutput.txt";
-    mymodelstruct.testaddress="/home/arash/Projects/FFNWrapper/observedoutput.txt";
+    path = "/home/arash/Projects/FFNWrapper/";
 #else
-    mymodelstruct.inputaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
-    mymodelstruct.testaddress="/home/behzad/Projects/Settling_Models/observedoutput.txt";
+    path = "/home/behzad/Projects/Settling_Models/"
 #endif
-
+    mymodelstruct.inputaddress = path + "observedoutput.txt";
+    mymodelstruct.testaddress = path + "observedoutput.txt";
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
     mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
@@ -66,6 +66,16 @@ int main()
     modelCreator.total_number_of_columns = 2;
     modelCreator.max_number_of_layers = 2;
     modelCreator.max_lag_multiplier = 6;
+
+    QFile file(QString::fromStdString(path) + "modelresults.txt");
+    QTextStream out;
+    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        out.setDevice(&file);
+    } else {
+       // Handle file open error
+       qDebug() << "Error opening file!";
+       return 0;
+    }
 
     for (int i=0; i<5; i++)
 
@@ -92,20 +102,7 @@ int main()
         F.PerformanceMetrics();
 
         qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2;
-
-         QFile file("modelresults.txt");
-
-        if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            QTextStream out(&file);
-
-            out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
-
-            file.close();
-        } else {
-            // Handle file open error
-            qDebug() << "Error opening file!";
-        }
-
+        out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
         F.DataSave();
 
 
@@ -114,7 +111,7 @@ int main()
     else
         i--;
     }
-
+    file.close();
     return 0;
 }
 
