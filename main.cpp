@@ -42,8 +42,9 @@ int main()
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
 #else
-    path = "/home/behzad/Projects/Settling_Models/"
+    path = "/home/behzad/Projects/FFNWrapper2/";
 #endif
+
     mymodelstruct.inputaddress = path + "observedoutput.txt";
     mymodelstruct.testaddress = path + "observedoutput.txt";
     // Defining Inputs
@@ -67,17 +68,17 @@ int main()
     modelCreator.max_number_of_layers = 2;
     modelCreator.max_lag_multiplier = 6;
 
-    QFile file(QString::fromStdString(path) + "modelresults.txt");
+    QFile results(QString::fromStdString(path) + "modelresults.txt");
     QTextStream out;
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        out.setDevice(&file);
+    if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        out.setDevice(&results);
     } else {
        // Handle file open error
        qDebug() << "Error opening file!";
        return 0;
     }
 
-    for (int i=0; i<5; i++)
+    for (int i=0; i<100; i++)
 
     {
 
@@ -90,8 +91,6 @@ int main()
     //qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
     //qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
 
-    //qDebug()<<mymodelstruct2.ParametersToString();
-
     // Running FFNWrapper
     if (mymodelstruct.ValidLags())
     {   FFNWrapper F;
@@ -103,6 +102,7 @@ int main()
 
         qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2;
         out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", MSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
+
         F.DataSave();
 
 
@@ -111,84 +111,7 @@ int main()
     else
         i--;
     }
-    file.close();
+    results.close();
+
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Test2
-/*
-#include <mlpack/core.hpp>
-#include <mlpack/methods/ann/ffn.hpp>
-#include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
-#include <armadillo>
-#include <iostream>
-#include <cmath>
-
-using namespace mlpack;
-//using namespace mlpack::ann;
-using namespace arma;
-
-double targetFunction(double x) {
-    return sin(x);
-}
-
-int main()
-{
-        // Generate training data.
-        const int numPoints = 1000;
-        mat X(1, numPoints);
-        mat Y(1, numPoints);
-
-        for (int i = 0; i < numPoints; ++i) {
-            double x = (i / static_cast<double>(numPoints)) * 10; // Range from 0 to 10
-            X(0, i) = x;
-            Y(0, i) = targetFunction(x);
-        }
-
-        // Define the model.
-        FFN<MeanSquaredError> model;
-        model.Add<Linear>(10); // Input layer with 1 neuron, hidden layer with 10 neurons
-        model.Add<ReLU>();        // Activation function
-        model.Add<Linear>(1); // Output layer with 1 neuron
-
-        // Train the model.
-        model.Train(X, Y); // 1000 iterations
-
-        // Test the model.
-        mat testInput(1, 10);
-        mat testOutput;
-
-        for (int i = 0; i < 10; ++i) {
-            testInput(0, i) = i; // Testing points from 0 to 9
-        }
-
-        model.Predict(testInput, testOutput);
-
-        // Output the results.
-        std::cout << "Input\tPredicted\tActual" << std::endl;
-        for (int i = 0; i < 10; ++i) {
-            std::cout << testInput(0, i) << "\t" << testOutput(0, i) << "\t\t" << targetFunction(testInput(0, i)) << std::endl;
-        }
-
-        return 0;
-    }
-
-    //Test2
-*/
