@@ -12,6 +12,12 @@ using namespace arma;
 #include <armadillo>
 using namespace mlpack::ann;
 
+#include <QVector>
+#include <iostream>
+#include <cmath>
+#include <gnuplot-iostream.h>
+
+#include <ensmallen.hpp>  // Ensmallen header file
 
 FFNWrapper::FFNWrapper():FFN<MeanSquaredError>()
 {
@@ -174,3 +180,101 @@ bool FFNWrapper::DataSave()
     return true;
 }
 
+
+bool FFNWrapper:: Plotter()
+{
+    CTimeSeriesSet<double> Observed(ModelStructure.inputaddress,true);
+
+    CTimeSeriesSet<double> Predicted(ModelStructure.testaddress,true);
+
+    vector<double> d1={1, 2};
+    vector<double> d2={2, 4};
+    vector<pair<double, double>> plotdata;
+    for (int i=0; i<Observed.maxnumpoints(); i++)
+    {
+        plotdata.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+    }
+
+
+    //plotdata.push_back(make_pair(Observed,Predicted));   // Store (time, value) pairs
+
+    /*
+
+    std::vector<double> time, values1, values2;
+    // Generate some dummy data for two time series
+    for (double i = 0; i < 100; i += 0.1) {
+        time.push_back(i);
+        values1.push_back(sin(i / 10.0) * 10.0);  // First time series (sin wave)
+        values2.push_back(cos(i / 10.0) * 10.0);  // Second time series (cos wave)
+    }
+
+    // Create a vector of pairs to send to Gnuplot for plotting
+    std::vector<std::pair<double, double>> data1, data2;
+
+    for (size_t i = 0; i < time.size(); ++i) {
+        data1.push_back(std::make_pair(time[i], values1[i]));
+        data2.push_back(std::make_pair(time[i], values2[i]));
+    }
+
+    plotdata.push_back(make_pair(d1,d2));   // Store (time, value) pairs
+
+    */
+
+    // Create a Gnuplot object
+    Gnuplot gp;
+
+    // Set titles and labels
+    gp << "set title 'Time Series Plot'\n";
+    gp << "set xlabel 'Observed'\n";
+    gp << "set ylabel 'Predicted'\n";
+
+    // Plot the data using lines
+    gp << "plot '-' with lines title 'Time Series Data'\n";
+    //gp.send1d(data1);  // Send the data to Gnuplot
+
+    gp.send1d(plotdata);
+
+    return true;
+}
+
+bool FFNWrapper:: Optimizer()
+{
+/*
+    // Define the objective function to minimize (f(x) = x^2 + 4x + 4).
+    class QuadraticFunction
+    {
+    public:
+        // Function value at a given point x.
+        double Evaluate(const rowvec& parameters)
+        {
+            // f(x) = x^2 + 4x + 4
+            double x = parameters(0);
+            return x * x + 4 * x + 4;
+        }
+
+        // Gradient of the objective function.
+        void Gradient(const rowvec& parameters, rowvec& gradient)
+        {
+            // Derivative of f(x) = 2x + 4
+            double x = parameters(0);
+            gradient(0) = 2 * x + 4;
+        }
+    };
+        // Create an instance of the quadratic function.
+        QuadraticFunction f;
+
+        // Initial parameters (let's start at x = 10).
+        rowvec initialPoint = {10};
+
+        // Create the optimizer (using Stochastic Gradient Descent in this case).
+        ens::SGD optimizer(0.1, 1000, 1e-6);
+
+        // Optimize the function using the gradient descent algorithm.
+        optimizer.Optimize(f, initialPoint);
+
+        // Output the result.
+        std::cout << "Optimal point: " << initialPoint(0) << std::endl;
+        std::cout << "Optimal value: " << f.Evaluate(initialPoint) << std::endl;
+*/
+        return true;
+}

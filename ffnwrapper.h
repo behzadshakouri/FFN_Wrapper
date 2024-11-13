@@ -5,6 +5,7 @@
 #include <vector>
 #include <BTCSet.h>
 #include "cmodelstructure.h"
+#include <gnuplot-iostream.h>
 
 using namespace mlpack;
 using namespace std;
@@ -27,6 +28,8 @@ public:
     bool Testing();
     bool PerformanceMetrics();
     bool DataSave();
+    bool Plotter();
+    bool Optimizer();
     CModelStructure ModelStructure;
     CTimeSeriesSet<double> *data;
     CTimeSeriesSet<double> *data2;

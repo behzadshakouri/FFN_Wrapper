@@ -33,6 +33,8 @@ int main()
     mymodelstruct.inputaddress = path + "observedoutput.txt";
     mymodelstruct.testaddress = path + "observedoutput.txt";
 
+    /*
+
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
     mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
@@ -42,6 +44,8 @@ int main()
     vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
+
+    */
 
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(2); // Output: V(11): Settling element (1)_Solids:concentration
@@ -64,7 +68,7 @@ int main()
         return 0;
     }
 
-    for (int i=0; i<100; i++)
+    for (int i=0; i<1; i++)
 
     {
 
@@ -90,6 +94,8 @@ int main()
             out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
 
             F.DataSave();
+            //F.Plotter();
+            F.Optimizer();
 
             //data::Save("model.xml","model", F);
         }
@@ -108,6 +114,7 @@ int main()
     F.Testing();
     F.PerformanceMetrics();
     F.DataSave();
+    F.Plotter();
 
     */
 
@@ -146,6 +153,7 @@ int main()
     F2.Testing();
     F2.PerformanceMetrics();
     F2.DataSave();
+    F2.Plotter();
 
     */
 
