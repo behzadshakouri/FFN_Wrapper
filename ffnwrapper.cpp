@@ -180,6 +180,7 @@ bool FFNWrapper::DataSave()
     return true;
 }
 
+/*
 
 bool FFNWrapper:: Plotter()
 {
@@ -220,6 +221,7 @@ bool FFNWrapper:: Plotter()
 
     */
 
+/*
     // Create a Gnuplot object
     Gnuplot gp;
 
@@ -236,6 +238,8 @@ bool FFNWrapper:: Plotter()
 
     return true;
 }
+*/
+
 
 bool FFNWrapper:: Optimizer()
 {

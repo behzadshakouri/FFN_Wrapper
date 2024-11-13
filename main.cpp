@@ -95,7 +95,7 @@ int main()
 
             F.DataSave();
             //F.Plotter();
-            F.Optimizer();
+            //F.Optimizer();
 
             //data::Save("model.xml","model", F);
         }
@@ -115,6 +115,7 @@ int main()
     F.PerformanceMetrics();
     F.DataSave();
     F.Plotter();
+    F.Optimizer();
 
     */
 
@@ -154,6 +155,7 @@ int main()
     F2.PerformanceMetrics();
     F2.DataSave();
     F2.Plotter();
+    F2.Optimizer();
 
     */
 
