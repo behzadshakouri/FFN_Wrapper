@@ -180,65 +180,39 @@ bool FFNWrapper::DataSave()
     return true;
 }
 
-/*
 
 bool FFNWrapper:: Plotter()
 {
-    CTimeSeriesSet<double> Observed(ModelStructure.inputaddress,true);
+    CTimeSeriesSet<double> Observed(ModelStructure.observedaddress,true);
 
-    CTimeSeriesSet<double> Predicted(ModelStructure.testaddress,true);
+    CTimeSeriesSet<double> Predicted(ModelStructure.predictaddress,true);
 
-    vector<double> d1={1, 2};
-    vector<double> d2={2, 4};
-    vector<pair<double, double>> plotdata;
+    vector<pair<double, double>> plotdata1, plotdata2;
     for (int i=0; i<Observed.maxnumpoints(); i++)
     {
-        plotdata.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+        plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+
     }
-
-
-    //plotdata.push_back(make_pair(Observed,Predicted));   // Store (time, value) pairs
-
-    /*
-
-    std::vector<double> time, values1, values2;
-    // Generate some dummy data for two time series
-    for (double i = 0; i < 100; i += 0.1) {
-        time.push_back(i);
-        values1.push_back(sin(i / 10.0) * 10.0);  // First time series (sin wave)
-        values2.push_back(cos(i / 10.0) * 10.0);  // Second time series (cos wave)
+    for (int i=0; i<Predicted.maxnumpoints(); i++)
+    {
+        plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
     }
-
-    // Create a vector of pairs to send to Gnuplot for plotting
-    std::vector<std::pair<double, double>> data1, data2;
-
-    for (size_t i = 0; i < time.size(); ++i) {
-        data1.push_back(std::make_pair(time[i], values1[i]));
-        data2.push_back(std::make_pair(time[i], values2[i]));
-    }
-
-    plotdata.push_back(make_pair(d1,d2));   // Store (time, value) pairs
-
-    */
-
-/*
     // Create a Gnuplot object
     Gnuplot gp;
 
     // Set titles and labels
-    gp << "set title 'Time Series Plot'\n";
-    gp << "set xlabel 'Observed'\n";
-    gp << "set ylabel 'Predicted'\n";
+    gp << "set title 'Comparison'\n";
+    gp << "set xlabel 'Time'\n";
+    gp << "set ylabel 'Solids Concentration'\n";
+    gp << "set grid\n";  // Optional: Add a grid for better visualization
 
-    // Plot the data using lines
-    gp << "plot '-' with lines title 'Time Series Data'\n";
-    //gp.send1d(data1);  // Send the data to Gnuplot
-
-    gp.send1d(plotdata);
+    // Plot both datasets on the same plot
+    gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+    gp.send1d(plotdata1);  // Send the first dataset (Observed)
+    gp.send1d(plotdata2);  // Send the second dataset (Predicted)
 
     return true;
 }
-*/
 
 
 bool FFNWrapper:: Optimizer()

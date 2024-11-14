@@ -33,6 +33,10 @@ int main()
     mymodelstruct.inputaddress = path + "observedoutput.txt";
     mymodelstruct.testaddress = path + "observedoutput.txt";
 
+    mymodelstruct.observedaddress = path + "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/TestOutputDataTS.csv";
+    mymodelstruct.predictaddress = path + "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/PredictionTS.csv";
+
+
     /*
 
     // Defining Inputs
@@ -94,7 +98,7 @@ int main()
             out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
 
             F.DataSave();
-            //F.Plotter();
+            F.Plotter();
             //F.Optimizer();
 
             //data::Save("model.xml","model", F);

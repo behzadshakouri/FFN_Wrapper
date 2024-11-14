@@ -41,7 +41,7 @@ INCLUDEPATH += $$OHQPATH/include/GA
 INCLUDEPATH += $$OHQPATH/src
 INCLUDEPATH += /usr/local/include
 
-LIBS += -larmadillo -llapack -lblas -lgsl
+LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lboost_iostreams
 
 HEADERS += \
     cmodelstructure.h \

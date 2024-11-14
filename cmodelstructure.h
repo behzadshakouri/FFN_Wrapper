@@ -18,6 +18,8 @@ public:
     double dt;
     string inputaddress;
     string testaddress;
+    string observedaddress;
+    string predictaddress;
     int n_input_layers;
     string activation_function;
     int n_output_layers;

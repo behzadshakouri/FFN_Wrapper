@@ -24,6 +24,8 @@ CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
     node_type = rhs.node_type;
     outputcolumns = rhs.outputcolumns;
     testaddress = rhs.testaddress;
+    observedaddress = rhs.observedaddress;
+    predictaddress = rhs.predictaddress;
 
 
 
@@ -45,6 +47,8 @@ CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Ope
     node_type = rhs.node_type;
     outputcolumns = rhs.outputcolumns;
     testaddress = rhs.testaddress;
+    observedaddress = rhs.observedaddress;
+    predictaddress = rhs.predictaddress;
 
     return *this;
 }
