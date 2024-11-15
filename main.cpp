@@ -32,7 +32,7 @@ int main()
     string datapath = "/home/behzad/Projects/Settling_Models/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    int randommodelstructure = 0;
+    int randommodelstructure = 0; // 0 for no random model structure usage and 1 for random model structure usage
 
     for (int r=0; r<5; r++) // Realization
 
@@ -101,7 +101,7 @@ int main()
 
     }
 
-    else {
+    else if (randommodelstructure == 0) {
 
         // Defining Inputs
         mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
@@ -129,9 +129,12 @@ int main()
         //F.Optimizer();
 
         //data::Save("model.xml","model", F);
+
+        results.close();
     }
 
-    results.close();
+    else
+        cout << "No estimation implemented!";
 
     }
 
