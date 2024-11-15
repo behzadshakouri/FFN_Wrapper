@@ -1,5 +1,5 @@
-#ifndef CMODELSTRUCTURE_H
-#define CMODELSTRUCTURE_H
+#ifndef CModelStructure_MULTI_H
+#define CModelStructure_MULTI_H
 
 #include "BTCSet.h"
 #include <string>
@@ -7,12 +7,12 @@
 
 using namespace std;
 
-class CModelStructure
+class CModelStructure_Multi
 {
 public:
-    CModelStructure();
-    CModelStructure(const CModelStructure &rhs);
-    CModelStructure& operator = (const CModelStructure &rhs);
+    CModelStructure_Multi();
+    CModelStructure_Multi(const CModelStructure_Multi &rhs);
+    CModelStructure_Multi& operator = (const CModelStructure_Multi &rhs);
     CTimeSeriesSet<double> *InputTimeSeries = nullptr; //(string& address, bool& tf);
     CTimeSeriesSet<double> *TestTimeSeries = nullptr; //(string& address, bool& tf);
     double dt;
@@ -33,7 +33,7 @@ public:
     int input_lag_multiplier;
     string outputpath;
 
-    bool operator==(const CModelStructure &m2)
+    bool operator==(const CModelStructure_Multi &m2)
     {
         if (input_lag_multiplier!=m2.input_lag_multiplier)
             return false;
@@ -51,7 +51,7 @@ public:
 
     bool WriteToFile(const QString &filename);
     QString ParametersToString();
-    bool operator!=(const CModelStructure &m2)
+    bool operator!=(const CModelStructure_Multi &m2)
     {
         return !(operator==(m2));
     }
@@ -67,4 +67,4 @@ public:
 
 };
 
-#endif // CMODELSTRUCTURE_H
+#endif // CModelStructure_MULTI_H

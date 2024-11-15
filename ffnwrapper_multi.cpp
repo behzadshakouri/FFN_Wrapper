@@ -1,4 +1,4 @@
-#include "ffnwrapper.h"
+#include "ffnwrapper_multi.h"
 #include <mlpack.hpp>
 
 using namespace mlpack;
@@ -19,19 +19,19 @@ using namespace mlpack::ann;
 
 #include <ensmallen.hpp>  // Ensmallen header file
 
-FFNWrapper::FFNWrapper():FFN<MeanSquaredError>()
+FFNWrapper_Multi::FFNWrapper_Multi():FFN<MeanSquaredError>()
 {
 
 }
 
-FFNWrapper::FFNWrapper(const FFNWrapper &rhs):FFN<MeanSquaredError>(rhs)
+FFNWrapper_Multi::FFNWrapper_Multi(const FFNWrapper_Multi &rhs):FFN<MeanSquaredError>(rhs)
 {
     ModelStructure = rhs.ModelStructure;
     data = rhs.data;
 
 }
 
-FFNWrapper& FFNWrapper::operator=(const FFNWrapper& rhs)
+FFNWrapper_Multi& FFNWrapper_Multi::operator=(const FFNWrapper_Multi& rhs)
 {
     FFN<MeanSquaredError>::operator=(rhs);
     ModelStructure = rhs.ModelStructure;
@@ -39,29 +39,29 @@ FFNWrapper& FFNWrapper::operator=(const FFNWrapper& rhs)
 
     return *this;
 }
-FFNWrapper::~FFNWrapper()
+FFNWrapper_Multi::~FFNWrapper_Multi()
 {
 
 }
 
 
-bool FFNWrapper::DataProcess()
+bool FFNWrapper_Multi::DataProcess()
 {
 
     // Load the whole data (OpenHydroQual output).
-    ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
+    //ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
 
     // Writing the data for checking
     data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
 
-    Shifter();
+    ShifterAppend();
 
     return true;
 }
 
-bool FFNWrapper::Shifter()
+bool FFNWrapper_Multi::Shifter()
 {
-       CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress,true);
+       CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[0],true);
 
         //Shifting by lags definition (Inputs)
         TrainInputData = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
@@ -78,9 +78,36 @@ bool FFNWrapper::Shifter()
     return true;
 }
 
+bool FFNWrapper_Multi::ShifterAppend()
+{
+    for (int i=0; i<ModelStructure.inputaddress.size(); i++)
+    {
+        CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
 
+        //Shifting by lags definition (Inputs)
+        mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+        if (TrainInputData.n_cols!=0)
+            TrainInputData = join_rows(TrainInputData, TrainInputData1);
+        else
+            TrainInputData = TrainInputData1;
 
-bool FFNWrapper::Initiate()
+        CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
+        //ShiftedInputs.writetofile("ShiftedInputs.txt");
+
+        //Shifting by lags definition (Outputs)
+
+        mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+        if (TrainOutputData.n_cols!=0)
+            TrainOutputData = join_rows(TrainOutputData, TrainOutputData1);
+        else
+            TrainOutputData = TrainOutputData1;
+        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
+        //ShiftedOutputs.writetofile("ShiftedOutputs.txt");
+    }
+    return true;
+}
+
+bool FFNWrapper_Multi::Initiate()
 {
     DataProcess();
 
@@ -98,7 +125,7 @@ bool FFNWrapper::Initiate()
     return true;
 }
 
-bool FFNWrapper::Training()
+bool FFNWrapper_Multi::Training()
 {
 
     // Train the model
@@ -107,7 +134,7 @@ bool FFNWrapper::Training()
     return true;
 }
 
-bool FFNWrapper::Testing()
+bool FFNWrapper_Multi::Testing()
 {
     // Use the Predict method to get the predictions.
 
@@ -130,7 +157,7 @@ bool FFNWrapper::Testing()
     return true;
 }
 
-bool FFNWrapper::PerformanceMetrics()
+bool FFNWrapper_Multi::PerformanceMetrics()
 {
     CTimeSeriesSet<double> PredictionData (Prediction,ModelStructure.dt,ModelStructure.lags);
     PredictionData.writetofile(ModelStructure.outputpath + "Prediction_" + to_string(ModelStructure.realization) + ".txt");
@@ -143,7 +170,7 @@ bool FFNWrapper::PerformanceMetrics()
 }
 
 
-bool FFNWrapper::DataSave()
+bool FFNWrapper_Multi::DataSave()
 {
     //Input data checking
     data->writetofile(ModelStructure.outputpath + "data_" + to_string(ModelStructure.realization) + ".csv");
@@ -182,7 +209,7 @@ bool FFNWrapper::DataSave()
 }
 
 
-bool FFNWrapper:: Plotter()
+bool FFNWrapper_Multi:: Plotter()
 {
     CTimeSeriesSet<double> Observed(ModelStructure.observedaddress,true);
 
@@ -216,7 +243,7 @@ bool FFNWrapper:: Plotter()
 }
 
 
-bool FFNWrapper:: Optimizer()
+bool FFNWrapper_Multi:: Optimizer()
 {
 /*
     // Define the objective function to minimize (f(x) = x^2 + 4x + 4).

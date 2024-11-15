@@ -29,30 +29,23 @@ int main()
     mymodelstruct.n_nodes = {2};
 
     mymodelstruct.dt=0.01;
+    string datapath = "/home/behzad/Projects/Settling_Models/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    mymodelstruct.inputaddress = path + "observedoutput.txt";
-    mymodelstruct.testaddress = path + "observedoutput.txt";
+    for (int r=0; r<3; r++) // Realization
 
-    mymodelstruct.observedaddress = path + "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/TestOutputDataTS.csv";
-    mymodelstruct.predictaddress = path + "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/PredictionTS.csv";
+    {
+        mymodelstruct.realization = r;
 
+        mymodelstruct.inputaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
+        mymodelstruct.testaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
 
-    /*
-
-    // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
-
-    //Lags definition
-    vector<int> lag1; lag1.push_back(28); //lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
-    mymodelstruct.lags.push_back(lag1);
-    mymodelstruct.lags.push_back(lag2);
-
-    */
+        mymodelstruct.outputpath = "/home/behzad/Projects/FFNWrapper2/Results/";
+        mymodelstruct.observedaddress = mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv";
+        mymodelstruct.predictedaddress = mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv";
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(2); // Output: V(11): Settling element (1)_Solids:concentration
+    mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
 
     //Model creator
     ModelCreator modelCreator;
@@ -72,18 +65,11 @@ int main()
         return 0;
     }
 
-    for (int i=0; i<1; i++)
+    for (int i=0; i<10; i++) // Random Model Structure Generation
 
     {
 
         modelCreator.CreateRandomModelStructure(&mymodelstruct);
-
-        //CModelStructure mymodelstruct2;
-        //CModelStructure mymodelstruct3(mymodelstruct);
-        //modelCreator.CreateRandomModelStructure(&mymodelstruct2);
-
-        //qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
-        //qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
 
         // Running FFNWrapper
         if (mymodelstruct.ValidLags())
@@ -109,7 +95,35 @@ int main()
 
     results.close();
 
-    /*
+    };
+
+    return 0;
+}
+
+
+
+
+
+//mymodelstruct.inputaddress = datapath + "observedoutput.txt";
+//mymodelstruct.testaddress = datapath + "observedoutput.txt";
+
+//mymodelstruct.observedaddress = path + buildpath + "TestOutputDataTS.csv";
+//mymodelstruct.predictaddress = path + buildpath + "PredictionTS.csv";
+/*
+
+    // Defining Inputs
+    mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+    mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+
+    //Lags definition
+    vector<int> lag1; lag1.push_back(28); //lag1.push_back(20); lag1.push_back(50);
+    vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
+    mymodelstruct.lags.push_back(lag1);
+    mymodelstruct.lags.push_back(lag2);
+
+    */
+
+/*
 
     FFNWrapper F;
     F.ModelStructure = mymodelstruct;
@@ -123,7 +137,16 @@ int main()
 
     */
 
-    /*
+
+//CModelStructure mymodelstruct2;
+//CModelStructure mymodelstruct3(mymodelstruct);
+//modelCreator.CreateRandomModelStructure(&mymodelstruct2);
+
+//qDebug()<<"Model2 ?= Model1"<<(mymodelstruct2==mymodelstruct);
+//qDebug()<<"Model3 ?= Model1"<<(mymodelstruct3==mymodelstruct);
+
+
+/*
      *
     // NEW MODEL
 
@@ -162,6 +185,3 @@ int main()
     F2.Optimizer();
 
     */
-
-    return 0;
-}

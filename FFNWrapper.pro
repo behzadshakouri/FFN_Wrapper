@@ -24,7 +24,9 @@ Arash {
 SOURCES += \
         $$OHQPATH/src/Utilities.cpp \
         cmodelstructure.cpp \
+        cmodelstructure_multi.cpp \
         ffnwrapper.cpp \
+        ffnwrapper_multi.cpp \
         main.cpp \
         modelcreator.cpp
 
@@ -45,5 +47,7 @@ LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lbo
 
 HEADERS += \
     cmodelstructure.h \
+    cmodelstructure_multi.h \
     ffnwrapper.h \
+    ffnwrapper_multi.h \
     modelcreator.h

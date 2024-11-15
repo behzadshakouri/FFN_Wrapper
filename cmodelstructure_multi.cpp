@@ -1,13 +1,13 @@
-#include "cmodelstructure.h"
+#include "cmodelstructure_multi.h"
 #include <QFile>
 #include <QTextStream>
 
-CModelStructure::CModelStructure() //Default constructor
+CModelStructure_Multi::CModelStructure_Multi() //Default constructor
 {
 
 }
 
-CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
+CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) // Copy constructor
 {
     InputTimeSeries = rhs.InputTimeSeries;
     TestTimeSeries = rhs.TestTimeSeries;
@@ -31,7 +31,7 @@ CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
 
 
 }
-CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Operator =
+CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_Multi &rhs) // Operator =
 {
     InputTimeSeries = rhs.InputTimeSeries;
     TestTimeSeries = rhs.TestTimeSeries;
@@ -56,7 +56,7 @@ CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Ope
     return *this;
 }
 
-bool CModelStructure::WriteToFile(const QString &filename)
+bool CModelStructure_Multi::WriteToFile(const QString &filename)
 {
     QFile file("output.txt");
 
@@ -71,7 +71,7 @@ bool CModelStructure::WriteToFile(const QString &filename)
         return true;
 }
 
-QString CModelStructure::ParametersToString()
+QString CModelStructure_Multi::ParametersToString()
 {
     QString out;
     out+="Number of hidden layers:" + QString::number(n_layers);

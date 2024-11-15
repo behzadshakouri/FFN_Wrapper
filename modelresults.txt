@@ -1,1 +1,0 @@
-i = 0, Number of hidden layers:1, Number of nodes: [4], Columns: [0,1], Lags: [[10],[20]], nMSE = 0.0462457, R2 = 0.917217
