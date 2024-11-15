@@ -32,7 +32,9 @@ int main()
     string datapath = "/home/behzad/Projects/Settling_Models/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    for (int r=0; r<3; r++) // Realization
+    int randommodelstructure = 0;
+
+    for (int r=0; r<5; r++) // Realization
 
     {
         mymodelstruct.realization = r;
@@ -65,6 +67,8 @@ int main()
         return 0;
     }
 
+    if (randommodelstructure == 1) {
+
     for (int i=0; i<10; i++) // Random Model Structure Generation
 
     {
@@ -95,10 +99,46 @@ int main()
 
     results.close();
 
-    };
+    }
+
+    else {
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
+        mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
+
+        //Lags definition
+        vector<int> lag1; lag1.push_back(28); //lag1.push_back(20); lag1.push_back(50);
+        vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
+        mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag2);
+
+
+        FFNWrapper F;
+        F.ModelStructure = mymodelstruct;
+        F.Initiate();
+        F.Training();
+        F.Testing();
+        F.PerformanceMetrics();
+
+        qDebug()<< mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
+        out << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
+
+        F.DataSave();
+        F.Plotter();
+        //F.Optimizer();
+
+        //data::Save("model.xml","model", F);
+    }
+
+    results.close();
+
+    }
 
     return 0;
 }
+
+
 
 
 
@@ -110,32 +150,6 @@ int main()
 //mymodelstruct.observedaddress = path + buildpath + "TestOutputDataTS.csv";
 //mymodelstruct.predictaddress = path + buildpath + "PredictionTS.csv";
 /*
-
-    // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(0); // Input 1: D(2): Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(1); // Input 2: CV(50): Reactor (1)_Solids:inflow_concentration
-
-    //Lags definition
-    vector<int> lag1; lag1.push_back(28); //lag1.push_back(20); lag1.push_back(50);
-    vector<int> lag2; lag2.push_back(14); //lag2.push_back(10); lag2.push_back(30);
-    mymodelstruct.lags.push_back(lag1);
-    mymodelstruct.lags.push_back(lag2);
-
-    */
-
-/*
-
-    FFNWrapper F;
-    F.ModelStructure = mymodelstruct;
-    F.Initiate();
-    F.Training();
-    F.Testing();
-    F.PerformanceMetrics();
-    F.DataSave();
-    F.Plotter();
-    F.Optimizer();
-
-    */
 
 
 //CModelStructure mymodelstruct2;
