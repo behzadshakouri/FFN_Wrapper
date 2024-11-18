@@ -16,11 +16,11 @@ public:
     CTimeSeriesSet<double> *InputTimeSeries = nullptr; //(string& address, bool& tf);
     CTimeSeriesSet<double> *TestTimeSeries = nullptr; //(string& address, bool& tf);
     double dt;
-    string inputaddress; //vector<string>
-    string testaddress;//vector<string>
-    string observedaddress;
-    string predictedaddress;
-    int realization;
+    vector<string> inputaddress;
+    vector<string> testaddress; //the number of test sets does not need to be equal to training sets
+    vector<string> observedaddress; //explain what is this for?
+    vector<string> predictedaddress;
+    int realization; //realization ID
     int n_input_layers;
     string activation_function;
     int n_output_layers;

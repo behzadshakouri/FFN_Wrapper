@@ -54,58 +54,84 @@ bool FFNWrapper_Multi::DataProcess()
     // Writing the data for checking
     data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
 
-    ShifterAppend();
+    Shifter(datacategory::Train);
 
     return true;
 }
 
-bool FFNWrapper_Multi::Shifter()
+bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 {
-       CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[0],true);
+    if (DataCategory == datacategory::Train)
+    {   for (unsigned int i=0; i<ModelStructure.inputaddress.size(); i++)
+        {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
 
-        //Shifting by lags definition (Inputs)
-        TrainInputData = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            //Shifting by lags definition (Inputs)
 
-        CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
-        //ShiftedInputs.writetofile("ShiftedInputs.txt");
+            mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
 
-        //Shifting by lags definition (Outputs)
-        TrainOutputData = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
+            //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
+            //Shifting by lags definition (Outputs)
+            mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+
+            if (i==0)
+            {
+                TrainInputData = TrainInputData1;
+                TrainOutputData = TrainOutputData1;
+            }
+            else
+            {
+                TrainInputData = arma::join_cols(TrainInputData, TrainInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
+                TrainInputData = arma::join_cols(TrainOutputData, TrainOutputData1);
+            }
+            datacount.push_back(TrainInputData1.n_cols);
+
+        }
+
+        CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
+        ShiftedInputs.writetofile("ShiftedInputs.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        //ShiftedOutputs.writetofile("ShiftedOutputs.txt");
-
-    return true;
-}
-
-bool FFNWrapper_Multi::ShifterAppend()
-{
-    for (int i=0; i<ModelStructure.inputaddress.size(); i++)
+        ShiftedOutputs.writetofile("ShiftedOutputs.txt");
+    }
+    else
     {
-        CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
+        for (unsigned int i=0; i<ModelStructure.testaddress.size(); i++)
+        {
+            CTimeSeriesSet<double> InputTimeSeries(ModelStructure.testaddress[i],true);
 
-        //Shifting by lags definition (Inputs)
-        mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
-        if (TrainInputData.n_cols!=0)
-            TrainInputData = join_rows(TrainInputData, TrainInputData1);
-        else
-            TrainInputData = TrainInputData1;
+            //Shifting by lags definition (Inputs)
 
-        CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
-        //ShiftedInputs.writetofile("ShiftedInputs.txt");
+            mat TestInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
 
-        //Shifting by lags definition (Outputs)
+            //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
+            //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
-        mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-        if (TrainOutputData.n_cols!=0)
-            TrainOutputData = join_rows(TrainOutputData, TrainOutputData1);
-        else
-            TrainOutputData = TrainOutputData1;
-        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        //ShiftedOutputs.writetofile("ShiftedOutputs.txt");
+            //Shifting by lags definition (Outputs)
+            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+
+            if (i==0)
+            {
+                TestInputData = TestInputData1;
+                TestOutputData = TestOutputData1;
+            }
+            else
+            {
+                TestInputData = arma::join_cols(TrainInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
+                TestInputData = arma::join_cols(TrainOutputData, TestOutputData1);
+            }
+            datacount.push_back(TestInputData1.n_cols);
+        }
+
+        CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
+        ShiftedInputs.writetofile("ShiftedInputsTest.txt");
+        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
+        ShiftedOutputs.writetofile("ShiftedOutputsTest.txt");
     }
     return true;
 }
+
+
 
 bool FFNWrapper_Multi::Initiate()
 {
@@ -138,18 +164,7 @@ bool FFNWrapper_Multi::Testing()
 {
     // Use the Predict method to get the predictions.
 
-    ModelStructure.TestTimeSeries = new CTimeSeriesSet<double>(ModelStructure.testaddress,true);
-
-    // Writing the data for checking
-    data2 = new CTimeSeriesSet<double>(*ModelStructure.TestTimeSeries);
-
-    TestInputData = ModelStructure.TestTimeSeries->ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
-
-    CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags);
-
-    TestOutputData = ModelStructure.TestTimeSeries->ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-
-    CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
+    Shifter(datacategory::Test);
 
     Predict(TestInputData, Prediction);
     //cout << "Prediction:" << Prediction;
@@ -211,34 +226,35 @@ bool FFNWrapper_Multi::DataSave()
 
 bool FFNWrapper_Multi:: Plotter()
 {
-    CTimeSeriesSet<double> Observed(ModelStructure.observedaddress,true);
+    for (unsigned int i=0; i<ModelStructure.observedaddress.size(); i++)
+    {   CTimeSeriesSet<double> Observed(ModelStructure.observedaddress[i],true);
 
-    CTimeSeriesSet<double> Predicted(ModelStructure.predictedaddress,true);
+        CTimeSeriesSet<double> Predicted(ModelStructure.predictedaddress[i],true);
 
-    vector<pair<double, double>> plotdata1, plotdata2;
-    for (int i=0; i<Observed.maxnumpoints(); i++)
-    {
-        plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
 
+        }
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
+        }
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Solids Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot both datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
-    for (int i=0; i<Predicted.maxnumpoints(); i++)
-    {
-        plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
-    }
-    // Create a Gnuplot object
-    Gnuplot gp;
-
-    // Set titles and labels
-    gp << "set title 'Comparison'\n";
-    gp << "set xlabel 'Time'\n";
-    gp << "set ylabel 'Solids Concentration'\n";
-    gp << "set grid\n";  // Optional: Add a grid for better visualization
-
-    // Plot both datasets on the same plot
-    gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
-    gp.send1d(plotdata1);  // Send the first dataset (Observed)
-    gp.send1d(plotdata2);  // Send the second dataset (Predicted)
-
     return true;
 }
 

@@ -2,7 +2,15 @@ TEMPLATE = app
 CONFIG += console c++17
 CONFIG -= app_bundle
 CONFIG += core
-CONFIG += PRECOMPILED_HEADER
+
+CONFIG+= precompile_header
+PRECOMPILED_HEADER = pch.h
+
+precompile_header:!isEmpty(PRECOMPILED_HEADER) {
+DEFINES += USING_PCH
+}
+
+
 DEFINES += GSL
 
 #CONFIG += Behzad
@@ -46,8 +54,10 @@ INCLUDEPATH += /usr/local/include
 LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lboost_iostreams
 
 HEADERS += \
+    pch.h \
     cmodelstructure.h \
     cmodelstructure_multi.h \
     ffnwrapper.h \
     ffnwrapper_multi.h \
-    modelcreator.h
+    modelcreator.h \
+

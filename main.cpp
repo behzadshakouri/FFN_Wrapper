@@ -1,7 +1,7 @@
 //Our main
 
-#include <iostream>
 #include <mlpack.hpp>
+#include <iostream>
 #include "ffnwrapper.h"
 #include <BTCSet.h>
 #include "modelcreator.h"
@@ -21,7 +21,7 @@ int main()
     for (int i=0; i<100; i++)
         X.BTC[0].append(i,i*i);
 
-    vector<int> splitvector = {20, 40, 60, 80};
+    vector<int> splitvector = {20, 40, 10};
 
     vector<CTimeSeriesSet<double>> split = X.Split(splitvector);
 
@@ -40,7 +40,7 @@ int main()
     mymodelstruct.n_nodes = {2};
 
     mymodelstruct.dt=0.01;
-    string datapath = "/home/behzad/Projects/Settling_Models/";
+    string datapath = "/home/arash/Projects/FFNWrapper/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
     int randommodelstructure = 0; // 0 for no random model structure usage and 1 for random model structure usage
@@ -74,7 +74,7 @@ int main()
         mymodelstruct.inputaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
         mymodelstruct.testaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
 
-        mymodelstruct.outputpath = "/home/behzad/Projects/FFNWrapper2/Results/";
+        mymodelstruct.outputpath = path + "Results/";
         mymodelstruct.observedaddress = mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv";
         mymodelstruct.predictedaddress = mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv";
 

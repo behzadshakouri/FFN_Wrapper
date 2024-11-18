@@ -4,13 +4,13 @@
 #include <mlpack.hpp>
 #include <vector>
 #include <BTCSet.h>
-#include "cmodelstructure.h"
+#include "cmodelstructure_multi.h"
 #include <gnuplot-iostream.h>
 
 using namespace mlpack;
 using namespace std;
 
-
+enum class datacategory {Train, Test};
 
 class FFNWrapper_Multi : FFN<MeanSquaredError>
 {
@@ -22,8 +22,7 @@ public:
     bool DataProcess();
     mat A;
 
-    bool Shifter();
-    bool ShifterAppend();
+    bool Shifter(datacategory);
     bool Initiate();
     bool Training();
     bool Testing();
@@ -31,7 +30,8 @@ public:
     bool DataSave();
     bool Plotter();
     bool Optimizer();
-    CModelStructure ModelStructure;
+    vector<int> datacount;
+    CModelStructure_Multi ModelStructure;
     CTimeSeriesSet<double> *data;
     CTimeSeriesSet<double> *data2;
     CTimeSeriesSet<double> GetInputData()
