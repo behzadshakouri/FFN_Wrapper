@@ -16,17 +16,6 @@ using namespace std;
 int main()
 {
 
-    CTimeSeriesSet<double> X(1);
-
-    for (int i=0; i<100; i++)
-        X.BTC[0].append(i,i*i);
-
-    vector<int> splitvector = {20, 40, 10};
-
-    vector<CTimeSeriesSet<double>> split = X.Split(splitvector);
-
-
-
     string path;
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
@@ -37,36 +26,41 @@ int main()
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct;
     mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {2};
+    mymodelstruct.n_nodes = {3};
 
     mymodelstruct.dt=0.01;
-    string datapath = "/home/arash/Projects/FFNWrapper/";
+    string datapath = "/home/behzad/Projects/FFNWrapper2/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    bool randommodelstructure = false; // 0 for no random model structure usage and 1 for random model structure usage
+    bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
 
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
     mymodelstruct.inputcolumns.push_back(1); // Input 1: Settling element (1)_Coagulant:external_mass_flow_timeseries
     mymodelstruct.inputcolumns.push_back(2); // Input 2: Reactor (1)_Solids:inflow_concentration
 
+    // Defining Output(s)
+    mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
+
     //Lags definition
-    vector<int> lag1; lag1.push_back(0);
-    vector<int> lag2; lag2.push_back(28);
-    vector<int> lag3; lag3.push_back(14);
+    vector<int> lag0; lag0.push_back(0);
+    vector<int> lag1; lag1.push_back(13);
+    vector<int> lag2; lag2.push_back(26);
+    //vector<int> lag1; lag1.push_back(0); lag1.push_back(6); //lag1.push_back(12); lag1.push_back(18); lag1.push_back(24);
+    //vector<int> lag2; lag2.push_back(0); lag2.push_back(6); //lag2.push_back(12); lag2.push_back(18); lag2.push_back(24);
+    mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
-    mymodelstruct.lags.push_back(lag3);
 
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
-    modelCreator.total_number_of_columns = 2;
+    modelCreator.total_number_of_columns = 3;
     modelCreator.max_number_of_layers = 2;
     modelCreator.max_lag_multiplier = 10;
 
-    for (int r=0; r<5; r++)
+    for (int r=0; r<2; r++)
     {
         mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
         mymodelstruct.testaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
@@ -77,10 +71,6 @@ int main()
     }
 
     {
-        // Defining Output(s)
-        mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
-
-
 
         QFile results(QString::fromStdString(path) + "modelresults.txt");
         QTextStream out;
@@ -93,7 +83,7 @@ int main()
         }
 
         if (randommodelstructure) {
-            for (int i=0; i<10; i++) // Random Model Structure Generation
+            for (int i=0; i<100; i++) // Random Model Structure Generation
             {
 
                 modelCreator.CreateRandomModelStructure(&mymodelstruct);
@@ -112,7 +102,7 @@ int main()
 
                     F.DataSave(datacategory::Train);
                     F.DataSave(datacategory::Test);
-                    F.Plotter();
+                    //F.Plotter();
                     //F.Optimizer();
 
                     //data::Save("model.xml","model", F);

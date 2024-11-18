@@ -202,7 +202,7 @@ bool FFNWrapper:: Plotter()
     Gnuplot gp;
 
     // Set titles and labels
-    gp << "set title 'Comparison'\n";
+    gp << "set title 'Comparison'\n"; // << ", R2 = " + to_string(_R2) + " nMSE = " + to_string(nMSE);
     gp << "set xlabel 'Time'\n";
     gp << "set ylabel 'Solids Concentration'\n";
     gp << "set grid\n";  // Optional: Add a grid for better visualization

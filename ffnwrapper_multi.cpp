@@ -118,8 +118,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             }
             else
             {
-                TestInputData = arma::join_rows(TrainInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
-                TestOutputData = arma::join_rows(TrainOutputData, TestOutputData1);
+                TestInputData = arma::join_rows(TestInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
+                TestOutputData = arma::join_rows(TestOutputData, TestOutputData1);
             }
             segment_sizes.push_back(TestInputData1.n_cols);
         }
@@ -220,6 +220,12 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 
         TestInputData.save(ModelStructure.outputpath + "TestInputData.txt",arma::file_type::raw_ascii);
         TestOutputData.save(ModelStructure.outputpath + "TestOutputData.txt",arma::file_type::raw_ascii);
+
+        CTimeSeriesSet<double> TestInputTS(TestInputData,ModelStructure.dt,ModelStructure.lags);
+        TestInputTS.writetofile(ModelStructure.outputpath + "TestInputTS_All.csv");
+
+        CTimeSeriesSet<double> TestOutputTS(TestOutputData,ModelStructure.dt,ModelStructure.lags);
+        TestOutputTS.writetofile(ModelStructure.outputpath + "TestOutputTS_All.csv");
 
         vector<CTimeSeriesSet<double>> TestInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TestInputSplit.size(); i++)
