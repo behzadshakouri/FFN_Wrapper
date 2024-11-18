@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "ffnwrapper.h"
+#include "ffnwrapper_multi.h"
 #include <gsl/gsl_rng.h>
 #include <QString>
 #include <BTCSet.h>
@@ -19,7 +20,9 @@ public:
     int ParametersSize();
     bool SetParameters(CModelStructure *modelstructure);
     bool CreateModel(CModelStructure *modelstructure) const;
+    bool CreateModel(CModelStructure_Multi *modelstructure) const;
     bool CreateRandomModelStructure(CModelStructure *modelstructure);
+    bool CreateRandomModelStructure(CModelStructure_Multi *modelstructure);
     bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
     int maximum_superficial_lag = 0;
@@ -28,6 +31,7 @@ public:
     int max_number_of_layers = 4;
     int max_lag_multiplier = 6;
     void clear(CModelStructure *modelstructure);
+    void clear(CModelStructure_Multi *modelstructure);
     bool operator==(const ModelCreator &m2)
     {
         CModelStructure modstruct1;

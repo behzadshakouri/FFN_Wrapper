@@ -52,7 +52,7 @@ bool FFNWrapper_Multi::DataProcess()
     //ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
 
     // Writing the data for checking
-    data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
+    //data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
 
     Shifter(datacategory::Train);
 
@@ -61,6 +61,7 @@ bool FFNWrapper_Multi::DataProcess()
 
 bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 {
+    segment_sizes.clear();
     if (DataCategory == datacategory::Train)
     {   for (unsigned int i=0; i<ModelStructure.inputaddress.size(); i++)
         {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
@@ -82,10 +83,10 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             }
             else
             {
-                TrainInputData = arma::join_cols(TrainInputData, TrainInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
-                TrainInputData = arma::join_cols(TrainOutputData, TrainOutputData1);
+                TrainInputData = arma::join_rows(TrainInputData, TrainInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
+                TrainOutputData = arma::join_rows(TrainOutputData, TrainOutputData1);
             }
-            datacount.push_back(TrainInputData1.n_cols);
+            segment_sizes.push_back(TrainInputData1.n_cols);
 
         }
 
@@ -117,10 +118,10 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             }
             else
             {
-                TestInputData = arma::join_cols(TrainInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
-                TestInputData = arma::join_cols(TrainOutputData, TestOutputData1);
+                TestInputData = arma::join_rows(TrainInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
+                TestOutputData = arma::join_rows(TrainOutputData, TestOutputData1);
             }
-            datacount.push_back(TestInputData1.n_cols);
+            segment_sizes.push_back(TestInputData1.n_cols);
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
@@ -175,9 +176,14 @@ bool FFNWrapper_Multi::Testing()
 bool FFNWrapper_Multi::PerformanceMetrics()
 {
     CTimeSeriesSet<double> PredictionData (Prediction,ModelStructure.dt,ModelStructure.lags);
-    PredictionData.writetofile(ModelStructure.outputpath + "Prediction_" + to_string(ModelStructure.realization) + ".txt");
+    vector<CTimeSeriesSet<double>> PredictionDataSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(Prediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+    for (unsigned int i=0; i<PredictionDataSplit.size(); i++)
+        PredictionDataSplit[i].writetofile(ModelStructure.outputpath + "Prediction_" + to_string(i) + ".txt");
     CTimeSeriesSet<double> TargetData = GetOutputData();
-    TargetData.writetofile(ModelStructure.outputpath + "Target_" + to_string(ModelStructure.realization) + ".txt");
+
+    vector<CTimeSeriesSet<double>> TargetDataSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+    for (unsigned int i=0; i<TargetDataSplit.size(); i++)
+        TargetDataSplit[i].writetofile(ModelStructure.outputpath + "Target_" + to_string(i) + ".txt");
     nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
     _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
 
@@ -185,38 +191,47 @@ bool FFNWrapper_Multi::PerformanceMetrics()
 }
 
 
-bool FFNWrapper_Multi::DataSave()
+bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 {
     //Input data checking
-    data->writetofile(ModelStructure.outputpath + "data_" + to_string(ModelStructure.realization) + ".csv");
+    if (data)
+        data->writetofile(ModelStructure.outputpath + "data.csv");
 
-    // Input/Output matrix checking
-    TrainInputData.save(ModelStructure.outputpath + "TrainInputData_" + to_string(ModelStructure.realization) + ".csv", arma::file_type::raw_ascii);
-    TrainOutputData.save(ModelStructure.outputpath + "TrainOutputData_" + to_string(ModelStructure.realization) + ".csv", arma::file_type::raw_ascii);
+    if (DataCategory==datacategory::Train)
+    {   // Input/Output matrix checking
+        TrainInputData.save(ModelStructure.outputpath + "TrainInputData.csv", arma::file_type::raw_ascii);
+        TrainOutputData.save(ModelStructure.outputpath + "TrainOutputData.csv", arma::file_type::raw_ascii);
 
-    CTimeSeriesSet<double> TrainInputDataTS(TrainInputData,ModelStructure.dt);
-    TrainInputDataTS.writetofile(ModelStructure.outputpath + "TrainInputDataTS_" + to_string(ModelStructure.realization) + ".csv");
+        vector<CTimeSeriesSet<double>> TrainInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TrainInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+        for (unsigned int i=0; i<TrainInputSplit.size(); i++)
+            TrainInputSplit[i].writetofile(ModelStructure.outputpath + "TrainInputDataTS_" + to_string(i) + ".csv");
 
-    CTimeSeriesSet<double> TrainOutputDataTS(TrainOutputData,ModelStructure.dt);
-    TrainOutputDataTS.writetofile(ModelStructure.outputpath + "TrainOutputDataTS_" + to_string(ModelStructure.realization) + ".csv");
+        vector<CTimeSeriesSet<double>> TrainOutputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TrainOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+        for (unsigned int i=0; i<TrainOutputSplit.size(); i++)
+            TrainOutputSplit[i].writetofile(ModelStructure.outputpath + "TrainOutputDataTS_" + to_string(i) + ".csv");
+    }
+    else if (DataCategory==datacategory::Test)
+    {   //Prediction results
+        Prediction.save(ModelStructure.outputpath + "Prediction.csv",arma::file_type::raw_ascii);
 
-    //Prediction results
-    Prediction.save(ModelStructure.outputpath + "Prediction_" + to_string(ModelStructure.realization) + ".csv",arma::file_type::raw_ascii);
+        vector<CTimeSeriesSet<double>> PredictionSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(Prediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+        for (unsigned int i=0; i<PredictionSplit.size(); i++)
+            PredictionSplit[i].writetofile(ModelStructure.outputpath + "PredictionTS_" + to_string(i) + ".csv");
 
-    CTimeSeriesSet<double> PredictionTS(Prediction,ModelStructure.dt);
-    PredictionTS.writetofile(ModelStructure.outputpath + "PredictionTS_" + to_string(ModelStructure.realization) + ".csv");
+        TestInputData.save(ModelStructure.outputpath + "TestInputData.txt",arma::file_type::raw_ascii);
+        TestOutputData.save(ModelStructure.outputpath + "TestOutputData.txt",arma::file_type::raw_ascii);
 
-    TestInputData.save(ModelStructure.outputpath + "TestInputData_" + to_string(ModelStructure.realization) + ".txt",arma::file_type::raw_ascii);
-    TestOutputData.save(ModelStructure.outputpath + "TestOutputData_" + to_string(ModelStructure.realization) + ".txt",arma::file_type::raw_ascii);
+        vector<CTimeSeriesSet<double>> TestInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+        for (unsigned int i=0; i<TestInputSplit.size(); i++)
+            TestInputSplit[i].writetofile(ModelStructure.outputpath + "TestInputTS_" + to_string(i) + ".csv");
 
-    CTimeSeriesSet<double> TestInputDataTS(TestInputData,ModelStructure.dt);
-    TestInputDataTS.writetofile(ModelStructure.outputpath + "TestInputDataTS_" + to_string(ModelStructure.realization) + ".csv");
 
-    CTimeSeriesSet<double> TestOutputDataTS(TestOutputData,ModelStructure.dt);
-    TestOutputDataTS.writetofile(ModelStructure.outputpath + "TestOutputDataTS_" + to_string(ModelStructure.realization) + ".csv");
+        vector<CTimeSeriesSet<double>> TestOutputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
+        for (unsigned int i=0; i<TestOutputSplit.size(); i++)
+            TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputTS_" + to_string(i) + ".csv");
 
-    //Performance metrics
-
+        //Performance metrics
+    }
     cout<<"nMSE = "<<nMSE<<endl;
     cout<<"R2 = "<<_R2<<endl;
 

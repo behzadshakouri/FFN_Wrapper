@@ -1,1 +1,1 @@
-Number of hidden layers:1, Number of nodes: [2], Columns: [0,1,2], Lags: [[0],[28],[14]], nMSE = 0.0219878, R2 = 0.966537
+Number of hidden layers:1, Number of nodes: [2], Columns: [0,1,2], Lags: [[0],[28],[14]], nMSE = 0.174251, R2 = 0.810561

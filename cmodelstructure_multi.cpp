@@ -26,7 +26,6 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     testaddress = rhs.testaddress;
     observedaddress = rhs.observedaddress;
     predictedaddress = rhs.predictedaddress;
-    realization = rhs.realization;
     outputpath = rhs.outputpath;
 
 
@@ -50,7 +49,6 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     testaddress = rhs.testaddress;
     observedaddress = rhs.observedaddress;
     predictedaddress = rhs.predictedaddress;
-    realization = rhs.realization;
     outputpath = rhs.outputpath;
 
     return *this;

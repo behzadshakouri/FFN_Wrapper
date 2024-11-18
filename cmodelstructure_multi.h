@@ -20,7 +20,6 @@ public:
     vector<string> testaddress; //the number of test sets does not need to be equal to training sets
     vector<string> observedaddress; //explain what is this for?
     vector<string> predictedaddress;
-    int realization; //realization ID
     int n_input_layers;
     string activation_function;
     int n_output_layers;

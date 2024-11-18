@@ -27,13 +27,13 @@ public:
     bool Training();
     bool Testing();
     bool PerformanceMetrics();
-    bool DataSave();
+    bool DataSave(datacategory);
     bool Plotter();
     bool Optimizer();
-    vector<int> datacount;
+    vector<int> segment_sizes;
     CModelStructure_Multi ModelStructure;
-    CTimeSeriesSet<double> *data;
-    CTimeSeriesSet<double> *data2;
+    CTimeSeriesSet<double> *data = nullptr;
+    CTimeSeriesSet<double> *data2 = nullptr;
     CTimeSeriesSet<double> GetInputData()
     {
         return CTimeSeriesSet<double>(TestInputData,ModelStructure.dt,ModelStructure.lags);
@@ -47,6 +47,7 @@ public:
     mat Prediction;
     double nMSE = -999;
     double _R2 = -999;
+
 
 private:
     mat TrainInputData;

@@ -2,7 +2,7 @@
 
 #include <mlpack.hpp>
 #include <iostream>
-#include "ffnwrapper.h"
+#include "ffnwrapper_multi.h"
 #include <BTCSet.h>
 #include "modelcreator.h"
 #include <QDebug>
@@ -35,7 +35,7 @@ int main()
 #endif
 
     // Defining Model Structure
-    CModelStructure mymodelstruct;
+    CModelStructure_Multi mymodelstruct;
     mymodelstruct.n_layers = 1;
     mymodelstruct.n_nodes = {2};
 
@@ -43,7 +43,7 @@ int main()
     string datapath = "/home/arash/Projects/FFNWrapper/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    int randommodelstructure = 0; // 0 for no random model structure usage and 1 for random model structure usage
+    bool randommodelstructure = false; // 0 for no random model structure usage and 1 for random model structure usage
 
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
@@ -66,18 +66,17 @@ int main()
     modelCreator.max_number_of_layers = 2;
     modelCreator.max_lag_multiplier = 10;
 
-    for (int r=0; r<5; r++) // Realization
-
+    for (int r=0; r<5; r++)
     {
-        mymodelstruct.realization = r;
-
-        mymodelstruct.inputaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
-        mymodelstruct.testaddress = datapath + "observedoutput_" + to_string(r) + ".txt";
+        mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
-        mymodelstruct.observedaddress = mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv";
-        mymodelstruct.predictedaddress = mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv";
+        mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+    }
 
+    {
         // Defining Output(s)
         mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
 
@@ -93,44 +92,43 @@ int main()
             return 0;
         }
 
-        if (randommodelstructure == 1) {
+        if (randommodelstructure) {
+            for (int i=0; i<10; i++) // Random Model Structure Generation
+            {
 
-        for (int i=0; i<10; i++) // Random Model Structure Generation
+                modelCreator.CreateRandomModelStructure(&mymodelstruct);
 
-        {
+                // Running FFNWrapper
+                if (mymodelstruct.ValidLags())
+                {   FFNWrapper_Multi F;
+                    F.ModelStructure = mymodelstruct;
+                    F.Initiate();
+                    F.Training();
+                    F.Testing();
+                    F.PerformanceMetrics();
 
-            modelCreator.CreateRandomModelStructure(&mymodelstruct);
+                    qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
+                    out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
 
-            // Running FFNWrapper
-            if (mymodelstruct.ValidLags())
-            {   FFNWrapper F;
-                F.ModelStructure = mymodelstruct;
-                F.Initiate();
-                F.Training();
-                F.Testing();
-                F.PerformanceMetrics();
+                    F.DataSave(datacategory::Train);
+                    F.DataSave(datacategory::Test);
+                    F.Plotter();
+                    //F.Optimizer();
 
-                qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
-                out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
-
-                F.DataSave();
-                F.Plotter();
-                //F.Optimizer();
-
-                //data::Save("model.xml","model", F);
+                    //data::Save("model.xml","model", F);
+                }
+                else
+                    i--;
             }
-            else
-                i--;
-        }
 
         results.close();
 
         }
 
-        else if (randommodelstructure == 0) {
+        else if (!randommodelstructure) {
 
 
-            FFNWrapper F;
+            FFNWrapper_Multi F;
             F.ModelStructure = mymodelstruct;
             F.Initiate();
             F.Training();
@@ -140,7 +138,7 @@ int main()
             qDebug()<< mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
             out << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
 
-            F.DataSave();
+            F.DataSave(datacategory::Test);
             F.Plotter();
             //F.Optimizer();
 
