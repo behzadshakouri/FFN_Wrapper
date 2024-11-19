@@ -28,7 +28,7 @@ public:
     map<string, double> Fitness();
     void AssignParameters(const vector<long unsigned int> &x);
     bool CreateModel();
-    FFNWrapper FFN;
+    FFNWrapper_Multi FFN;
     bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
     int maximum_superficial_lag = 0;

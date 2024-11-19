@@ -31,7 +31,12 @@ public:
     vector<int> outputcolumns;
     int input_lag_multiplier;
     string outputpath;
-
+    void Reset()
+    {
+        inputcolumns.clear();
+        lags.clear();
+        n_nodes.clear();
+    }
     bool operator==(const CModelStructure_Multi &m2)
     {
         if (input_lag_multiplier!=m2.input_lag_multiplier)

@@ -127,11 +127,11 @@ bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
 bool ModelCreator::CreateModel(CModelStructure_Multi *modelstructure) const
 {
     vector<int> columns = convertToBase(parameters[0],2);
-
+    modelstructure->Reset();
     //column selection
     for (unsigned int i=0; i<columns.size(); i++)
     {
-        if (columns[i]==1) modelstructure->inputcolumns.push_back(i);
+        if (columns[i]==1 && i<total_number_of_columns) modelstructure->inputcolumns.push_back(i);
     }
     modelstructure->input_lag_multiplier = parameters[1];
     //lag selection
@@ -235,10 +235,8 @@ std::vector<int> convertToBase(unsigned long int number, int base) {
 
 bool ModelCreator::CreateModel()
 {
-    CModelStructure modelstructure;
-    CreateModel(&modelstructure);
-    FFN.ModelStructure = modelstructure;
 
+    CreateModel(&FFN.ModelStructure);
     return true;
 }
 

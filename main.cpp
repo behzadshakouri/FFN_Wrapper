@@ -25,11 +25,9 @@ int main()
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
 
-    GeneticAlgorithm<ModelCreator> GA;
-    GA.model = modelCreator;
 
-    GA.Initialize();
-    GA.AssignFitnesses();
+
+
     string path;
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
@@ -75,6 +73,13 @@ int main()
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
     }
+
+    GeneticAlgorithm<ModelCreator> GA;
+    GA.model = modelCreator;
+    GA.model.FFN.ModelStructure = mymodelstruct;
+
+    GA.Initialize();
+    GA.AssignFitnesses();
 
     {
 
