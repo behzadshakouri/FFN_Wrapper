@@ -34,6 +34,7 @@ public:
     CModelStructure_Multi ModelStructure;
     CTimeSeriesSet<double> *data = nullptr;
     CTimeSeriesSet<double> *data2 = nullptr;
+    bool silent = true;
     CTimeSeriesSet<double> GetInputData()
     {
         return CTimeSeriesSet<double>(TestInputData,ModelStructure.dt,ModelStructure.lags);

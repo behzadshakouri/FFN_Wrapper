@@ -8,6 +8,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
+#include "ga.h"
 
 using namespace mlpack;
 using namespace std;
@@ -15,7 +16,20 @@ using namespace std;
 
 int main()
 {
+    //Model creator (Random model structure)
+    ModelCreator modelCreator;
+    modelCreator.lag_frequency = 3;
+    modelCreator.maximum_superficial_lag = 5;
+    modelCreator.total_number_of_columns = 3;
+    modelCreator.max_number_of_layers = 3;
+    modelCreator.max_lag_multiplier = 10;
+    modelCreator.max_number_of_nodes_in_layers = 10;
 
+    GeneticAlgorithm<ModelCreator> GA;
+    GA.model = modelCreator;
+
+    GA.Initialize();
+    GA.AssignFitnesses();
     string path;
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
@@ -26,13 +40,13 @@ int main()
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct;
     mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {3};
+    mymodelstruct.n_nodes = {7};
 
     mymodelstruct.dt=0.01;
-    string datapath = "/home/behzad/Projects/FFNWrapper2/";
+    string datapath = "/home/arash/Projects/FFNWrapper/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 
-    bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
+    bool randommodelstructure = true; // true for random model structure usage and false for no random model structure usage
 
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
@@ -43,22 +57,14 @@ int main()
     mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
 
     //Lags definition
-    vector<int> lag0; lag0.push_back(0);
-    vector<int> lag1; lag1.push_back(13);
-    vector<int> lag2; lag2.push_back(26);
-    //vector<int> lag1; lag1.push_back(0); lag1.push_back(6); //lag1.push_back(12); lag1.push_back(18); lag1.push_back(24);
-    //vector<int> lag2; lag2.push_back(0); lag2.push_back(6); //lag2.push_back(12); lag2.push_back(18); lag2.push_back(24);
-    mymodelstruct.lags.push_back(lag0);
+    vector<int> lag1; lag1.push_back(0);lag1.push_back(14);
+    vector<int> lag2; lag2.push_back(14);
+    vector<int> lag3; lag3.push_back(7);lag2.push_back(28);
+
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
 
-    //Model creator (Random model structure)
-    ModelCreator modelCreator;
-    modelCreator.lag_frequency = 3;
-    modelCreator.maximum_superficial_lag = 5;
-    modelCreator.total_number_of_columns = 3;
-    modelCreator.max_number_of_layers = 2;
-    modelCreator.max_lag_multiplier = 10;
+
 
     for (int r=0; r<2; r++)
     {
@@ -83,7 +89,7 @@ int main()
         }
 
         if (randommodelstructure) {
-            for (int i=0; i<100; i++) // Random Model Structure Generation
+            for (int i=0; i<1000; i++) // Random Model Structure Generation
             {
 
                 modelCreator.CreateRandomModelStructure(&mymodelstruct);

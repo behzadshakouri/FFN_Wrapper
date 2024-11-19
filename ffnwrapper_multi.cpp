@@ -175,15 +175,18 @@ bool FFNWrapper_Multi::Testing()
 
 bool FFNWrapper_Multi::PerformanceMetrics()
 {
+
     CTimeSeriesSet<double> PredictionData (Prediction,ModelStructure.dt,ModelStructure.lags);
     vector<CTimeSeriesSet<double>> PredictionDataSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(Prediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
-    for (unsigned int i=0; i<PredictionDataSplit.size(); i++)
-        PredictionDataSplit[i].writetofile(ModelStructure.outputpath + "Prediction_" + to_string(i) + ".txt");
+    if (!silent)
+        for (unsigned int i=0; i<PredictionDataSplit.size(); i++)
+            PredictionDataSplit[i].writetofile(ModelStructure.outputpath + "Prediction_" + to_string(i) + ".txt");
     CTimeSeriesSet<double> TargetData = GetOutputData();
 
     vector<CTimeSeriesSet<double>> TargetDataSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
-    for (unsigned int i=0; i<TargetDataSplit.size(); i++)
-        TargetDataSplit[i].writetofile(ModelStructure.outputpath + "Target_" + to_string(i) + ".txt");
+    if (!silent)
+        for (unsigned int i=0; i<TargetDataSplit.size(); i++)
+            TargetDataSplit[i].writetofile(ModelStructure.outputpath + "Target_" + to_string(i) + ".txt");
     nMSE = diff2(PredictionData.BTC[0],TargetData.BTC[0])/(norm2(TargetData.BTC[0])/TargetData.BTC[0].n);
     _R2 = R2(PredictionData.BTC[0],TargetData.BTC[0]);
 
@@ -193,6 +196,7 @@ bool FFNWrapper_Multi::PerformanceMetrics()
 
 bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 {
+    if (silent) return false;
     //Input data checking
     if (data)
         data->writetofile(ModelStructure.outputpath + "data.csv");

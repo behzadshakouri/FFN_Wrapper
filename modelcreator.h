@@ -8,6 +8,7 @@
 #include <QString>
 #include <BTCSet.h>
 
+
 using namespace std;
 class ModelCreator
 {
@@ -23,6 +24,11 @@ public:
     bool CreateModel(CModelStructure_Multi *modelstructure) const;
     bool CreateRandomModelStructure(CModelStructure *modelstructure);
     bool CreateRandomModelStructure(CModelStructure_Multi *modelstructure);
+    long unsigned int MaxParameter(int i);
+    map<string, double> Fitness();
+    void AssignParameters(const vector<long unsigned int> &x);
+    bool CreateModel();
+    FFNWrapper FFN;
     bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
     int maximum_superficial_lag = 0;

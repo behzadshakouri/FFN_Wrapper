@@ -13,11 +13,11 @@ DEFINES += USING_PCH
 
 DEFINES += GSL
 
-CONFIG += Behzad
-DEFINES += Behzad
+#CONFIG += Behzad
+#DEFINES += Behzad
 
-#CONFIG += Arash
-#DEFINES += Arash
+CONFIG += Arash
+DEFINES += Arash
 
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
@@ -54,7 +54,11 @@ INCLUDEPATH += /usr/local/include
 LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lboost_iostreams
 
 HEADERS += \
+    Binary.h \
+    ga.h \
+    individual.h \
     pch.h \
+    ga.hpp \
     cmodelstructure.h \
     cmodelstructure_multi.h \
     ffnwrapper.h \

@@ -50,13 +50,32 @@ bool ModelCreator::CreateRandomModelStructure(CModelStructure *modelstructure)
     return true;
 }
 
+long unsigned int ModelCreator::MaxParameter(int i)
+{
+    if (i==0) return pow(2,total_number_of_columns)-1;
+    if (i==1) return max_lag_multiplier-1;
+    if (i<total_number_of_columns+2) return pow(lag_frequency,maximum_superficial_lag)-1;
+    if (i==total_number_of_columns+2) return pow(max_number_of_layers,max_number_of_layers+1)-1;
+    return 0;
+}
+
+void ModelCreator::AssignParameters(const vector<long unsigned int> &x)
+{
+    if (x.size()!=total_number_of_columns+3) return;
+    parameters.resize(ParametersSize());
+    for (unsigned int i = 0; i<total_number_of_columns+3; i++)
+    {
+        parameters[i] = x[i]+1;
+    }
+
+}
+
+
 bool ModelCreator::CreateRandomModelStructure(CModelStructure_Multi *modelstructure)
 {
     long unsigned int max_column_selection = pow(2,total_number_of_columns);
     long unsigned int max_lag_selection = pow(lag_frequency,maximum_superficial_lag);
     long unsigned int max_node_selection = pow(max_number_of_layers,max_number_of_layers+1)-1;
-
-
 
     parameters.resize(ParametersSize());
     parameters[0] = gsl_rng_uniform_int(r, max_column_selection-1)+1; // Selected Columns
@@ -214,4 +233,24 @@ std::vector<int> convertToBase(unsigned long int number, int base) {
     return result;
 }
 
+bool ModelCreator::CreateModel()
+{
+    CModelStructure modelstructure;
+    CreateModel(&modelstructure);
+    FFN.ModelStructure = modelstructure;
+
+    return true;
+}
+
+map<string, double> ModelCreator::Fitness()
+{
+    map<string,double> out;
+    FFN.Initiate();
+    FFN.Training();
+    FFN.Testing();
+    FFN.PerformanceMetrics();
+    out["MSE"] = FFN.nMSE;
+    out["R2"] = FFN._R2;
+    return out;
+}
 
