@@ -55,5 +55,90 @@ void GeneticAlgorithm<T>::AssignFitnesses()
             Individuals[i].fitness = Individuals[i].fitness_measures["MSE"];
         }
     }
+    vector<int> ranks = getRanks();
+    for (unsigned int i=0; i<Individuals.size(); i++)
+    {
+        Individuals[i].rank = ranks[i];
+    }
+}
+
+template<class T>
+void GeneticAlgorithm<T>::CrossOver()
+{
 
 }
+
+
+// Function to randomly select an Individual based on inverse rank probability
+template<class T>
+const Individual& GeneticAlgorithm<T>::selectIndividualByRank() {
+    // Calculate weights as the inverse of rank
+    std::vector<double> weights(Individuals.size());
+    for (size_t i = 0; i < Individuals.size(); ++i) {
+        weights[i] = 1.0 / Individuals[i].rank;
+    }
+
+    // Create a cumulative probability distribution
+    std::vector<double> cumulative(weights.size());
+    std::partial_sum(weights.begin(), weights.end(), cumulative.begin());
+
+    // Normalize the cumulative probabilities
+    double totalWeight = cumulative.back();
+    for (double& value : cumulative) {
+        value /= totalWeight;
+    }
+
+    // Generate a random number between 0 and 1
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+    double randomValue = dis(gen);
+
+    // Find the corresponding individual
+    for (size_t i = 0; i < cumulative.size(); ++i) {
+        if (randomValue <= cumulative[i]) {
+            return Individuals[i];
+        }
+    }
+
+    // Fallback (shouldn't be reached)
+    return Individuals.back();
+}
+
+void SortIndices(const std::vector<Individual>& individuals, std::vector<int>& indices) {
+    size_t n = indices.size();
+
+    // Perform Bubble Sort on indices based on fitness values
+    for (size_t i = 0; i < n - 1; ++i) {
+        for (size_t j = 0; j < n - i - 1; ++j) {
+            // Compare fitness values of the indices
+            if (individuals[indices[j]].fitness > individuals[indices[j + 1]].fitness) {
+                // Swap indices
+                std::swap(indices[j], indices[j + 1]);
+            }
+        }
+    }
+}
+
+template<class T>
+std::vector<int> GeneticAlgorithm<T>::getRanks() {
+    size_t n = Individuals.size();
+
+    // Create a vector of indices from 0 to n-1
+    std::vector<int> indices(n);
+    for (size_t i = 0; i < n; ++i) {
+        indices[i] = i;
+    }
+
+    // Sort indices based on fitness using our custom bubble sort
+    SortIndices(Individuals, indices);
+
+    // Create a vector to store ranks
+    std::vector<int> ranks(n);
+    for (size_t i = 0; i < n; ++i) {
+        ranks[indices[i]] = i + 1; // Rank starts from 1
+    }
+
+    return ranks;
+}
+

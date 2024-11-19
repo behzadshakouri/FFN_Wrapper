@@ -8,7 +8,7 @@
 
 struct GeneticAlgorithmsettings
 {
-    unsigned int totalpopulation = 40;
+    unsigned int totalpopulation = 6;
     unsigned int generations = 50;
 };
 
@@ -26,8 +26,9 @@ public:
     T model;
     vector<T> models;
     GeneticAlgorithmsettings Settings;
-
-
+    std::vector<int> getRanks();
+    void CrossOver();
+    const Individual& selectIndividualByRank();
 
 };
 

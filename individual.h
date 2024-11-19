@@ -20,6 +20,7 @@ public:
         fitness = other.fitness;
         fitness_measures = other.fitness_measures;
         splitlocations = other.splitlocations;
+        rank = other.rank;
     }
 
     // Assignment operator
@@ -34,6 +35,7 @@ public:
         fitness = other.fitness;
         fitness_measures = other.fitness_measures;
         splitlocations = other.splitlocations;
+        rank = other.rank;
         return *this;
     }
 
@@ -50,6 +52,15 @@ public:
         std::cout << std::endl;
     }
     vector<int> splitlocations;
+    unsigned int rank = 0;
+    bool operator>(const Individual &I)
+    {
+        return (fitness>I.fitness?true:false);
+    }
+    bool operator<(const Individual &I)
+    {
+        return (fitness<I.fitness?true:false);
+    }
 };
 
 
