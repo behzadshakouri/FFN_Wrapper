@@ -1,4 +1,6 @@
 #include "ga.h"
+#include <iostream>
+#include <fstream>
 
 template<class T>
 GeneticAlgorithm<T>::GeneticAlgorithm()
@@ -11,13 +13,29 @@ template<class T>
 T GeneticAlgorithm<T>::Optimize()
 {
     Initialize();
-    for (unsigned int generation=0; generation<Settings.generations; generation++)
+    for (current_generation=0; current_generation<Settings.generations; current_generation++)
     {
-        cout<<"Generation: "<<generation<<endl;
+        cout<<"Generation: "<<current_generation<<endl;
         CrossOver();
         AssignFitnesses();
+        WriteToFile();
     }
     return models[max_rank];
+
+}
+
+
+template<class T>
+void GeneticAlgorithm<T>::WriteToFile()
+{
+    file.open(Settings.outputpath+"/GA_Output.txt", std::ios::app);
+    file<<"Generation: "<< current_generation << endl;
+    if (file.is_open())
+    {
+        for (unsigned int i=0; i<Individuals.size(); i++)
+        file<<i<<":"<<Individuals[i].toBinary().getBinary()<<","<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE = " <<Individuals[i].fitness_measures["MSE"] << ",R2 = " << Individuals[i].fitness_measures["R2"] << endl;
+    }
+    file.close();
 }
 
 template<class T>
@@ -41,6 +59,7 @@ void GeneticAlgorithm<T>::Initialize()
 
     }
     AssignFitnesses();
+    WriteToFile();
 }
 
 template<class T>

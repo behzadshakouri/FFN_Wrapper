@@ -11,6 +11,7 @@ struct GeneticAlgorithmsettings
     unsigned int totalpopulation = 40;
     unsigned int generations = 100;
     double mutation_probability = 0.05;
+    string outputpath = "";
 };
 
 using namespace std;
@@ -23,6 +24,7 @@ public:
     T Optimize();
     void AssignFitnesses();
     void Initialize();
+    void WriteToFile();
     vector<Individual> Individuals;
     T model;
     vector<T> models;
@@ -32,6 +34,8 @@ public:
     const Individual& selectIndividualByRank();
 private:
     unsigned int max_rank=0;
+    std::ofstream file;
+    unsigned int current_generation=0;
 
 };
 

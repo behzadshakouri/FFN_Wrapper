@@ -75,10 +75,12 @@ int main()
     }
 
     GeneticAlgorithm<ModelCreator> GA;
+    GA.Settings.outputpath = mymodelstruct.outputpath;
     GA.model = modelCreator;
     GA.model.FFN.ModelStructure = mymodelstruct;
 
-    FFN OptimizedModel = GA.Optimize();
+    ModelCreator OptimizedModel = GA.Optimize();
+    cout<<"Optimized Model Structure: " << OptimizedModel.FFN.ModelStructure.ParametersToString().toStdString()<<endl;
 
 /*
     {

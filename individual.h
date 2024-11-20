@@ -62,6 +62,7 @@ public:
         }
         std::cout << std::endl;
     }
+
     vector<unsigned int> splitlocations;
     unsigned int rank = 0;
     bool operator>(const Individual &I)
