@@ -31,18 +31,20 @@ int main()
     string path;
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
+    string datapath = "/home/arash/Projects/FFNWrapper/";
 #else
     path = "/home/behzad/Projects/FFNWrapper2/";
+    string datapath = "/home/behzad/Projects/FFNWrapper2/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #endif
 
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct;
     mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {7};
+    mymodelstruct.n_nodes = {4};
 
     mymodelstruct.dt=0.01;
-    string datapath = "/home/arash/Projects/FFNWrapper/";
-    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
+
 
     bool randommodelstructure = true; // true for random model structure usage and false for no random model structure usage
 
@@ -52,13 +54,14 @@ int main()
     mymodelstruct.inputcolumns.push_back(2); // Input 2: Reactor (1)_Solids:inflow_concentration
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
+    mymodelstruct.outputcolumns.push_back(3); // Output: Settling element (1)_Solids:concentration
 
     //Lags definition
-    vector<int> lag1; lag1.push_back(0);lag1.push_back(14);
-    vector<int> lag2; lag2.push_back(14);
-    vector<int> lag3; lag3.push_back(7);lag2.push_back(28);
+    vector<int> lag0; lag0.push_back(0);lag0.push_back(14);
+    vector<int> lag1; lag1.push_back(14);
+    vector<int> lag2; lag2.push_back(7);lag2.push_back(28);
 
+    mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
 
@@ -74,6 +77,7 @@ int main()
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
     }
 
+    /*
     GeneticAlgorithm<ModelCreator> GA;
     GA.Settings.outputpath = mymodelstruct.outputpath;
     GA.model = modelCreator;
@@ -132,6 +136,7 @@ int main()
 
 
             FFNWrapper_Multi F;
+            F.silent = false;
             F.ModelStructure = mymodelstruct;
             F.Initiate();
             F.Train();
