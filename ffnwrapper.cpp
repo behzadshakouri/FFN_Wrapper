@@ -98,16 +98,16 @@ bool FFNWrapper::Initiate()
     return true;
 }
 
-bool FFNWrapper::Training()
+bool FFNWrapper::Train()
 {
 
     // Train the model
-    Train(TrainInputData, TrainOutputData);
+    FFN::Train(TrainInputData, TrainOutputData);
 
     return true;
 }
 
-bool FFNWrapper::Testing()
+bool FFNWrapper::Test()
 {
     // Use the Predict method to get the predictions.
 

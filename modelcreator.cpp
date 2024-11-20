@@ -243,12 +243,39 @@ bool ModelCreator::CreateModel()
 map<string, double> ModelCreator::Fitness()
 {
     map<string,double> out;
-    FFN.Initiate();
-    FFN.Training();
-    FFN.Testing();
+    FFN.Initiate(!initiated);
+    FFN.Train();
+    FFN.Test();
     FFN.PerformanceMetrics();
     out["MSE"] = FFN.nMSE;
     out["R2"] = FFN._R2;
+    initiated = true;
     return out;
+}
+
+ModelCreator::ModelCreator(const ModelCreator &other)
+{
+    FFN = other.FFN;
+    initiated = other.initiated;
+    total_number_of_columns = other.total_number_of_columns;
+    maximum_superficial_lag = other.maximum_superficial_lag;
+    lag_frequency = other.lag_frequency;
+    max_number_of_nodes_in_layers = other.max_number_of_nodes_in_layers;
+    max_number_of_layers = other.max_number_of_layers;
+    max_lag_multiplier = other.max_lag_multiplier;
+
+}
+
+ModelCreator &ModelCreator::operator=(const ModelCreator &other)
+{
+    FFN = other.FFN;
+    initiated = other.initiated;
+    total_number_of_columns = other.total_number_of_columns;
+    maximum_superficial_lag = other.maximum_superficial_lag;
+    lag_frequency = other.lag_frequency;
+    max_number_of_nodes_in_layers = other.max_number_of_nodes_in_layers;
+    max_number_of_layers = other.max_number_of_layers;
+    max_lag_multiplier = other.max_lag_multiplier;
+    return *this;
 }
 

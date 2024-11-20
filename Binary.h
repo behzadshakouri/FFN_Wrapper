@@ -19,7 +19,7 @@ public:
     // Copy constructor
     BinaryNumber(const BinaryNumber &other) {
         binary = other.binary;
-        std::cout << "Copy constructor called\n";
+        //std::cout << "Copy constructor called\n";
     }
 
     // Assignment operator
@@ -68,8 +68,8 @@ public:
     // Function to perform crossover between two BinaryNumbers at a random point
     static BinaryNumber crossover(const BinaryNumber &bn1, const BinaryNumber &bn2) {
         // Initialize random seed
-        std::srand(static_cast<unsigned>(std::time(nullptr)));
-
+        std::srand(static_cast<unsigned>(std::time(nullptr)+call_counter));
+        call_counter++;
         // Determine the minimum length of the two binary strings
         size_t minLength = std::min(bn1.binary.size(), bn2.binary.size());
 
@@ -199,8 +199,8 @@ public:
         }
 
         // Seed the random number generator
-        std::srand(static_cast<unsigned>(std::time(nullptr)));
-
+        std::srand(static_cast<unsigned>(std::time(nullptr)+call_counter));
+        call_counter++;
         // Iterate through each digit in the binary string
         for (size_t i = 0; i < binary.size(); ++i) {
             double randomValue = static_cast<double>(std::rand()) / RAND_MAX; // Generate a random value between 0 and 1

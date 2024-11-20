@@ -14,6 +14,8 @@ class ModelCreator
 {
 public:
     ModelCreator();
+    ModelCreator(const ModelCreator &other);
+    ModelCreator &operator=(const ModelCreator &other);
     bool SetParameters(const vector<long int> &params)
     {
         parameters = params;
@@ -31,6 +33,7 @@ public:
     FFNWrapper_Multi FFN;
     bool AppendModelStructureToFile();
     int total_number_of_columns = 0;
+    bool initiated = false;
     int maximum_superficial_lag = 0;
     int lag_frequency = 0;
     int max_number_of_nodes_in_layers = 10;

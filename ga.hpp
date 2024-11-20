@@ -6,6 +6,20 @@ GeneticAlgorithm<T>::GeneticAlgorithm()
 
 }
 
+
+template<class T>
+T GeneticAlgorithm<T>::Optimize()
+{
+    Initialize();
+    for (unsigned int generation=0; generation<Settings.generations; generation++)
+    {
+        cout<<"Generation: "<<generation<<endl;
+        CrossOver();
+        AssignFitnesses();
+    }
+    return models[max_rank];
+}
+
 template<class T>
 void GeneticAlgorithm<T>::Initialize()
 {
@@ -26,7 +40,7 @@ void GeneticAlgorithm<T>::Initialize()
         Individuals[i].display();
 
     }
-
+    AssignFitnesses();
 }
 
 template<class T>
@@ -42,7 +56,6 @@ void GeneticAlgorithm<T>::AssignFitnesses()
         }
         models[i].AssignParameters(parameterset);
         models[i].CreateModel();
-        cout<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<endl;
         if (models[i].FFN.ModelStructure.ValidLags())
         {
             Individuals[i].fitness_measures = models[i].Fitness();
@@ -54,6 +67,7 @@ void GeneticAlgorithm<T>::AssignFitnesses()
             Individuals[i].fitness_measures["R2"]=0;
             Individuals[i].fitness = Individuals[i].fitness_measures["MSE"];
         }
+        cout<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE = " <<Individuals[i].fitness_measures["MSE"] << ",R2 = " << Individuals[i].fitness_measures["R2"] << endl;
     }
     vector<int> ranks = getRanks();
     for (unsigned int i=0; i<Individuals.size(); i++)
@@ -65,7 +79,17 @@ void GeneticAlgorithm<T>::AssignFitnesses()
 template<class T>
 void GeneticAlgorithm<T>::CrossOver()
 {
-
+    vector<Individual> newIndividuals = Individuals;
+    newIndividuals[0] = Individuals[max_rank];
+    for (unsigned int i=1; i<Individuals.size(); i++)
+    {
+        Individual Ind1 = selectIndividualByRank();
+        Individual Ind2 = selectIndividualByRank();
+        BinaryNumber FullBinary = Ind1.toBinary();
+        FullBinary.mutate(Settings.mutation_probability);
+        newIndividuals[i] = FullBinary.split(Individuals[i].splitlocations);
+    }
+    Individuals = newIndividuals;
 }
 
 
@@ -138,7 +162,7 @@ std::vector<int> GeneticAlgorithm<T>::getRanks() {
     for (size_t i = 0; i < n; ++i) {
         ranks[indices[i]] = i + 1; // Rank starts from 1
     }
-
+    max_rank = indices[0];
     return ranks;
 }
 

@@ -27,6 +27,10 @@ FFNWrapper_Multi::FFNWrapper_Multi():FFN<MeanSquaredError>()
 FFNWrapper_Multi::FFNWrapper_Multi(const FFNWrapper_Multi &rhs):FFN<MeanSquaredError>(rhs)
 {
     ModelStructure = rhs.ModelStructure;
+    TrainInputData = rhs.TrainInputData;
+    TrainOutputData = rhs.TrainOutputData;
+    TestInputData = rhs.TestInputData;
+    TestOutputData = rhs.TestOutputData;
     data = rhs.data;
 
 }
@@ -35,6 +39,10 @@ FFNWrapper_Multi& FFNWrapper_Multi::operator=(const FFNWrapper_Multi& rhs)
 {
     FFN<MeanSquaredError>::operator=(rhs);
     ModelStructure = rhs.ModelStructure;
+    TrainInputData = rhs.TrainInputData;
+    TrainOutputData = rhs.TrainOutputData;
+    TestInputData = rhs.TestInputData;
+    TestOutputData = rhs.TestOutputData;
     data = rhs.data;
 
     return *this;
@@ -62,8 +70,12 @@ bool FFNWrapper_Multi::DataProcess()
 bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 {
     segment_sizes.clear();
+
     if (DataCategory == datacategory::Train)
-    {   for (unsigned int i=0; i<ModelStructure.inputaddress.size(); i++)
+    {
+        TrainInputData.clear();
+        TrainOutputData.clear();
+        for (unsigned int i=0; i<ModelStructure.inputaddress.size(); i++)
         {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
 
             //Shifting by lags definition (Inputs)
@@ -97,6 +109,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     }
     else
     {
+        TestInputData.clear();
+        TestOutputData.clear();
         for (unsigned int i=0; i<ModelStructure.testaddress.size(); i++)
         {
             CTimeSeriesSet<double> InputTimeSeries(ModelStructure.testaddress[i],true);
@@ -134,11 +148,15 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
 
 
-bool FFNWrapper_Multi::Initiate()
+bool FFNWrapper_Multi::Initiate(bool dataprocess)
 {
+
     DataProcess();
 
-    // Initialize the network
+    //Initialize the network
+    if (!dataprocess)
+        FFN::operator=(FFN<MeanSquaredError>());
+
     for (int layer = 0; layer<ModelStructure.n_layers; layer++)
     {
         Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
@@ -152,16 +170,16 @@ bool FFNWrapper_Multi::Initiate()
     return true;
 }
 
-bool FFNWrapper_Multi::Training()
+bool FFNWrapper_Multi::Train()
 {
 
     // Train the model
-    Train(TrainInputData, TrainOutputData);
+    FFN::Train(TrainInputData, TrainOutputData);
 
     return true;
 }
 
-bool FFNWrapper_Multi::Testing()
+bool FFNWrapper_Multi::Test()
 {
     // Use the Predict method to get the predictions.
 

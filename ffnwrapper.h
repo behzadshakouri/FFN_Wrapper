@@ -24,8 +24,8 @@ public:
 
     bool Shifter();
     bool Initiate();
-    bool Training();
-    bool Testing();
+    bool Train();
+    bool Test();
     bool PerformanceMetrics();
     bool DataSave();
     bool Plotter();

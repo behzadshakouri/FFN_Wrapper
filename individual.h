@@ -12,7 +12,7 @@ public:
 
     // Copy constructor
     Individual(const Individual &other) {
-        std::cout << "Individual Copy Constructor Called\n";
+        //std::cout << "Individual Copy Constructor Called\n";
         this->clear(); // Clear current content
         for (const auto &binary : other) {
             this->push_back(binary); // Copy each BinaryNumber object
@@ -26,7 +26,7 @@ public:
     // Assignment operator
     Individual &operator=(const Individual &other) {
         if (this != &other) {
-            std::cout << "Individual Assignment Operator Called\n";
+            //std::cout << "Individual Assignment Operator Called\n";
             this->clear(); // Clear current content
             for (const auto &binary : other) {
                 this->push_back(binary); // Copy each BinaryNumber object
@@ -36,6 +36,17 @@ public:
         fitness_measures = other.fitness_measures;
         splitlocations = other.splitlocations;
         rank = other.rank;
+        return *this;
+    }
+
+    Individual &operator=(const vector<BinaryNumber> &other) {
+        if (this != &other) {
+            //std::cout << "Individual Assignment Operator Called\n";
+            this->clear(); // Clear current content
+            for (const auto &binary : other) {
+                this->push_back(binary); // Copy each BinaryNumber object
+            }
+        }
         return *this;
     }
 
@@ -51,7 +62,7 @@ public:
         }
         std::cout << std::endl;
     }
-    vector<int> splitlocations;
+    vector<unsigned int> splitlocations;
     unsigned int rank = 0;
     bool operator>(const Individual &I)
     {
@@ -61,6 +72,14 @@ public:
     {
         return (fitness<I.fitness?true:false);
     }
+    BinaryNumber toBinary() const
+    {
+        BinaryNumber B = at(0);
+        for (unsigned int i=1; i<size(); i++)
+            B += at(i);
+        return B;
+    }
+
 };
 
 

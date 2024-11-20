@@ -8,8 +8,9 @@
 
 struct GeneticAlgorithmsettings
 {
-    unsigned int totalpopulation = 6;
-    unsigned int generations = 50;
+    unsigned int totalpopulation = 40;
+    unsigned int generations = 100;
+    double mutation_probability = 0.05;
 };
 
 using namespace std;
@@ -19,7 +20,7 @@ class GeneticAlgorithm
 {
 public:
     GeneticAlgorithm();
-    void Optimize();
+    T Optimize();
     void AssignFitnesses();
     void Initialize();
     vector<Individual> Individuals;
@@ -29,6 +30,8 @@ public:
     std::vector<int> getRanks();
     void CrossOver();
     const Individual& selectIndividualByRank();
+private:
+    unsigned int max_rank=0;
 
 };
 

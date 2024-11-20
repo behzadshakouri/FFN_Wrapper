@@ -23,9 +23,9 @@ public:
     mat A;
 
     bool Shifter(datacategory);
-    bool Initiate();
-    bool Training();
-    bool Testing();
+    bool Initiate(bool dataprocess = true);
+    bool Train();
+    bool Test();
     bool PerformanceMetrics();
     bool DataSave(datacategory);
     bool Plotter();
