@@ -86,6 +86,8 @@ int main()
     ModelCreator OptimizedModel = GA.Optimize();
     cout<<"Optimized Model Structure: " << OptimizedModel.FFN.ModelStructure.ParametersToString().toStdString()<<endl;
 
+    //We can test here:
+
 /*
     {
 
