@@ -16,6 +16,12 @@ using namespace std;
 
 int main()
 {
+    const char* ompThreads = std::getenv("OMP_NUM_THREADS");
+        if (ompThreads) {
+            std::cout << "OMP_NUM_THREADS is set to: " << ompThreads << std::endl;
+        } else {
+            std::cout << "OMP_NUM_THREADS is not set." << std::endl;
+        }
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;

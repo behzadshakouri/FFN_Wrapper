@@ -31,7 +31,6 @@ FFNWrapper_Multi::FFNWrapper_Multi(const FFNWrapper_Multi &rhs):FFN<MeanSquaredE
     TrainOutputData = rhs.TrainOutputData;
     TestInputData = rhs.TestInputData;
     TestOutputData = rhs.TestOutputData;
-    data = rhs.data;
 
 }
 
@@ -43,7 +42,6 @@ FFNWrapper_Multi& FFNWrapper_Multi::operator=(const FFNWrapper_Multi& rhs)
     TrainOutputData = rhs.TrainOutputData;
     TestInputData = rhs.TestInputData;
     TestOutputData = rhs.TestOutputData;
-    data = rhs.data;
 
     return *this;
 }
@@ -184,7 +182,6 @@ bool FFNWrapper_Multi::Test()
     // Use the Predict method to get the predictions.
 
     Shifter(datacategory::Test);
-
     Predict(TestInputData, Prediction);
     //cout << "Prediction:" << Prediction;
 
@@ -215,9 +212,6 @@ bool FFNWrapper_Multi::PerformanceMetrics()
 bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 {
     if (silent) return false;
-    //Input data checking
-    if (data)
-        data->writetofile(ModelStructure.outputpath + "data.csv");
 
     if (DataCategory==datacategory::Train)
     {   // Input/Output matrix checking

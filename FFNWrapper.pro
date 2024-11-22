@@ -19,6 +19,9 @@ DEFINES += GSL
 CONFIG += Arash
 DEFINES += Arash
 
+QMAKE_CXXFLAGS *= "-Xpreprocessor -fopenmp"
+QMAKE_LFLAGS +=  -fopenmp
+
 Behzad {
     OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
 
@@ -52,6 +55,7 @@ INCLUDEPATH += $$OHQPATH/src
 INCLUDEPATH += /usr/local/include
 
 LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lboost_iostreams
+LIBS += -lgomp -lpthread
 
 HEADERS += \
     Binary.h \

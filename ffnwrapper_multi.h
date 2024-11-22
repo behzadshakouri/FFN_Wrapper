@@ -32,8 +32,8 @@ public:
     bool Optimizer();
     vector<int> segment_sizes;
     CModelStructure_Multi ModelStructure;
-    CTimeSeriesSet<double> *data = nullptr;
-    CTimeSeriesSet<double> *data2 = nullptr;
+    //CTimeSeriesSet<double> *data = nullptr;
+    //CTimeSeriesSet<double> *data2 = nullptr;
     bool silent = true;
     CTimeSeriesSet<double> GetInputData()
     {

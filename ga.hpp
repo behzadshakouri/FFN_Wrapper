@@ -1,11 +1,12 @@
 #include "ga.h"
 #include <iostream>
 #include <fstream>
+#include <omp.h>
 
 template<class T>
 GeneticAlgorithm<T>::GeneticAlgorithm()
 {
-
+    omp_set_num_threads(8);
 }
 
 
@@ -65,6 +66,7 @@ void GeneticAlgorithm<T>::Initialize()
 template<class T>
 void GeneticAlgorithm<T>::AssignFitnesses()
 {
+    //#pragma omp parallel for
     for (unsigned int i=0; i<models.size(); i++)
     {
         vector<unsigned long int> parameterset;
