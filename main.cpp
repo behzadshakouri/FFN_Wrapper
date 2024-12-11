@@ -77,7 +77,7 @@ int main()
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
     }
 
-    /*
+
     GeneticAlgorithm<ModelCreator> GA;
     GA.Settings.outputpath = mymodelstruct.outputpath;
     GA.model = modelCreator;
@@ -85,7 +85,8 @@ int main()
 
     ModelCreator OptimizedModel = GA.Optimize();
     cout<<"Optimized Model Structure: " << OptimizedModel.FFN.ModelStructure.ParametersToString().toStdString()<<endl;
-
+    OptimizedModel.FFN.silent = false;
+    OptimizedModel.FFN.DataSave(datacategory::Test);
     //We can test here:
 
 /*
