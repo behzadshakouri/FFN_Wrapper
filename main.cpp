@@ -16,6 +16,10 @@ using namespace std;
 
 int main()
 {
+    bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
+
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
@@ -24,8 +28,6 @@ int main()
     modelCreator.max_number_of_layers = 3;
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
-
-
 
 
     string path;
@@ -45,9 +47,6 @@ int main()
 
     mymodelstruct.dt=0.01;
 
-
-    bool randommodelstructure = true; // true for random model structure usage and false for no random model structure usage
-
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
     mymodelstruct.inputcolumns.push_back(1); // Input 1: Settling element (1)_Coagulant:external_mass_flow_timeseries
@@ -66,7 +65,19 @@ int main()
     mymodelstruct.lags.push_back(lag2);
 
 
+    QFile results(QString::fromStdString(path) + "modelresults.txt");
+    QTextStream out;
+    if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        out.setDevice(&results);
+    } else {
+        // Handle file open error
+        qDebug() << "Error opening file!";
+        return 0;
+    }
 
+    if (GA)
+
+    {
     for (int r=0; r<2; r++)
     {
         mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
@@ -89,18 +100,11 @@ int main()
     OptimizedModel.FFN.DataSave(datacategory::Test);
     //We can test here:
 
-/*
-    {
+    }
 
-        QFile results(QString::fromStdString(path) + "modelresults.txt");
-        QTextStream out;
-        if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
-            out.setDevice(&results);
-        } else {
-            // Handle file open error
-            qDebug() << "Error opening file!";
-            return 0;
-        }
+    else
+
+    {
 
         if (randommodelstructure) {
             for (int i=0; i<1000; i++) // Random Model Structure Generation
@@ -162,9 +166,10 @@ int main()
             cout << "No estimation implemented!";
 
     }
-*/
+
     return 0;
 }
+
 
 
 
