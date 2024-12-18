@@ -16,9 +16,12 @@ using namespace std;
 
 int main()
 {
+
+    bool ASM = true; // true for ASM and false for Settling element simple model
+
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
 
     //Model creator (Random model structure)
     ModelCreator modelCreator;
@@ -31,12 +34,19 @@ int main()
 
 
     string path;
+    string path_ASM;
+
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
+    path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
     string datapath = "/home/arash/Projects/FFNWrapper/";
+    string datapath_ASM = "/home/arash/Projects/FFNWrapper/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #else
     path = "/home/behzad/Projects/FFNWrapper2/";
+    path_ASM = "/home/behzad/Projects/FFNWrapper/ASM/";
     string datapath = "/home/behzad/Projects/FFNWrapper2/";
+    string datapath_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #endif
 
@@ -64,30 +74,37 @@ int main()
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
 
-
-    QFile results(QString::fromStdString(path) + "modelresults.txt");
+    QFile results;
     QTextStream out;
-    if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        out.setDevice(&results);
-    } else {
-        // Handle file open error
-        qDebug() << "Error opening file!";
-        return 0;
-    }
 
-    if (GA)
-
-    {
     for (int r=0; r<2; r++)
     {
+
+        if (ASM)
+        {
+        mymodelstruct.inputaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
+
+        mymodelstruct.outputpath = path_ASM + "Results/";
+        mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+        }
+
+        else if (!ASM)
+        {
         mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
         mymodelstruct.testaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+        }
+
     }
 
+    if (GA)
+
+    {
 
     GeneticAlgorithm<ModelCreator> GA;
     GA.Settings.outputpath = mymodelstruct.outputpath;
@@ -100,9 +117,35 @@ int main()
     OptimizedModel.FFN.DataSave(datacategory::Test);
     //We can test here:
 
+    if (ASM)
+    {
+        QFile results(QString::fromStdString(path_ASM) + "modelresults.txt");
+        //QTextStream out;
+        if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            out.setDevice(&results);
+        } else {
+            // Handle file open error
+            qDebug() << "Error opening file!";
+            return 0;
+        }
     }
 
-    else
+    else if(!ASM)
+    {
+        QFile results(QString::fromStdString(path) + "modelresults.txt");
+        //QTextStream out;
+        if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            out.setDevice(&results);
+        } else {
+            // Handle file open error
+            qDebug() << "Error opening file!";
+            return 0;
+        }
+    }
+
+    }
+
+    else if (!GA)
 
     {
 
