@@ -16,41 +16,60 @@ using namespace std;
 
 int main()
 {
+<<<<<<< HEAD
     const char* ompThreads = std::getenv("OMP_NUM_THREADS");
         if (ompThreads) {
             std::cout << "OMP_NUM_THREADS is set to: " << ompThreads << std::endl;
         } else {
             std::cout << "OMP_NUM_THREADS is not set." << std::endl;
         }
+=======
+
+    const double Realization = 2; // Number of Realizations
+    const double total_data_cols = 3; // Number of Inputs + Outputs
+
+    bool ASM = true; // true for ASM and false for Settling element simple model
+
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    const double GA_Nsim = 1000; // Number of GA simulations ???
+
+    bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
+    const double Random_Nsim = 1; // Number of random model structure simulations
+
+>>>>>>> origin/main
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
-    modelCreator.total_number_of_columns = 3;
+    modelCreator.total_number_of_columns = total_data_cols;
     modelCreator.max_number_of_layers = 3;
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
 
 
-
-
     string path;
+    string path_ASM;
+
 #ifdef Arash
     path = "/home/arash/Projects/FFNWrapper/";
+    path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
+    string datapath = "/home/arash/Projects/FFNWrapper/";
+    string datapath_ASM = "/home/arash/Projects/FFNWrapper/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #else
     path = "/home/behzad/Projects/FFNWrapper2/";
+    path_ASM = "/home/behzad/Projects/FFNWrapper/ASM/";
+    string datapath = "/home/behzad/Projects/FFNWrapper2/";
+    string datapath_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #endif
 
     // Defining Model Structure
-    CModelStructure_Multi mymodelstruct;
+    CModelStructure_Multi mymodelstruct; //randommodelstructure
     mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {7};
+    mymodelstruct.n_nodes = {4};
 
     mymodelstruct.dt=0.01;
-    string datapath = "/home/arash/Projects/FFNWrapper/";
-    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
-
-    bool randommodelstructure = true; // true for random model structure usage and false for no random model structure usage
 
     // Defining Inputs
     mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
@@ -58,27 +77,44 @@ int main()
     mymodelstruct.inputcolumns.push_back(2); // Input 2: Reactor (1)_Solids:inflow_concentration
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(3); // Output: V(11): Settling element (1)_Solids:concentration
+    mymodelstruct.outputcolumns.push_back(3); // Output: Settling element (1)_Solids:concentration
 
     //Lags definition
-    vector<int> lag1; lag1.push_back(0);lag1.push_back(14);
-    vector<int> lag2; lag2.push_back(14);
-    vector<int> lag3; lag3.push_back(7);lag2.push_back(28);
+    vector<int> lag0; lag0.push_back(0);lag0.push_back(14);
+    vector<int> lag1; lag1.push_back(14);
+    vector<int> lag2; lag2.push_back(7);lag2.push_back(28);
 
+    mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
 
+    QFile results;
+    QTextStream out;
 
-
-    for (int r=0; r<2; r++)
+    for (int r=0; r<Realization; r++)
     {
+
+        if (ASM) {
+        mymodelstruct.inputaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
+
+        mymodelstruct.outputpath = path_ASM + "Results/";
+        mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+        }
+
+        else if (!ASM) {
         mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
         mymodelstruct.testaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+        }
+
     }
+
+    if (GA) {
 
     GeneticAlgorithm<ModelCreator> GA;
     GA.Settings.outputpath = mymodelstruct.outputpath;
@@ -87,14 +123,13 @@ int main()
 
     ModelCreator OptimizedModel = GA.Optimize();
     cout<<"Optimized Model Structure: " << OptimizedModel.FFN.ModelStructure.ParametersToString().toStdString()<<endl;
-
+    OptimizedModel.FFN.silent = false;
+    OptimizedModel.FFN.DataSave(datacategory::Test);
     //We can test here:
 
-/*
-    {
-
-        QFile results(QString::fromStdString(path) + "modelresults.txt");
-        QTextStream out;
+    if (ASM) {
+        QFile results(QString::fromStdString(path_ASM) + "modelresults.txt");
+        //QTextStream out;
         if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
             out.setDevice(&results);
         } else {
@@ -102,9 +137,26 @@ int main()
             qDebug() << "Error opening file!";
             return 0;
         }
+    }
+
+    else if(!ASM) {
+        QFile results(QString::fromStdString(path) + "modelresults.txt");
+        //QTextStream out;
+        if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            out.setDevice(&results);
+        } else {
+            // Handle file open error
+            qDebug() << "Error opening file!";
+            return 0;
+        }
+    }
+
+    }
+
+    else if (!GA) {
 
         if (randommodelstructure) {
-            for (int i=0; i<1000; i++) // Random Model Structure Generation
+            for (int i=0; i<Random_Nsim; i++) // Random Model Structure Generation
             {
 
                 modelCreator.CreateRandomModelStructure(&mymodelstruct);
@@ -138,8 +190,8 @@ int main()
 
         else if (!randommodelstructure) {
 
-
             FFNWrapper_Multi F;
+            //F.silent = false;
             F.ModelStructure = mymodelstruct;
             F.Initiate();
             F.Train();
@@ -162,9 +214,10 @@ int main()
             cout << "No estimation implemented!";
 
     }
-*/
+
     return 0;
 }
+
 
 
 
