@@ -20,6 +20,13 @@ int main()
     const double Realization = 2; // Number of Realizations
     const double total_data_cols = 3; // Number of Inputs + Outputs
 
+    enum class _model {Settling, ASM} model = _model::ASM;
+
+    if (model==_model::ASM)
+    {
+
+    }
+
     bool ASM = true; // true for ASM and false for Settling element simple model
 
     bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
