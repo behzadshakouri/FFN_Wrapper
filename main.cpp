@@ -27,9 +27,9 @@ int main()
 
     }
 
-    bool ASM = true; // true for ASM and false for Settling element simple model
+    bool ASM = false; // true for ASM and false for Settling element simple model
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
