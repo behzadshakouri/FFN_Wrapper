@@ -17,8 +17,10 @@ using namespace std;
 int main()
 {
 
-    const double Realization = 2; // Number of Realizations
-    const double total_data_cols = 3; // Number of Inputs + Outputs
+    // Simulation & Data Configuration ---> Should be defined
+
+    const double Realization = 1; // Number of Realizations
+    double total_data_cols; // Number of Inputs + Outputs
 
     enum class _model {Settling, ASM} model = _model::ASM;
 
@@ -27,20 +29,27 @@ int main()
 
     }
 
-    bool ASM = false; // true for ASM and false for Settling element simple model
+    bool ASM = true; // true for ASM and false for Settling element simple model
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    if (ASM)
+    total_data_cols = 9; // Number of Inputs + Outputs
+    else
+    total_data_cols = 4; // Number of Inputs + Outputs
+
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 1; // Number of random model structure simulations
+
+    //------------------------------------------------------------------------------------------------------------------------------
 
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
     modelCreator.total_number_of_columns = total_data_cols;
-    modelCreator.max_number_of_layers = 3;
+    modelCreator.max_number_of_layers = total_data_cols-1;
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
 
@@ -52,7 +61,7 @@ int main()
     path = "/home/arash/Projects/FFNWrapper/";
     path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
     string datapath = "/home/arash/Projects/FFNWrapper/";
-    string datapath_ASM = "/home/arash/Projects/FFNWrapper/";
+    string datapath_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #else
     path = "/home/behzad/Projects/FFNWrapper2/";
