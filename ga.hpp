@@ -75,6 +75,7 @@ void GeneticAlgorithm<T>::AssignFitnesses()
         }
         models[i].AssignParameters(parameterset);
         models[i].CreateModel();
+        cout<<"Pre-Train: "<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<endl; // Debugger
         if (models[i].FFN.ModelStructure.ValidLags())
         {
             Individuals[i].fitness_measures = models[i].Fitness();

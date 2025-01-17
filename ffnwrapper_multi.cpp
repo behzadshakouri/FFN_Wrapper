@@ -251,12 +251,12 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 
         vector<CTimeSeriesSet<double>> TestInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TestInputSplit.size(); i++)
-            TestInputSplit[i].writetofile(ModelStructure.outputpath + "TestInputTS_" + to_string(i) + ".csv");
+            TestInputSplit[i].writetofile(ModelStructure.outputpath + "TestInputDataTS_" + to_string(i) + ".csv");
 
 
         vector<CTimeSeriesSet<double>> TestOutputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TestOutputSplit.size(); i++)
-            TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputTS_" + to_string(i) + ".csv");
+            TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputDataTS_" + to_string(i) + ".csv");
 
         //Performance metrics
     }
