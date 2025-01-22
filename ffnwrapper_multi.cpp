@@ -80,13 +80,28 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
             //Shifting by lags definition (Inputs)
 
-            mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TrainInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TrainInputData1;
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TrainOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TrainOutputData1;
+
+            // Normalize inputs (X) using Min-Max scaling
+            minMaxScaler_tr_i.Fit(TrainInputData11);        // Fit the scaler to the input data
+            minMaxScaler_tr_i.Transform(TrainInputData11,TrainInputData1);  // Normalize the input data
+
+            // Normalize outputs (y) using Standard Scaling (z-score normalization)
+            minMaxScaler_tr_o.Fit(TrainOutputData11);        // Fit the scaler to the output data
+            minMaxScaler_tr_o.Transform(TrainOutputData11,TrainOutputData1);  // Normalize the output data
+
+            // Save normalized data (if needed)
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_traininputdata.csv", TrainInputData1);
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_trainoutputdata.csv", TrainOutputData1);
+
 
             if (i==0)
             {
@@ -117,13 +132,27 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
             //Shifting by lags definition (Inputs)
 
-            mat TestInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TestInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TestInputData1;
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TestOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TestOutputData1;
+
+            // Normalize inputs (X) using Min-Max scaling
+            minMaxScaler_te_i.Fit(TestInputData11);        // Fit the scaler to the input data
+            minMaxScaler_te_i.Transform(TestInputData11,TestInputData1);  // Normalize the input data
+
+            // Normalize outputs (y) using Standard Scaling (z-score normalization)
+            minMaxScaler_te_o.Fit(TestOutputData11);        // Fit the scaler to the output data
+            minMaxScaler_te_o.Transform(TestOutputData11,TestOutputData1);  // Normalize the output data
+
+            // Save normalized data (if needed)
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TestInputData1);
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestOutputData1);
 
             if (i==0)
             {
@@ -187,6 +216,20 @@ bool FFNWrapper_Multi::Test()
 
     Predict(TestInputData, Prediction);
     //cout << "Prediction:" << Prediction;
+
+    mat Prediction1;
+    mat TestInputData1;
+    // Reverse normalization on predictions (outputs)
+    minMaxScaler_te_o.InverseTransform(Prediction,Prediction1);  // Reverse the output normalization
+
+    // Reverse normalization on inputs (if needed for visualization or further use)
+    minMaxScaler_te_i.InverseTransform(TestInputData,TestInputData1);  // Reverse the input normalization (if you need this)
+
+    // Save the reversed predictions
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_predictions.csv", Prediction1);
+
+    // Save the reversed input data
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_testinputdata.csv", Prediction1);
 
     return true;
 }

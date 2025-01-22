@@ -49,6 +49,12 @@ public:
     double nMSE = -999;
     double _R2 = -999;
 
+    //Normalization
+    mlpack::data::MinMaxScaler minMaxScaler_tr_i;
+    mlpack::data::MinMaxScaler minMaxScaler_tr_o;
+    mlpack::data::MinMaxScaler minMaxScaler_te_i;
+    mlpack::data::MinMaxScaler minMaxScaler_te_o;
+
 
 private:
     mat TrainInputData;
