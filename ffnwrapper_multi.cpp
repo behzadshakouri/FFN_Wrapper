@@ -102,6 +102,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_traininputdata.csv", TrainInputData1);
             mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_trainoutputdata.csv", TrainOutputData1);
 
+            // Skipping Output normalization
+            TrainOutputData1=TrainOutputData11;
+
 
             if (i==0)
             {
@@ -153,6 +156,10 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             // Save normalized data (if needed)
             mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TestInputData1);
             mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestOutputData1);
+
+            // Skipping Output normalization
+            TestOutputData1=TestOutputData11;
+
 
             if (i==0)
             {
@@ -333,7 +340,7 @@ bool FFNWrapper_Multi:: Plotter()
         // Set titles and labels
         gp << "set title 'Comparison'\n";
         gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Solids Concentration'\n";
+        gp << "set ylabel 'Concentration'\n";
         gp << "set grid\n";  // Optional: Add a grid for better visualization
 
         // Plot both datasets on the same plot

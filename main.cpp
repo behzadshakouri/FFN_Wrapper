@@ -32,12 +32,12 @@ int main()
     bool ASM = true; // true for ASM and false for Settling element simple model
 
     if (ASM)
-    total_data_cols = 9; // Number of Inputs + Outputs (3+4+1)+1 -----------------TEST----------------
+    total_data_cols = 9; // Number of Inputs + Outputs (3+4+1)+1
     else
     total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
 
     bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
-    const double GA_Nsim = 10; // Number of GA simulations ???
+    const double GA_Nsim = 100; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 100; // Number of random model structure simulations
@@ -78,8 +78,8 @@ int main()
     if (ASM)
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
-    mymodelstruct.n_layers = 4;
-    mymodelstruct.n_nodes = {10,10,5,6};
+    mymodelstruct.n_layers = 3;
+    mymodelstruct.n_nodes = {10,6,3};
 
     mymodelstruct.dt=0.1;
 
@@ -106,7 +106,17 @@ int main()
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(total_data_cols-1); // Output: Settling element (1)_Solids:concentration
 
+    // Lags definition
+    vector<int> lag0; lag0.push_back(0); lag0.push_back(2); lag0.push_back(4); lag0.push_back(6);
+    vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(6);
+    vector<int> lag2; lag2.push_back(2); lag2.push_back(6);
+    vector<int> lag3; lag3.push_back(0);
+    vector<int> lag4; lag4.push_back(4); lag4.push_back(6);
+    vector<int> lag5; lag5.push_back(0); lag5.push_back(2); lag5.push_back(4); lag5.push_back(8);
+    vector<int> lag6; lag6.push_back(4); lag6.push_back(6); lag6.push_back(8);
+    vector<int> lag7; lag7.push_back(0); lag7.push_back(8);
 
+    /*
     // Lags definition
     vector<int> lag0; lag0.push_back(9); lag0.push_back(36); //lag0.push_back(60);
     vector<int> lag1; lag1.push_back(0); lag1.push_back(36); //lag1.push_back(60);
@@ -116,6 +126,7 @@ int main()
     vector<int> lag5; lag5.push_back(0); lag5.push_back(27); lag5.push_back(60);
     vector<int> lag6; lag6.push_back(0); lag6.push_back(27); lag6.push_back(60);
     vector<int> lag7; lag7.push_back(18); lag7.push_back(27); lag7.push_back(36); lag7.push_back(60);
+    */
 
     mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
