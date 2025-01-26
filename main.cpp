@@ -12,10 +12,20 @@
 
 using namespace mlpack;
 using namespace std;
+using namespace arma;
 
 
 int main()
 {
+
+    // This is just for testing make_uniform
+    CTimeSeriesSet<double> X("/home/arash/Projects/FFNWrapper/output_c.txt",true);
+    CTimeSeriesSet<double> X_out = X.make_uniform(0.1,2); // increment 0.1, starting from time 2
+    X_out.writetofile("/home/arash/Projects/FFNWrapper/output_uniformized.txt");
+    //
+
+
+
 
     // Simulation & Data Configuration ---> Should be defined
 

@@ -9,6 +9,7 @@
 
 using namespace mlpack;
 using namespace std;
+using namespace arma;
 
 enum class datacategory {Train, Test};
 

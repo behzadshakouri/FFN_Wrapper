@@ -13,27 +13,27 @@ DEFINES += USING_PCH
 
 DEFINES += GSL
 
-CONFIG += Behzad
-DEFINES += Behzad
+#CONFIG += Behzad
+#DEFINES += Behzad
 
-#CONFIG += Arash
-#DEFINES += Arash
+CONFIG += Arash
+DEFINES += Arash
 
 QMAKE_CXXFLAGS *= "-Xpreprocessor -fopenmp"
 QMAKE_LFLAGS +=  -fopenmp
 
 Behzad {
-    OHQPATH = /home/behzad/Projects/OpenHydroQual/aquifolium
+    OHQPATH = /home/behzad/Projects/Utilities
 
 }
 
 Arash {
-    OHQPATH = /home/arash/Projects/QAquifolium/aquifolium
+    OHQPATH = /home/arash/Projects/Utilities
 
 }
 
 SOURCES += \
-        $$OHQPATH/src/Utilities.cpp \
+        $$OHQPATH/Utilities.cpp \
         cmodelstructure.cpp \
         cmodelstructure_multi.cpp \
         ffnwrapper.cpp \
@@ -49,15 +49,17 @@ DEFINES += ARMA_USE_LAPACK ARMA_USE_BLAS _ARMA
 DEFINES += use_VTK ARMA_USE_SUPERLU
 CONFIG += use_VTK
 
-INCLUDEPATH += $$OHQPATH/include
-INCLUDEPATH += $$OHQPATH/include/GA
-INCLUDEPATH += $$OHQPATH/src
+INCLUDEPATH += $$OHQPATH
 INCLUDEPATH += /usr/local/include
 
 LIBS += -larmadillo -llapack -lblas -lgsl -lboost_filesystem -lboost_system -lboost_iostreams
 LIBS += -lgomp -lpthread
 
 HEADERS += \
+    ../Utilities/BTC.h \
+    ../Utilities/BTC.hpp \
+    ../Utilities/BTCSet.h \
+    ../Utilities/BTCSet.hpp \
     Binary.h \
     ga.h \
     individual.h \
