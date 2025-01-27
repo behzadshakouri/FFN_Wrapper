@@ -17,16 +17,6 @@ using namespace arma;
 
 int main()
 {
-
-    // This is just for testing make_uniform
-    CTimeSeriesSet<double> X("/home/arash/Projects/FFNWrapper/output_c.txt",true);
-    CTimeSeriesSet<double> X_out = X.make_uniform(0.1,2); // increment 0.1, starting from time 2
-    X_out.writetofile("/home/arash/Projects/FFNWrapper/output_uniformized.txt");
-    //
-
-
-
-
     // Simulation & Data Configuration ---> Should be defined
 
     const double Realization = 1; // Number of Realizations
@@ -42,12 +32,12 @@ int main()
     bool ASM = true; // true for ASM and false for Settling element simple model
 
     if (ASM)
-    total_data_cols = 9; // Number of Inputs + Outputs (3+4+1)+1
+    total_data_cols = 9; // Number of Inputs + Outputs (3+1+4+1)+1
     else
     total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
 
     bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
-    const double GA_Nsim = 100; // Number of GA simulations ???
+    const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 100; // Number of random model structure simulations
