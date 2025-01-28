@@ -32,7 +32,7 @@ int main()
     bool ASM = true; // true for ASM and false for Settling element simple model
 
     if (ASM)
-    total_data_cols = 9; // Number of Inputs + Outputs (3+1+4+1)+1
+    total_data_cols = 10; // Number of Inputs + Outputs (3+1+4+1)+1
     else
     total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
 
@@ -79,7 +79,7 @@ int main()
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
     mymodelstruct.n_layers = 3;
-    mymodelstruct.n_nodes = {10,6,3};
+    mymodelstruct.n_nodes = {10,8,7};
 
     mymodelstruct.dt=0.1;
 
@@ -101,20 +101,24 @@ int main()
     mymodelstruct.inputcolumns.push_back(5);
     mymodelstruct.inputcolumns.push_back(6);
     mymodelstruct.inputcolumns.push_back(7);
+    mymodelstruct.inputcolumns.push_back(8);
+
 
 
     // Defining Output(s)
     mymodelstruct.outputcolumns.push_back(total_data_cols-1); // Output: Settling element (1)_Solids:concentration
 
     // Lags definition
-    vector<int> lag0; lag0.push_back(0); lag0.push_back(2); lag0.push_back(4); lag0.push_back(6);
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(6);
-    vector<int> lag2; lag2.push_back(2); lag2.push_back(6);
-    vector<int> lag3; lag3.push_back(0);
-    vector<int> lag4; lag4.push_back(4); lag4.push_back(6);
-    vector<int> lag5; lag5.push_back(0); lag5.push_back(2); lag5.push_back(4); lag5.push_back(8);
-    vector<int> lag6; lag6.push_back(4); lag6.push_back(6); lag6.push_back(8);
-    vector<int> lag7; lag7.push_back(0); lag7.push_back(8);
+    vector<int> lag0; lag0.push_back(2); lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
+    vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(4); lag1.push_back(8);
+    vector<int> lag2; lag2.push_back(2);
+    vector<int> lag3; lag3.push_back(0); lag3.push_back(6);
+    vector<int> lag4; lag4.push_back(8);
+    vector<int> lag5; lag5.push_back(6);
+    vector<int> lag6; lag6.push_back(2); lag6.push_back(6);
+    vector<int> lag7; lag7.push_back(2);
+    vector<int> lag8; lag8.push_back(4); lag8.push_back(10);
+
 
     /*
     // Lags definition
@@ -136,6 +140,8 @@ int main()
     mymodelstruct.lags.push_back(lag5);
     mymodelstruct.lags.push_back(lag6);
     mymodelstruct.lags.push_back(lag7);
+    mymodelstruct.lags.push_back(lag8);
+
 
     }
     else if (!ASM)
