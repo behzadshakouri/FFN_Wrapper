@@ -10,7 +10,6 @@ private:
     arma::rowvec maxValues; // Store maximum values of each column
 
 public:
-public:
     // Function to normalize each column between 0 and 1
     arma::mat normalize(const arma::mat& data) {
         minValues = arma::min(data, 0); // Compute min for each column
@@ -60,6 +59,8 @@ public:
 
     // Function to load scaling parameters from a file using std functions
     void loadParameters(const std::string& filename) {
+        minValues.clear();
+        maxValues.clear();
         std::ifstream file(filename);
         if (file.is_open()) {
             std::string line;
@@ -91,6 +92,14 @@ public:
         } else {
             throw std::runtime_error("Unable to open file for reading.");
         }
+    }
+    arma::rowvec GetMinValues()
+    {
+        return minValues;
+    }
+    arma::rowvec GetMaxValues()
+    {
+        return maxValues;
     }
 };
 

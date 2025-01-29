@@ -40,7 +40,7 @@ int main()
     arma::mat restoredData = newTransformer.inverseTransform(normalizedData);
     std::cout << "Restored Data:\n" << restoredData << std::endl;
 
-    arma::mat newdata = {{1.2, 2.3, 1.4}, {4, 5, 6}, {7, 8, 9}};
+    arma::mat newdata = {{1.2, 2.3, 1.4, 0.8}, {4, 5, 6, 4.5}, {7, 8, 9, 8.6}};
     arma::mat newnormalizedData = newTransformer.transform(newdata);
     std::cout << "Normalized Data:\n" << newnormalizedData << std::endl;
 
@@ -212,8 +212,8 @@ int main()
     {
 
         if (ASM) {
-        mymodelstruct.inputaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_" + to_string(r) + ".txt");
+        mymodelstruct.inputaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path_ASM + "Results/";
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
@@ -222,8 +222,8 @@ int main()
         }
 
         else if (!ASM) {
-        mymodelstruct.inputaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath + "observedoutput_" + to_string(r) + ".txt");
+        mymodelstruct.inputaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");

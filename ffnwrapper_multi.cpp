@@ -65,7 +65,7 @@ bool FFNWrapper_Multi::DataProcess()
     return true;
 }
 
-bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
+bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data according to lags
 {
     segment_sizes.clear();
 

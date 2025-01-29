@@ -13,11 +13,11 @@ DEFINES += USING_PCH
 
 DEFINES += GSL
 
-#CONFIG += Behzad
-#DEFINES += Behzad
+CONFIG += Behzad
+DEFINES += Behzad
 
-CONFIG += Arash
-DEFINES += Arash
+#CONFIG += Arash
+#DEFINES += Arash
 
 QMAKE_CXXFLAGS *= "-Xpreprocessor -fopenmp"
 QMAKE_LFLAGS +=  -fopenmp
