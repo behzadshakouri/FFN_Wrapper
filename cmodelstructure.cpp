@@ -14,7 +14,7 @@ CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
     activation_function = rhs.activation_function;
     dt = rhs.dt;
     input_lag_multiplier = rhs.input_lag_multiplier;
-    inputaddress = rhs.inputaddress;
+    trainaddress = rhs.trainaddress;
     inputcolumns = rhs.inputcolumns;
     lags = rhs.lags;
     n_input_layers = rhs.n_input_layers;
@@ -38,7 +38,7 @@ CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Ope
     activation_function = rhs.activation_function;
     dt = rhs.dt;
     input_lag_multiplier = rhs.input_lag_multiplier;
-    inputaddress = rhs.inputaddress;
+    trainaddress = rhs.trainaddress;
     inputcolumns = rhs.inputcolumns;
     lags = rhs.lags;
     n_input_layers = rhs.n_input_layers;

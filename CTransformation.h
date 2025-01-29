@@ -6,26 +6,26 @@
 
 class CTransformation {
 private:
-    arma::rowvec minValues; // Store minimum values of each column
-    arma::rowvec maxValues; // Store maximum values of each column
+    arma::colvec minValues; // Store minimum values of each column
+    arma::colvec maxValues; // Store maximum values of each column
 
 public:
     // Function to normalize each column between 0 and 1
     arma::mat normalize(const arma::mat& data) {
-        minValues = arma::min(data, 0); // Compute min for each column
-        maxValues = arma::max(data, 0); // Compute max for each column
+        minValues = arma::min(data, 1); // Compute min for each column
+        maxValues = arma::max(data, 1); // Compute max for each column
 
         arma::mat normalizedData = data;
-        for (arma::uword i = 0; i < data.n_cols; ++i) {
-            normalizedData.col(i) = (data.col(i) - minValues(i)) / (maxValues(i) - minValues(i));
+        for (arma::uword i = 0; i < data.n_rows; ++i) {
+            normalizedData.row(i) = (data.row(i) - minValues(i)) / (maxValues(i) - minValues(i));
         }
         return normalizedData;
     }
 
     arma::mat transform(const arma::mat& data) {
         arma::mat normalizedData = data;
-        for (arma::uword i = 0; i < data.n_cols; ++i) {
-            normalizedData.col(i) = (data.col(i) - minValues(i)) / (maxValues(i) - minValues(i));
+        for (arma::uword i = 0; i < data.n_rows; ++i) {
+            normalizedData.row(i) = (data.row(i) - minValues(i)) / (maxValues(i) - minValues(i));
         }
         return normalizedData;
     }
@@ -33,8 +33,8 @@ public:
     // Function to perform inverse transformation
     arma::mat inverseTransform(const arma::mat& normalizedData) {
         arma::mat originalData = normalizedData;
-        for (arma::uword i = 0; i < normalizedData.n_cols; ++i) {
-            originalData.col(i) = normalizedData.col(i) * (maxValues(i) - minValues(i)) + minValues(i);
+        for (arma::uword i = 0; i < normalizedData.n_rows; ++i) {
+            originalData.row(i) = normalizedData.row(i) * (maxValues(i) - minValues(i)) + minValues(i);
         }
         return originalData;
     }
@@ -87,8 +87,8 @@ public:
             file.close();
 
             // Convert vectors to arma::rowvec
-            minValues = arma::rowvec(minVals);
-            maxValues = arma::rowvec(maxVals);
+            minValues = arma::colvec(minVals);
+            maxValues = arma::colvec(maxVals);
         } else {
             throw std::runtime_error("Unable to open file for reading.");
         }

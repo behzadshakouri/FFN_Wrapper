@@ -16,7 +16,7 @@ public:
     CTimeSeriesSet<double> *InputTimeSeries = nullptr; //(string& address, bool& tf);
     CTimeSeriesSet<double> *TestTimeSeries = nullptr; //(string& address, bool& tf);
     double dt;
-    vector<string> inputaddress;
+    vector<string> trainaddress;
     vector<string> testaddress; //the number of test sets does not need to be equal to training sets
     vector<string> observedaddress; //explain what is this for?
     vector<string> predictedaddress;

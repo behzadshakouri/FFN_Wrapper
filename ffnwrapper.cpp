@@ -49,7 +49,7 @@ bool FFNWrapper::DataProcess()
 {
 
     // Load the whole data (OpenHydroQual output).
-    ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
+    ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.trainaddress,true);
 
     // Writing the data for checking
     data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
@@ -61,7 +61,7 @@ bool FFNWrapper::DataProcess()
 
 bool FFNWrapper::Shifter()
 {
-       CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress,true);
+       CTimeSeriesSet<double> InputTimeSeries(ModelStructure.trainaddress,true);
 
         //Shifting by lags definition (Inputs)
         TrainInputData = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);

@@ -19,6 +19,9 @@ using namespace mlpack::ann;
 
 #include <ensmallen.hpp>  // Ensmallen header file
 
+#include <CTransformation.h>
+
+
 FFNWrapper_Multi::FFNWrapper_Multi():FFN<MeanSquaredError>()
 {
 
@@ -51,19 +54,38 @@ FFNWrapper_Multi::~FFNWrapper_Multi()
 }
 
 
-bool FFNWrapper_Multi::DataProcess()
+bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
 {
 
-    // Load the whole data (OpenHydroQual output).
-    //ModelStructure.InputTimeSeries = new CTimeSeriesSet<double>(ModelStructure.inputaddress,true);
+    DataProcess();
 
-    // Writing the data for checking
-    //data = new CTimeSeriesSet<double>(*ModelStructure.InputTimeSeries);
+    //Initialize the network
+    if (!dataprocess)
+        FFN::operator=(FFN<MeanSquaredError>());
 
-    Shifter(datacategory::Train);
+    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
+    {
+        Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
+        Add<Sigmoid>(); // Activation Funchion
+    }
+
+   //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
+    //model.Add<Sigmoid>(); // Activation Funchion 2
+    Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
 
     return true;
 }
+
+bool FFNWrapper_Multi::DataProcess()
+{
+
+    Shifter(datacategory::Train);
+    Transformation();
+
+    return true;
+}
+
+
 
 bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data according to lags
 {
@@ -73,36 +95,18 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
     {
         TrainInputData.clear();
         TrainOutputData.clear();
-        for (unsigned int i=0; i<ModelStructure.inputaddress.size(); i++)
-        {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.inputaddress[i],true);
+        for (unsigned int i=0; i<ModelStructure.trainaddress.size(); i++)
+        {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.trainaddress[i],true);
 
             //Shifting by lags definition (Inputs)
 
-            mat TrainInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
-            mat TrainInputData1;
+            mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TrainOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            mat TrainOutputData1;
-
-            // Normalize inputs (X) using Min-Max scaling
-            minMaxScaler_tr_i.Fit(TrainInputData11);        // Fit the scaler to the input data
-            minMaxScaler_tr_i.Transform(TrainInputData11,TrainInputData1);  // Normalize the input data
-
-            // Normalize outputs (y) using Standard Scaling (z-score normalization)
-            minMaxScaler_tr_o.Fit(TrainOutputData11);        // Fit the scaler to the output data
-            minMaxScaler_tr_o.Transform(TrainOutputData11,TrainOutputData1);  // Normalize the output data
-
-            // Save normalized data (if needed)
-            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_traininputdata.csv", TrainInputData1);
-            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_trainoutputdata.csv", TrainOutputData1);
-
-            // Skipping Output normalization
-            TrainOutputData1=TrainOutputData11;
-
+            mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
             if (i==0)
             {
@@ -119,9 +123,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("ShiftedInputs.txt");
+        ShiftedInputs.writetofile("ShiftedInputsTrain.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("ShiftedOutputs.txt");
+        ShiftedOutputs.writetofile("ShiftedOutputsTrain.txt");
     }
     else
     {
@@ -133,31 +137,13 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
             //Shifting by lags definition (Inputs)
 
-            mat TestInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
-            mat TestInputData1;
+            mat TestInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TestOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            mat TestOutputData1;
-
-            // Normalize inputs (X) using Min-Max scaling
-            minMaxScaler_te_i.Fit(TestInputData11);        // Fit the scaler to the input data
-            minMaxScaler_te_i.Transform(TestInputData11,TestInputData1);  // Normalize the input data
-
-            // Normalize outputs (y) using Standard Scaling (z-score normalization)
-            minMaxScaler_te_o.Fit(TestOutputData11);        // Fit the scaler to the output data
-            minMaxScaler_te_o.Transform(TestOutputData11,TestOutputData1);  // Normalize the output data
-
-            // Save normalized data (if needed)
-            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TestInputData1);
-            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestOutputData1);
-
-            // Skipping Output normalization
-            TestOutputData1=TestOutputData11;
-
+            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
             if (i==0)
             {
@@ -181,28 +167,36 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 }
 
 
-
-bool FFNWrapper_Multi::Initiate(bool dataprocess)
+bool FFNWrapper_Multi::Transformation()
 {
 
-    DataProcess();
+    //Testing CTransformation class
+    CTransformation transformer;
+    arma::mat inputdata = TrainInputData;
 
-    //Initialize the network
-    if (!dataprocess)
-        FFN::operator=(FFN<MeanSquaredError>());
+    //std::cout << "Original Data:\n" << inputdata << std::endl;
 
-    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
-    {
-        Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-        Add<Sigmoid>(); // Activation Funchion
-    }
+    // Normalize data
+    arma::mat normalizedInputData = transformer.normalize(inputdata);
+    //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
+    normalizedInputData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/nid.txt", arma::file_type::raw_ascii);
 
-   //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
-    //model.Add<Sigmoid>(); // Activation Funchion 2
-    Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
+    // Save parameters
+    transformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
+
+    // Load parameters
+    CTransformation newInputTransformer;
+    newInputTransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
+
+    // Inverse transform
+    arma::mat restoredInputData = newInputTransformer.inverseTransform(normalizedInputData);
+    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
+
+    TrainInputData = normalizedInputData;
 
     return true;
 }
+
 
 bool FFNWrapper_Multi::Train()
 {
@@ -213,7 +207,7 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
-bool FFNWrapper_Multi::Test()
+bool FFNWrapper_Multi::Test() // Predicting test data
 {
     // Use the Predict method to get the predictions.
 
@@ -221,24 +215,10 @@ bool FFNWrapper_Multi::Test()
     Predict(TestInputData, Prediction);
     //cout << "Prediction:" << Prediction;
 
-    mat Prediction1;
-    mat TestInputData1;
-    // Reverse normalization on predictions (outputs)
-    minMaxScaler_te_o.InverseTransform(Prediction,Prediction1);  // Reverse the output normalization
-
-    // Reverse normalization on inputs (if needed for visualization or further use)
-    minMaxScaler_te_i.InverseTransform(TestInputData,TestInputData1);  // Reverse the input normalization (if you need this)
-
-    // Save the reversed predictions
-    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_predictions.csv", Prediction1);
-
-    // Save the reversed input data
-    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_testinputdata.csv", Prediction1);
-
     return true;
 }
 
-bool FFNWrapper_Multi::PerformanceMetrics()
+bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
 {
 
     CTimeSeriesSet<double> PredictionData (Prediction,ModelStructure.dt,ModelStructure.lags);
@@ -259,7 +239,7 @@ bool FFNWrapper_Multi::PerformanceMetrics()
 }
 
 
-bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
+bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
 {
     if (silent) return false;
 
@@ -311,7 +291,7 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 }
 
 
-bool FFNWrapper_Multi:: Plotter()
+bool FFNWrapper_Multi:: Plotter() // Plotting the results
 {
     for (unsigned int i=0; i<ModelStructure.observedaddress.size(); i++)
     {   CTimeSeriesSet<double> Observed(ModelStructure.observedaddress[i],true);

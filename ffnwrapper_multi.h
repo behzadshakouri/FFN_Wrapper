@@ -20,17 +20,18 @@ public:
     FFNWrapper_Multi(const FFNWrapper_Multi &F);
     FFNWrapper_Multi& operator=(const FFNWrapper_Multi& rhs);
     virtual ~FFNWrapper_Multi();
-    bool DataProcess();
-    mat A;
 
-    bool Shifter(datacategory);
     bool Initiate(bool dataprocess = true);
+    bool DataProcess();
+    bool Shifter(datacategory);
+    bool Transformation();
     bool Train();
     bool Test();
     bool PerformanceMetrics();
     bool DataSave(datacategory);
     bool Plotter();
     bool Optimizer();
+    mat A;
     vector<int> segment_sizes;
     CModelStructure_Multi ModelStructure;
     //CTimeSeriesSet<double> *data = nullptr;

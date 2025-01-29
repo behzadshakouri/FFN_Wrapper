@@ -14,7 +14,7 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     activation_function = rhs.activation_function;
     dt = rhs.dt;
     input_lag_multiplier = rhs.input_lag_multiplier;
-    inputaddress = rhs.inputaddress;
+    trainaddress = rhs.trainaddress;
     inputcolumns = rhs.inputcolumns;
     lags = rhs.lags;
     n_input_layers = rhs.n_input_layers;
@@ -37,7 +37,7 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     activation_function = rhs.activation_function;
     dt = rhs.dt;
     input_lag_multiplier = rhs.input_lag_multiplier;
-    inputaddress = rhs.inputaddress;
+    trainaddress = rhs.trainaddress;
     inputcolumns = rhs.inputcolumns;
     lags = rhs.lags;
     n_input_layers = rhs.n_input_layers;

@@ -18,36 +18,6 @@ using namespace arma;
 
 int main()
 {
-
-    //Testing CTransformation class
-    CTransformation transformer;
-    arma::mat data = {{1, 2, 3,2}, {4, 5, 6,5.5}, {7, 8, 9,7.5} };
-
-    std::cout << "Original Data:\n" << data << std::endl;
-
-    // Normalize data
-    arma::mat normalizedData = transformer.normalize(data);
-    std::cout << "Normalized Data:\n" << normalizedData << std::endl;
-
-    // Save parameters
-    transformer.saveParameters("scaling_params.txt");
-
-    // Load parameters
-    CTransformation newTransformer;
-    newTransformer.loadParameters("scaling_params.txt");
-
-    // Inverse transform
-    arma::mat restoredData = newTransformer.inverseTransform(normalizedData);
-    std::cout << "Restored Data:\n" << restoredData << std::endl;
-
-    arma::mat newdata = {{1.2, 2.3, 1.4, 0.8}, {4, 5, 6, 4.5}, {7, 8, 9, 8.6}};
-    arma::mat newnormalizedData = newTransformer.transform(newdata);
-    std::cout << "Normalized Data:\n" << newnormalizedData << std::endl;
-
-
-
-
-
     // Simulation & Data Configuration ---> Should be defined
 
     const double Realization = 1; // Number of Realizations
@@ -212,7 +182,7 @@ int main()
     {
 
         if (ASM) {
-        mymodelstruct.inputaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
         mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path_ASM + "Results/";
@@ -222,7 +192,7 @@ int main()
         }
 
         else if (!ASM) {
-        mymodelstruct.inputaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
         mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
@@ -345,9 +315,36 @@ int main()
 
 
 
+/*
+    //Testing CTransformation class
+    CTransformation transformer;
+    arma::mat data = {{1, 2, 3,2}, {4, 5, 6,5.5}, {7, 8, 9,7.5} };
+
+    std::cout << "Original Data:\n" << data << std::endl;
+
+    // Normalize data
+    arma::mat normalizedData = transformer.normalize(data);
+    std::cout << "Normalized Data:\n" << normalizedData << std::endl;
+
+    // Save parameters
+    transformer.saveParameters("scaling_params.txt");
+
+    // Load parameters
+    CTransformation newTransformer;
+    newTransformer.loadParameters("scaling_params.txt");
+
+    // Inverse transform
+    arma::mat restoredData = newTransformer.inverseTransform(normalizedData);
+    std::cout << "Restored Data:\n" << restoredData << std::endl;
+
+    arma::mat newdata = {{1.2, 2.3, 1.4, 0.8}, {4, 5, 6, 4.5}, {7, 8, 9, 8.6}};
+    arma::mat newnormalizedData = newTransformer.transform(newdata);
+    std::cout << "Normalized Data:\n" << newnormalizedData << std::endl;
+    */
 
 
-//mymodelstruct.inputaddress = datapath + "observedoutput.txt";
+
+//mymodelstruct.trainaddress = datapath + "observedoutput.txt";
 //mymodelstruct.testaddress = datapath + "observedoutput.txt";
 
 //mymodelstruct.observedaddress = path + buildpath + "TestOutputDataTS.csv";
@@ -375,7 +372,7 @@ int main()
 
     mymodelstruct2.dt=0.01;
 
-    mymodelstruct2.inputaddress = path + "observedoutput.txt";
+    mymodelstruct2.trainaddress = path + "observedoutput.txt";
     mymodelstruct2.testaddress = path + "observedoutput.txt";
 
     // Defining Inputs
