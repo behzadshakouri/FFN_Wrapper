@@ -78,13 +78,31 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
             //Shifting by lags definition (Inputs)
 
-            mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TrainInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TrainInputData1;
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TrainOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TrainOutputData1;
+
+            // Normalize inputs (X) using Min-Max scaling
+            minMaxScaler_tr_i.Fit(TrainInputData11);        // Fit the scaler to the input data
+            minMaxScaler_tr_i.Transform(TrainInputData11,TrainInputData1);  // Normalize the input data
+
+            // Normalize outputs (y) using Standard Scaling (z-score normalization)
+            minMaxScaler_tr_o.Fit(TrainOutputData11);        // Fit the scaler to the output data
+            minMaxScaler_tr_o.Transform(TrainOutputData11,TrainOutputData1);  // Normalize the output data
+
+            // Save normalized data (if needed)
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_traininputdata.csv", TrainInputData1);
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_trainoutputdata.csv", TrainOutputData1);
+
+            // Skipping Output normalization
+            TrainOutputData1=TrainOutputData11;
+
 
             if (i==0)
             {
@@ -115,13 +133,31 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
             //Shifting by lags definition (Inputs)
 
-            mat TestInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TestInputData11 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            mat TestInputData1;
 
             //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TestOutputData11 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TestOutputData1;
+
+            // Normalize inputs (X) using Min-Max scaling
+            minMaxScaler_te_i.Fit(TestInputData11);        // Fit the scaler to the input data
+            minMaxScaler_te_i.Transform(TestInputData11,TestInputData1);  // Normalize the input data
+
+            // Normalize outputs (y) using Standard Scaling (z-score normalization)
+            minMaxScaler_te_o.Fit(TestOutputData11);        // Fit the scaler to the output data
+            minMaxScaler_te_o.Transform(TestOutputData11,TestOutputData1);  // Normalize the output data
+
+            // Save normalized data (if needed)
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TestInputData1);
+            mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestOutputData1);
+
+            // Skipping Output normalization
+            TestOutputData1=TestOutputData11;
+
 
             if (i==0)
             {
@@ -185,6 +221,20 @@ bool FFNWrapper_Multi::Test()
     Predict(TestInputData, Prediction);
     //cout << "Prediction:" << Prediction;
 
+    mat Prediction1;
+    mat TestInputData1;
+    // Reverse normalization on predictions (outputs)
+    minMaxScaler_te_o.InverseTransform(Prediction,Prediction1);  // Reverse the output normalization
+
+    // Reverse normalization on inputs (if needed for visualization or further use)
+    minMaxScaler_te_i.InverseTransform(TestInputData,TestInputData1);  // Reverse the input normalization (if you need this)
+
+    // Save the reversed predictions
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_predictions.csv", Prediction1);
+
+    // Save the reversed input data
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/reversed_testinputdata.csv", Prediction1);
+
     return true;
 }
 
@@ -245,12 +295,12 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory)
 
         vector<CTimeSeriesSet<double>> TestInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TestInputSplit.size(); i++)
-            TestInputSplit[i].writetofile(ModelStructure.outputpath + "TestInputTS_" + to_string(i) + ".csv");
+            TestInputSplit[i].writetofile(ModelStructure.outputpath + "TestInputDataTS_" + to_string(i) + ".csv");
 
 
         vector<CTimeSeriesSet<double>> TestOutputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TestOutputSplit.size(); i++)
-            TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputTS_" + to_string(i) + ".csv");
+            TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputDataTS_" + to_string(i) + ".csv");
 
         //Performance metrics
     }
@@ -284,7 +334,7 @@ bool FFNWrapper_Multi:: Plotter()
         // Set titles and labels
         gp << "set title 'Comparison'\n";
         gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Solids Concentration'\n";
+        gp << "set ylabel 'Concentration'\n";
         gp << "set grid\n";  // Optional: Add a grid for better visualization
 
         // Plot both datasets on the same plot

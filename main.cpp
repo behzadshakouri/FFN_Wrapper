@@ -12,37 +12,44 @@
 
 using namespace mlpack;
 using namespace std;
+using namespace arma;
 
 
 int main()
 {
-<<<<<<< HEAD
-    const char* ompThreads = std::getenv("OMP_NUM_THREADS");
-        if (ompThreads) {
-            std::cout << "OMP_NUM_THREADS is set to: " << ompThreads << std::endl;
-        } else {
-            std::cout << "OMP_NUM_THREADS is not set." << std::endl;
-        }
-=======
+    // Simulation & Data Configuration ---> Should be defined
 
-    const double Realization = 2; // Number of Realizations
-    const double total_data_cols = 3; // Number of Inputs + Outputs
+    const double Realization = 1; // Number of Realizations
+    double total_data_cols; // Number of Inputs + Outputs
+
+    enum class _model {Settling, ASM} model = _model::ASM;
+
+    if (model==_model::ASM)
+    {
+
+    }
 
     bool ASM = true; // true for ASM and false for Settling element simple model
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    if (ASM)
+    total_data_cols = 10; // Number of Inputs + Outputs (3+1+4+1)+1
+    else
+    total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
+
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
-    const double Random_Nsim = 1; // Number of random model structure simulations
+    const double Random_Nsim = 100; // Number of random model structure simulations
 
->>>>>>> origin/main
+    //------------------------------------------------------------------------------------------------------------------------------
+
     //Model creator (Random model structure)
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
-    modelCreator.total_number_of_columns = total_data_cols;
-    modelCreator.max_number_of_layers = 3;
+    modelCreator.total_number_of_columns = total_data_cols-1; // Inputs
+    modelCreator.max_number_of_layers = 4;
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
 
@@ -54,32 +61,109 @@ int main()
     path = "/home/arash/Projects/FFNWrapper/";
     path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
     string datapath = "/home/arash/Projects/FFNWrapper/";
-    string datapath_ASM = "/home/arash/Projects/FFNWrapper/";
+    string datapath_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #else
     path = "/home/behzad/Projects/FFNWrapper2/";
-    path_ASM = "/home/behzad/Projects/FFNWrapper/ASM/";
+    path_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
     string datapath = "/home/behzad/Projects/FFNWrapper2/";
     string datapath_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
     string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
 #endif
 
+
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct; //randommodelstructure
+
+    if (ASM)
+    {
+    // ------------------------simple model properties for optimized structure----------------------------------------------------
+    mymodelstruct.n_layers = 3;
+    mymodelstruct.n_nodes = {10,8,7};
+
+    mymodelstruct.dt=0.1;
+
+    // Defining Inputs
+
+    // Defining Inputs
+    /*
+    for (int i=0; i<total_data_cols-1; i++)
+    {
+        mymodelstruct.inputcolumns.push_back(i); // Input 0: Inflow
+    }
+    */
+
+    mymodelstruct.inputcolumns.push_back(0);
+    mymodelstruct.inputcolumns.push_back(1);
+    mymodelstruct.inputcolumns.push_back(2);
+    mymodelstruct.inputcolumns.push_back(3);
+    mymodelstruct.inputcolumns.push_back(4);
+    mymodelstruct.inputcolumns.push_back(5);
+    mymodelstruct.inputcolumns.push_back(6);
+    mymodelstruct.inputcolumns.push_back(7);
+    mymodelstruct.inputcolumns.push_back(8);
+
+
+
+    // Defining Output(s)
+    mymodelstruct.outputcolumns.push_back(total_data_cols-1); // Output: Settling element (1)_Solids:concentration
+
+    // Lags definition
+    vector<int> lag0; lag0.push_back(2); lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
+    vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(4); lag1.push_back(8);
+    vector<int> lag2; lag2.push_back(2);
+    vector<int> lag3; lag3.push_back(0); lag3.push_back(6);
+    vector<int> lag4; lag4.push_back(8);
+    vector<int> lag5; lag5.push_back(6);
+    vector<int> lag6; lag6.push_back(2); lag6.push_back(6);
+    vector<int> lag7; lag7.push_back(2);
+    vector<int> lag8; lag8.push_back(4); lag8.push_back(10);
+
+
+    /*
+    // Lags definition
+    vector<int> lag0; lag0.push_back(9); lag0.push_back(36); //lag0.push_back(60);
+    vector<int> lag1; lag1.push_back(0); lag1.push_back(36); //lag1.push_back(60);
+    vector<int> lag2; lag2.push_back(36); //lag2.push_back(60);
+    vector<int> lag3; lag3.push_back(36); lag3.push_back(60);
+    vector<int> lag4; lag4.push_back(0); lag4.push_back(36); lag4.push_back(60);
+    vector<int> lag5; lag5.push_back(0); lag5.push_back(27); lag5.push_back(60);
+    vector<int> lag6; lag6.push_back(0); lag6.push_back(27); lag6.push_back(60);
+    vector<int> lag7; lag7.push_back(18); lag7.push_back(27); lag7.push_back(36); lag7.push_back(60);
+    */
+
+    mymodelstruct.lags.push_back(lag0);
+    mymodelstruct.lags.push_back(lag1);
+    mymodelstruct.lags.push_back(lag2);
+    mymodelstruct.lags.push_back(lag3);
+    mymodelstruct.lags.push_back(lag4);
+    mymodelstruct.lags.push_back(lag5);
+    mymodelstruct.lags.push_back(lag6);
+    mymodelstruct.lags.push_back(lag7);
+    mymodelstruct.lags.push_back(lag8);
+
+
+    }
+    else if (!ASM)
+    {
+    // ------------------------simple model properties for optimized structure----------------------------------------------------
+    // Defining Model Structure
     mymodelstruct.n_layers = 1;
     mymodelstruct.n_nodes = {4};
 
     mymodelstruct.dt=0.01;
 
     // Defining Inputs
-    mymodelstruct.inputcolumns.push_back(0); // Input 0: Inflow
-    mymodelstruct.inputcolumns.push_back(1); // Input 1: Settling element (1)_Coagulant:external_mass_flow_timeseries
-    mymodelstruct.inputcolumns.push_back(2); // Input 2: Reactor (1)_Solids:inflow_concentration
+    for (int i=0; i<total_data_cols-1; i++)
+    {
+    mymodelstruct.inputcolumns.push_back(i); // Input 0: Inflow
+    }
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(3); // Output: Settling element (1)_Solids:concentration
+    mymodelstruct.outputcolumns.push_back(total_data_cols-1); // Output: Settling element (1)_Solids:concentration
 
-    //Lags definition
+
+    // Lags definition
     vector<int> lag0; lag0.push_back(0);lag0.push_back(14);
     vector<int> lag1; lag1.push_back(14);
     vector<int> lag2; lag2.push_back(7);lag2.push_back(28);
@@ -87,7 +171,9 @@ int main()
     mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
     mymodelstruct.lags.push_back(lag2);
+    }
 
+    // ---------------------------------------------GA---------------------------------------------------------
     QFile results;
     QTextStream out;
 
@@ -101,6 +187,7 @@ int main()
         mymodelstruct.outputpath = path_ASM + "Results/";
         mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
         mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+
         }
 
         else if (!ASM) {
@@ -124,6 +211,7 @@ int main()
     ModelCreator OptimizedModel = GA.Optimize();
     cout<<"Optimized Model Structure: " << OptimizedModel.FFN.ModelStructure.ParametersToString().toStdString()<<endl;
     OptimizedModel.FFN.silent = false;
+    OptimizedModel.FFN.DataSave(datacategory::Train);
     OptimizedModel.FFN.DataSave(datacategory::Test);
     //We can test here:
 
@@ -164,6 +252,7 @@ int main()
                 // Running FFNWrapper
                 if (mymodelstruct.ValidLags())
                 {   FFNWrapper_Multi F;
+                    F.silent = false;
                     F.ModelStructure = mymodelstruct;
                     F.Initiate();
                     F.Train();
@@ -191,7 +280,7 @@ int main()
         else if (!randommodelstructure) {
 
             FFNWrapper_Multi F;
-            //F.silent = false;
+            F.silent = false;
             F.ModelStructure = mymodelstruct;
             F.Initiate();
             F.Train();
@@ -201,6 +290,8 @@ int main()
             qDebug()<< mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
             out << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
 
+            //F.silent = false;
+            F.DataSave(datacategory::Train);
             F.DataSave(datacategory::Test);
             F.Plotter();
             //F.Optimizer();

@@ -9,6 +9,7 @@
 
 using namespace mlpack;
 using namespace std;
+using namespace arma;
 
 enum class datacategory {Train, Test};
 
@@ -48,6 +49,12 @@ public:
     mat Prediction;
     double nMSE = -999;
     double _R2 = -999;
+
+    //Normalization
+    mlpack::data::MinMaxScaler minMaxScaler_tr_i;
+    mlpack::data::MinMaxScaler minMaxScaler_tr_o;
+    mlpack::data::MinMaxScaler minMaxScaler_te_i;
+    mlpack::data::MinMaxScaler minMaxScaler_te_o;
 
 
 private:
