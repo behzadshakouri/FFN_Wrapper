@@ -9,6 +9,7 @@
 #include <QFile>
 #include <QTextStream>
 #include "ga.h"
+#include <CTransformation.h>
 
 using namespace mlpack;
 using namespace std;
@@ -17,6 +18,36 @@ using namespace arma;
 
 int main()
 {
+
+    //Testing CTransformation class
+    CTransformation transformer;
+    arma::mat data = {{1, 2, 3,2}, {4, 5, 6,5.5}, {7, 8, 9,7.5} };
+
+    std::cout << "Original Data:\n" << data << std::endl;
+
+    // Normalize data
+    arma::mat normalizedData = transformer.normalize(data);
+    std::cout << "Normalized Data:\n" << normalizedData << std::endl;
+
+    // Save parameters
+    transformer.saveParameters("scaling_params.txt");
+
+    // Load parameters
+    CTransformation newTransformer;
+    newTransformer.loadParameters("scaling_params.txt");
+
+    // Inverse transform
+    arma::mat restoredData = newTransformer.inverseTransform(normalizedData);
+    std::cout << "Restored Data:\n" << restoredData << std::endl;
+
+    arma::mat newdata = {{1.2, 2.3, 1.4}, {4, 5, 6}, {7, 8, 9}};
+    arma::mat newnormalizedData = newTransformer.transform(newdata);
+    std::cout << "Normalized Data:\n" << newnormalizedData << std::endl;
+
+
+
+
+
     // Simulation & Data Configuration ---> Should be defined
 
     const double Realization = 1; // Number of Realizations
