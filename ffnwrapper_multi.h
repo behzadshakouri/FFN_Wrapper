@@ -37,19 +37,31 @@ public:
     //CTimeSeriesSet<double> *data = nullptr;
     //CTimeSeriesSet<double> *data2 = nullptr;
     bool silent = true;
-    CTimeSeriesSet<double> GetInputData()
+
+    CTimeSeriesSet<double> GetTrainInputData()
+    {
+        return CTimeSeriesSet<double>(TrainInputData,ModelStructure.dt,ModelStructure.lags);
+    }
+    CTimeSeriesSet<double> GetTrainOutputData()
+    {
+        return CTimeSeriesSet<double>(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
+    }
+    CTimeSeriesSet<double> GetTestInputData()
     {
         return CTimeSeriesSet<double>(TestInputData,ModelStructure.dt,ModelStructure.lags);
     }
-    CTimeSeriesSet<double> GetOutputData()
+    CTimeSeriesSet<double> GetTestOutputData()
     {
         return CTimeSeriesSet<double>(TestOutputData,ModelStructure.dt,ModelStructure.lags);
-
     }
 
-    mat Prediction;
-    double nMSE = -999;
-    double _R2 = -999;
+    mat TrainDataPrediction;
+    mat TestDataPrediction;
+
+    double nMSE_Train = -999;
+    double _R2_Train = -999;
+    double nMSE_Test = -999;
+    double _R2_Test = -999;
 
     //Normalization
     mlpack::data::MinMaxScaler minMaxScaler_tr_i;

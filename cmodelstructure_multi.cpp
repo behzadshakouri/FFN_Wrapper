@@ -24,8 +24,11 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     node_type = rhs.node_type;
     outputcolumns = rhs.outputcolumns;
     testaddress = rhs.testaddress;
-    observedaddress = rhs.observedaddress;
-    predictedaddress = rhs.predictedaddress;
+    trainobservedaddress = rhs.trainobservedaddress;
+    trainpredictedaddress = rhs.trainpredictedaddress;
+    testobservedaddress = rhs.testobservedaddress;
+    testpredictedaddress = rhs.testpredictedaddress;
+
     outputpath = rhs.outputpath;
 
 
@@ -47,8 +50,10 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     node_type = rhs.node_type;
     outputcolumns = rhs.outputcolumns;
     testaddress = rhs.testaddress;
-    observedaddress = rhs.observedaddress;
-    predictedaddress = rhs.predictedaddress;
+    trainobservedaddress = rhs.trainobservedaddress;
+    trainpredictedaddress = rhs.trainpredictedaddress;
+    testobservedaddress = rhs.testobservedaddress;
+    testpredictedaddress = rhs.testpredictedaddress;
     outputpath = rhs.outputpath;
 
     return *this;

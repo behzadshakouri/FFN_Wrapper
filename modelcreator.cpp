@@ -247,8 +247,10 @@ map<string, double> ModelCreator::Fitness()
     FFN.Train();
     FFN.Test();
     FFN.PerformanceMetrics();
-    out["MSE"] = FFN.nMSE;
-    out["R2"] = FFN._R2;
+    out["MSE_Train"] = FFN.nMSE_Train;
+    out["R2_Train"] = FFN._R2_Train;
+    out["MSE_Test"] = FFN.nMSE_Test;
+    out["R2_Test"] = FFN._R2_Test;
     initiated = true;
     return out;
 }

@@ -18,8 +18,11 @@ public:
     double dt;
     vector<string> trainaddress;
     vector<string> testaddress; //the number of test sets does not need to be equal to training sets
-    vector<string> observedaddress; //explain what is this for?
-    vector<string> predictedaddress;
+    vector<string> trainobservedaddress; //explain what is this for?
+    vector<string> trainpredictedaddress;
+    vector<string> testobservedaddress;
+    vector<string> testpredictedaddress;
+
     int n_input_layers;
     string activation_function;
     int n_output_layers;

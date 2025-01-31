@@ -20,7 +20,7 @@ int main()
 {
     // Simulation & Data Configuration ---> Should be defined
 
-    const double Realization = 1; // Number of Realizations
+    const double Realization = 2; // Number of Realizations
     double total_data_cols; // Number of Inputs + Outputs
 
     enum class _model {Settling, ASM} model = _model::ASM;
@@ -186,8 +186,12 @@ int main()
         mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path_ASM + "Results/";
-        mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
-        mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+
+        mymodelstruct.trainobservedaddress.push_back(mymodelstruct.outputpath + "TrainOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.trainpredictedaddress.push_back(mymodelstruct.outputpath + "TrainDataPredictionTS_" + to_string(r) + ".csv");
+
+        mymodelstruct.testobservedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.testpredictedaddress.push_back(mymodelstruct.outputpath + "TestDataPredictionTS_" + to_string(r) + ".csv");
 
         }
 
@@ -196,8 +200,13 @@ int main()
         mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
-        mymodelstruct.observedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
-        mymodelstruct.predictedaddress.push_back(mymodelstruct.outputpath + "PredictionTS_" + to_string(r) + ".csv");
+
+        mymodelstruct.trainobservedaddress.push_back(mymodelstruct.outputpath + "TrainOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.trainpredictedaddress.push_back(mymodelstruct.outputpath + "TrainDataPredictionTS_" + to_string(r) + ".csv");
+
+        mymodelstruct.testobservedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        mymodelstruct.testpredictedaddress.push_back(mymodelstruct.outputpath + "TestDataPredictionTS_" + to_string(r) + ".csv");
+
         }
 
     }
@@ -260,8 +269,11 @@ int main()
                     F.Test();
                     F.PerformanceMetrics();
 
-                    qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
-                    out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
+                    //qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE_Train = " << F.nMSE_Train << ", R2_Train = " << F._R2_Train;
+                    //out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE_Train = " << F.nMSE_Train << ", R2_Train = " << F._R2_Train << "\n";
+
+                    //qDebug()<< "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE_Test = " << F.nMSE_Test << ", R2_Test = " << F._R2_Test;
+                    //out << "i = " << i << ", " << mymodelstruct.ParametersToString() << ", nMSE_Test = " << F.nMSE_Test << ", R2_Test = " << F._R2_Test << "\n";
 
                     F.DataSave(datacategory::Train);
                     F.DataSave(datacategory::Test);
@@ -288,8 +300,11 @@ int main()
             F.Test();
             F.PerformanceMetrics();
 
-            qDebug()<< mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2;
-            out << mymodelstruct.ParametersToString() << ", nMSE = " << F.nMSE << ", R2 = " << F._R2 << "\n";
+            //qDebug()<< mymodelstruct.ParametersToString() << ", nMSE_Train = " << F.nMSE_Train << ", R2_Train = " << F._R2_Train;
+            //out << mymodelstruct.ParametersToString() << ", nMSE_Train = " << F.nMSE_Train << ", R2_Train = " << F._R2_Train << "\n";
+
+            //qDebug()<< mymodelstruct.ParametersToString() << ", nMSE_Test = " << F.nMSE_Test << ", R2_Test = " << F._R2_Test;
+            //out << mymodelstruct.ParametersToString() << ", nMSE_Test = " << F.nMSE_Test << ", R2_Test = " << F._R2_Test << "\n";
 
             //F.silent = false;
             F.DataSave(datacategory::Train);
