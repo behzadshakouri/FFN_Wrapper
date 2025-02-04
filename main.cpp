@@ -20,7 +20,7 @@ int main()
 {
     // Simulation & Data Configuration ---> Should be defined
 
-    const double Realization = 2; // Number of Realizations
+    const double Realization = 1; // Number of Realizations
     double total_data_cols; // Number of Inputs + Outputs
 
     enum class _model {Settling, ASM} model = _model::ASM;
@@ -37,7 +37,7 @@ int main()
     else
     total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage

@@ -171,10 +171,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 bool FFNWrapper_Multi::Transformation()
 {
 
-
-    //Testing CTransformation class
+    /*
+    // Train data transform
     CTransformation traintransformer;
-    arma::mat inputdata = TrainInputData;
 
     //std::cout << "Original Data:\n" << inputdata << std::endl;
 
@@ -190,15 +189,52 @@ bool FFNWrapper_Multi::Transformation()
     CTransformation testtransformer;
     testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
 
-    // Test data test transform
+    // Test data transform
     arma::mat normalizedTestData = testtransformer.transform(TestInputData);
     //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
     normalizedTestData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata.txt", arma::file_type::raw_ascii);
 
-
+    // Writing normalized data to matrices
     TrainInputData = normalizedTrainData;
     TestInputData = normalizedTestData;
+    */
 
+    // Train data transform
+    CTransformation alldatatransformer;
+    arma::mat All_DATA;
+    All_DATA = arma::join_rows(TrainInputData, TestInputData);
+
+    //std::cout << "Original Data:\n" << inputdata << std::endl;
+
+    // Normalize train input data
+    arma::mat normalizedData = alldatatransformer.normalize(All_DATA);
+    //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
+    normalizedData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedidata.txt", arma::file_type::raw_ascii);
+
+    // Save parameters
+    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+
+    // Load parameters for train data
+    CTransformation traintransformer;
+    traintransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+
+    // Load parameters for test
+    CTransformation testtransformer;
+    testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+
+    // Test data transform
+    arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
+    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
+    normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
+
+    // Test data transform
+    arma::mat normalizedTestData = testtransformer.transform(TestInputData);
+    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
+    normalizedTestData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata.txt", arma::file_type::raw_ascii);
+
+    // Writing normalized data to matrices
+    TrainInputData = normalizedTrainData;
+    TestInputData = normalizedTestData;
 
     /*
     mat TrainInputData1;

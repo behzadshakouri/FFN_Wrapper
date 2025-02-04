@@ -14,6 +14,8 @@ template<class T>
 T GeneticAlgorithm<T>::Optimize()
 {
     Initialize();
+    file.open(Settings.outputpath+"/GA_Output.txt", std::ios::out);
+    file.close();
     for (current_generation=0; current_generation<Settings.generations; current_generation++)
     {
         cout<<"Generation: "<<current_generation<<endl;
@@ -34,7 +36,7 @@ void GeneticAlgorithm<T>::WriteToFile()
     if (file.is_open())
     {
         for (unsigned int i=0; i<Individuals.size(); i++)
-        file<<i<<":"<<Individuals[i].toBinary().getBinary()<<","<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE = " <<Individuals[i].fitness_measures["MSE"] << ",R2 = " << Individuals[i].fitness_measures["R2"] << endl;
+        file<<i<<":"<<Individuals[i].toBinary().getBinary()<<","<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE_Train = " <<Individuals[i].fitness_measures["MSE_Train"] << ",R2_Train = " << Individuals[i].fitness_measures["R2_Train"] <<", MSE_Test = " <<Individuals[i].fitness_measures["MSE_Test"] << ",R2_Test = " << Individuals[i].fitness_measures["R2_Test"]<< endl;
     }
     file.close();
 }
@@ -81,15 +83,15 @@ void GeneticAlgorithm<T>::AssignFitnesses()
         if (models[i].FFN.ModelStructure.ValidLags())
         {
             Individuals[i].fitness_measures = models[i].Fitness();
-            Individuals[i].fitness = Individuals[i].fitness_measures["MSE"];
+            Individuals[i].fitness = Individuals[i].fitness_measures["MSE_Test"];
         }
         else
         {
-            Individuals[i].fitness_measures["MSE"]=1e12;
-            Individuals[i].fitness_measures["R2"]=0;
-            Individuals[i].fitness = Individuals[i].fitness_measures["MSE"];
+            Individuals[i].fitness_measures["MSE_Test"]=1e12;
+            Individuals[i].fitness_measures["R2_Test"]=0;
+            Individuals[i].fitness = Individuals[i].fitness_measures["MSE_Test"];
         }
-        cout<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE = " <<Individuals[i].fitness_measures["MSE"] << ",R2 = " << Individuals[i].fitness_measures["R2"] << endl;
+        cout<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE_Train = " <<Individuals[i].fitness_measures["MSE_Train"] << ",R2_Train = " << Individuals[i].fitness_measures["R2_Train"] <<", MSE_Test = " <<Individuals[i].fitness_measures["MSE_Test"] << ",R2_Test = " << Individuals[i].fitness_measures["R2_Test"] << endl;
     }
     vector<int> ranks = getRanks();
     for (unsigned int i=0; i<Individuals.size(); i++)
