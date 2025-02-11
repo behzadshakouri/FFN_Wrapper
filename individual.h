@@ -2,6 +2,7 @@
 #define INDIVIDUAL_H
 
 #include <Binary.h>
+#include "Utilities.h"
 
 using namespace std;
 
@@ -80,6 +81,14 @@ public:
             B += at(i);
         return B;
     }
+
+    string toAssignmentText(const string &name, int iterator)
+    {
+        string out = name + "_" + aquiutils::numbertostring(iterator) + "=" + aquiutils::numbertostring(fitness_measures[name + "_" + aquiutils::numbertostring(iterator)]);
+        return out;
+    }
+
+
 
 };
 

@@ -58,10 +58,10 @@ public:
     mat TrainDataPrediction;
     mat TestDataPrediction;
 
-    double nMSE_Train = -999;
-    double _R2_Train = -999;
-    double nMSE_Test = -999;
-    double _R2_Test = -999;
+    vector<double> nMSE_Train;
+    vector<double> _R2_Train;
+    vector<double> nMSE_Test;
+    vector<double> _R2_Test;
 
     //Normalization
     mlpack::data::MinMaxScaler minMaxScaler_tr_i;

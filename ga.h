@@ -39,6 +39,7 @@ private:
 
 };
 
+
 #include <ga.hpp>
 
 #endif // GeneticAlgorithm_H

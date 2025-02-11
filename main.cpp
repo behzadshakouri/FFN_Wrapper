@@ -22,6 +22,7 @@ int main()
 
     const double Realization = 1; // Number of Realizations
     double total_data_cols; // Number of Inputs + Outputs
+    double number_of_outputs; // Number of Outputs
 
     enum class _model {Settling, ASM} model = _model::ASM;
 
@@ -33,9 +34,15 @@ int main()
     bool ASM = true; // true for ASM and false for Settling element simple model
 
     if (ASM)
-    total_data_cols = 10; // Number of Inputs + Outputs (3+1+4+1)+1
+    {
+    total_data_cols = 11; // Number of Inputs + Outputs (3+1+4+1)+(1+1)
+    number_of_outputs = 2; // Number of Outputs
+    }
     else
+    {
     total_data_cols = 4; // Number of Inputs + Outputs (1+2)+1
+    number_of_outputs = 2; // Number of Outputs
+    }
 
     bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
@@ -49,7 +56,7 @@ int main()
     ModelCreator modelCreator;
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
-    modelCreator.total_number_of_columns = total_data_cols-1; // Inputs
+    modelCreator.total_number_of_columns = total_data_cols-number_of_outputs; // Inputs
     modelCreator.max_number_of_layers = 4;
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10;
@@ -96,19 +103,22 @@ int main()
 
     mymodelstruct.inputcolumns.push_back(0);
     mymodelstruct.inputcolumns.push_back(1);
-    mymodelstruct.inputcolumns.push_back(2);
+    //mymodelstruct.inputcolumns.push_back(2);
     mymodelstruct.inputcolumns.push_back(3);
-    mymodelstruct.inputcolumns.push_back(4);
-    mymodelstruct.inputcolumns.push_back(5);
+    //mymodelstruct.inputcolumns.push_back(4);
+    //mymodelstruct.inputcolumns.push_back(5);
     mymodelstruct.inputcolumns.push_back(6);
-    mymodelstruct.inputcolumns.push_back(7);
-    mymodelstruct.inputcolumns.push_back(8);
+    //mymodelstruct.inputcolumns.push_back(7);
+    //mymodelstruct.inputcolumns.push_back(8);
 
 
 
     // Defining Output(s)
-    mymodelstruct.outputcolumns.push_back(total_data_cols-1); // Output: Settling element (1)_Solids:concentration
+    for (int i = 0; i<number_of_outputs; i++)
+        mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
 
+
+    /*
     // Lags definition
     vector<int> lag0; lag0.push_back(2); lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
     vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(4); lag1.push_back(8);
@@ -120,6 +130,18 @@ int main()
     vector<int> lag7; lag7.push_back(2);
     vector<int> lag8; lag8.push_back(4); lag8.push_back(10);
 
+    */
+
+    // Lags definition
+    vector<int> lag0; lag0.push_back(1); lag0.push_back(2);
+    vector<int> lag1; lag1.push_back(1); lag1.push_back(3);
+    //vector<int> lag2; lag2.push_back(0);
+    vector<int> lag3; lag3.push_back(0); lag3.push_back(2); lag3.push_back(3); lag3.push_back(4);
+    //vector<int> lag4; lag4.push_back(0);
+    //vector<int> lag5; lag5.push_back(0);
+    vector<int> lag6; lag6.push_back(1); lag6.push_back(3); lag6.push_back(4);
+    //vector<int> lag7; lag7.push_back(0);
+    //vector<int> lag8; lag8.push_back(0);
 
     /*
     // Lags definition
@@ -135,13 +157,13 @@ int main()
 
     mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
-    mymodelstruct.lags.push_back(lag2);
+    //mymodelstruct.lags.push_back(lag2);
     mymodelstruct.lags.push_back(lag3);
-    mymodelstruct.lags.push_back(lag4);
-    mymodelstruct.lags.push_back(lag5);
+    //mymodelstruct.lags.push_back(lag4);
+    //mymodelstruct.lags.push_back(lag5);
     mymodelstruct.lags.push_back(lag6);
-    mymodelstruct.lags.push_back(lag7);
-    mymodelstruct.lags.push_back(lag8);
+    //mymodelstruct.lags.push_back(lag7);
+    //mymodelstruct.lags.push_back(lag8);
 
 
     }

@@ -90,6 +90,7 @@ bool ModelCreator::CreateRandomModelStructure(CModelStructure_Multi *modelstruct
 
 bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
 {
+
     vector<int> columns = convertToBase(parameters[0],2);
 
     //column selection
@@ -124,8 +125,9 @@ bool ModelCreator::CreateModel(CModelStructure *modelstructure) const
     return true;
 }
 
-bool ModelCreator::CreateModel(CModelStructure_Multi *modelstructure) const
+bool ModelCreator::CreateModel(CModelStructure_Multi *modelstructure)
 {
+    modelstruct = modelstructure;
     vector<int> columns = convertToBase(parameters[0],2);
     modelstructure->Reset();
     //column selection
@@ -247,10 +249,12 @@ map<string, double> ModelCreator::Fitness()
     FFN.Train();
     FFN.Test();
     FFN.PerformanceMetrics();
-    out["MSE_Train"] = FFN.nMSE_Train;
-    out["R2_Train"] = FFN._R2_Train;
-    out["MSE_Test"] = FFN.nMSE_Test;
-    out["R2_Test"] = FFN._R2_Test;
+    for (int constituent=0; constituent<modelstruct->outputcolumns.size(); constituent++ )
+    {   out["MSE_Train_"+aquiutils::numbertostring(constituent)] = FFN.nMSE_Train[constituent];
+        out["R2_Train_"+aquiutils::numbertostring(constituent)] = FFN._R2_Train[constituent];
+        out["MSE_Test_"+aquiutils::numbertostring(constituent)] = FFN.nMSE_Test[constituent];
+        out["R2_Test_"+aquiutils::numbertostring(constituent)] = FFN._R2_Test[constituent];
+    }
     initiated = true;
     return out;
 }

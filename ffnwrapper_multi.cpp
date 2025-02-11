@@ -72,6 +72,7 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
    //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
     //model.Add<Sigmoid>(); // Activation Funchion 2
     Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
+    //Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers (Second output)
 
     return true;
 }
@@ -301,9 +302,13 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
         for (unsigned int i=0; i<TrainDataTargetSplit.size(); i++)
             TrainDataTargetSplit[i].writetofile(ModelStructure.outputpath + "TrainDataTarget_" + to_string(i) + ".txt");
 
-    nMSE_Train = diff2(TrainDataPrediction1.BTC[0],TrainDataTarget.BTC[0])/(norm2(TrainDataTarget.BTC[0])/TrainDataTarget.BTC[0].n);
-    _R2_Train = R2(TrainDataPrediction1.BTC[0],TrainDataTarget.BTC[0]);
-
+    nMSE_Train.resize(ModelStructure.outputcolumns.size());
+    _R2_Train.resize(ModelStructure.outputcolumns.size());
+    for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
+    {
+    nMSE_Train[constituent] = diff2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent])/(norm2(TrainDataTarget.BTC[constituent])/TrainDataTarget.BTC[constituent].n);
+    _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
+    }
     // TestData
     CTimeSeriesSet<double> TestDataPrediction1 (TestDataPrediction,ModelStructure.dt,ModelStructure.lags);
     vector<CTimeSeriesSet<double>> TestDataPredictionSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestDataPrediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
@@ -315,11 +320,15 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
     vector<CTimeSeriesSet<double>> TestDataTargetSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestOutputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
     if (!silent)
         for (unsigned int i=0; i<TestDataTargetSplit.size(); i++)
+
             TestDataTargetSplit[i].writetofile(ModelStructure.outputpath + "TestDataTarget_" + to_string(i) + ".txt");
-
-    nMSE_Test = diff2(TestDataPrediction1.BTC[0],TestDataTarget.BTC[0])/(norm2(TestDataTarget.BTC[0])/TestDataTarget.BTC[0].n);
-    _R2_Test = R2(TestDataPrediction1.BTC[0],TestDataTarget.BTC[0]);
-
+    nMSE_Test.resize(ModelStructure.outputcolumns.size());
+    _R2_Test.resize(ModelStructure.outputcolumns.size());
+    for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
+    {
+    nMSE_Test[constituent] = diff2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent])/(norm2(TestDataTarget.BTC[constituent])/TestDataTarget.BTC[constituent].n);
+    _R2_Test[constituent] = R2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
+    }
     return true;
 }
 
@@ -352,8 +361,11 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
         TrainOutputData.save(ModelStructure.outputpath + "TrainOutputData.txt",arma::file_type::raw_ascii);
 
         // Performance metrics
-        cout<<"nMSE_Train = "<<nMSE_Train<<endl;
-        cout<<"R2_Train = "<<_R2_Train<<endl;
+        for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
+        {
+        cout<<"nMSE_Train_" + aquiutils::numbertostring(constituent) + "="<<nMSE_Train[constituent]<<endl;
+        cout<<"R2_Train_" + aquiutils::numbertostring(constituent) + "="<<_R2_Train[constituent]<<endl;
+        }
 
     }
 
@@ -384,9 +396,11 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
             TestOutputSplit[i].writetofile(ModelStructure.outputpath + "TestOutputDataTS_" + to_string(i) + ".csv");
 
         // Performance metrics
-        cout<<"nMSE_Test = "<<nMSE_Test<<endl;
-        cout<<"R2_Test = "<<_R2_Test<<endl;
-
+        for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
+        {
+        cout<<"nMSE_Test_" + aquiutils::numbertostring(constituent) + "="<<nMSE_Train[constituent]<<endl;
+        cout<<"R2_Test_" + aquiutils::numbertostring(constituent) + "="<<_R2_Train[constituent]<<endl;
+        }
     }
 
     return true;
@@ -395,7 +409,7 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
 
 bool FFNWrapper_Multi:: Plotter() // Plotting the results
 {
-    // Train Data Plotter
+    // Train Data Plotter (Output 1)
     for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
     {   CTimeSeriesSet<double> Observed(ModelStructure.trainobservedaddress[i],true);
 
@@ -427,7 +441,39 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
 
     }
 
-    // Test Data Plotter
+    // Train Data Plotter (Output 2)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {   CTimeSeriesSet<double> Observed(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted(ModelStructure.trainpredictedaddress[i],true);
+
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[1].GetT(i),Observed.BTC[1].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[1].GetT(i),Predicted.BTC[1].GetC(i)));
+        }
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Train Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot both datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted)
+
+    }
+
+    // Test Data Plotter (Output 1)
     for (unsigned int i=0; i<ModelStructure.testobservedaddress.size(); i++)
     {   CTimeSeriesSet<double> Observed(ModelStructure.testobservedaddress[i],true);
 
@@ -457,6 +503,137 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
         gp.send1d(plotdata1);  // Send the first dataset (Observed)
         gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
+
+    // Test Data Plotter (Output 2)
+    for (unsigned int i=0; i<ModelStructure.testobservedaddress.size(); i++)
+    {   CTimeSeriesSet<double> Observed(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted(ModelStructure.testpredictedaddress[i],true);
+
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[1].GetT(i),Observed.BTC[1].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[1].GetT(i),Predicted.BTC[1].GetC(i)));
+        }
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Test Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot both datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted)
+    }
+
+/*
+    // Train and Test Plotter (Output 1)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {   CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+        vector<pair<double, double>> plotdata1, plotdata2, plotdata3, plotdata4;
+        for (int i=0; i<Observed_Train.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed_Train.BTC[0].GetT(i),Observed_Train.BTC[0].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted_Train.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted_Train.BTC[0].GetT(i),Predicted_Train.BTC[0].GetC(i)));
+        }
+        //vector<pair<double, double>> plotdata3, plotdata4;
+        for (int i=0; i<Observed_Test.maxnumpoints(); i++)
+        {
+            plotdata3.push_back(make_pair(Observed_Test.BTC[0].GetT(i),Observed_Test.BTC[0].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted_Test.maxnumpoints(); i++)
+        {
+            plotdata4.push_back(make_pair(Predicted_Test.BTC[0].GetT(i),Predicted_Test.BTC[0].GetC(i)));
+        }
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot all datasets on the same plot
+        gp << "plot '-' with lines title 'Observed Train', '-' with lines title 'Predicted Train'\n, '-' with lines title 'Observed Test'\n, '-' with lines title 'Predicted Test'\n";
+        //gp << "plot '.' with lines title 'Observed Test', '.' with lines title 'Predicted Test'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+        //gp.send1d(plotdata3);  // Send the first dataset (Observed_Test)
+        //gp.send1d(plotdata4);  // Send the second dataset (Predicted_Test)
+    }
+
+    // Train and Test Plotter (Output 2)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {   CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+        vector<pair<double, double>> plotdata1, plotdata2, plotdata3, plotdata4;
+        for (int i=0; i<Observed_Train.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed_Train.BTC[1].GetT(i),Observed_Train.BTC[1].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted_Train.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted_Train.BTC[1].GetT(i),Predicted_Train.BTC[1].GetC(i)));
+        }
+        //vector<pair<double, double>> plotdata3, plotdata4;
+        for (int i=0; i<Observed_Test.maxnumpoints(); i++)
+        {
+            plotdata3.push_back(make_pair(Observed_Test.BTC[1].GetT(i),Observed_Test.BTC[1].GetC(i)));
+
+        }
+        for (int i=0; i<Predicted_Test.maxnumpoints(); i++)
+        {
+            plotdata4.push_back(make_pair(Predicted_Test.BTC[1].GetT(i),Predicted_Test.BTC[1].GetC(i)));
+        }
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot all datasets on the same plot
+        gp << "plot '-' with lines title 'Observed Train', '-' with lines title 'Predicted Train'\n, '-' with lines title 'Observed Test'\n, '-' with lines title 'Predicted Test'\n";
+        //gp << "plot '.' with lines title 'Observed Test', '.' with lines title 'Predicted Test'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+        //gp.send1d(plotdata3);  // Send the first dataset (Observed_Test)
+        //gp.send1d(plotdata4);  // Send the second dataset (Predicted_Test)
+    }
+*/
+
+
 
     return true;
 }

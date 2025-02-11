@@ -13,6 +13,7 @@ using namespace std;
 class ModelCreator
 {
 public:
+    CModelStructure_Multi *modelstruct = nullptr;
     ModelCreator();
     ModelCreator(const ModelCreator &other);
     ModelCreator &operator=(const ModelCreator &other);
@@ -23,7 +24,7 @@ public:
     int ParametersSize();
     bool SetParameters(CModelStructure *modelstructure);
     bool CreateModel(CModelStructure *modelstructure) const;
-    bool CreateModel(CModelStructure_Multi *modelstructure) const;
+    bool CreateModel(CModelStructure_Multi *modelstructure);
     bool CreateRandomModelStructure(CModelStructure *modelstructure);
     bool CreateRandomModelStructure(CModelStructure_Multi *modelstructure);
     long unsigned int MaxParameter(int i);

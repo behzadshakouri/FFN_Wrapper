@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <omp.h>
+#include "Utilities.h"
 
 template<class T>
 GeneticAlgorithm<T>::GeneticAlgorithm()
@@ -14,6 +15,7 @@ template<class T>
 T GeneticAlgorithm<T>::Optimize()
 {
     Initialize();
+    WriteToFile();
     file.open(Settings.outputpath+"/GA_Output.txt", std::ios::out);
     file.close();
     for (current_generation=0; current_generation<Settings.generations; current_generation++)
@@ -36,9 +38,24 @@ void GeneticAlgorithm<T>::WriteToFile()
     if (file.is_open())
     {
         for (unsigned int i=0; i<Individuals.size(); i++)
-        file<<i<<":"<<Individuals[i].toBinary().getBinary()<<","<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE_Train = " <<Individuals[i].fitness_measures["MSE_Train"] << ",R2_Train = " << Individuals[i].fitness_measures["R2_Train"] <<", MSE_Test = " <<Individuals[i].fitness_measures["MSE_Test"] << ",R2_Test = " << Individuals[i].fitness_measures["R2_Test"]<< endl;
+        {   file<<i<<":"<<Individuals[i].toBinary().getBinary()<<","<<models[i].FFN.ModelStructure.ParametersToString().toStdString();
+            for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            {
+                file<< ","<<Individuals[i].toAssignmentText("MSE_Train",constituent)<<","<<Individuals[i].toAssignmentText("R2_Train",constituent);
+                file<< ","<<Individuals[i].toAssignmentText("MSE_Test",constituent)<<","<<Individuals[i].toAssignmentText("R2_Test",constituent);
+            }
+            file<<endl;
+        }
     }
     file.close();
+    for (unsigned int i=0; i<Individuals.size(); i++)
+    {
+        for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            cout<< ","<<Individuals[i].toAssignmentText("MSE_Train",constituent)<<","<<Individuals[i].toAssignmentText("R2_Train",constituent);
+        for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            cout<< ","<<Individuals[i].toAssignmentText("MSE_Test",constituent)<<","<<Individuals[i].toAssignmentText("R2_Test",constituent);
+        cout<<std::endl;
+    }
 }
 
 template<class T>
@@ -83,16 +100,30 @@ void GeneticAlgorithm<T>::AssignFitnesses()
         if (models[i].FFN.ModelStructure.ValidLags())
         {
             Individuals[i].fitness_measures = models[i].Fitness();
-            Individuals[i].fitness = Individuals[i].fitness_measures["MSE_Test"];
+            Individuals[i].fitness=0;
+            for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+                Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)];
         }
         else
         {
-            Individuals[i].fitness_measures["MSE_Test"]=1e12;
-            Individuals[i].fitness_measures["R2_Test"]=0;
-            Individuals[i].fitness = Individuals[i].fitness_measures["MSE_Test"];
+            for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            {   Individuals[i].fitness_measures["MSE_Test_"+ aquiutils::numbertostring(constituent)]=1e12;
+                Individuals[i].fitness_measures["R2_Test_"+ aquiutils::numbertostring(constituent)]=0;
+                Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)];
+            }
         }
-        cout<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString()<<", MSE_Train = " <<Individuals[i].fitness_measures["MSE_Train"] << ",R2_Train = " << Individuals[i].fitness_measures["R2_Train"] <<", MSE_Test = " <<Individuals[i].fitness_measures["MSE_Test"] << ",R2_Test = " << Individuals[i].fitness_measures["R2_Test"] << endl;
+        cout<<i<<":"<<models[i].FFN.ModelStructure.ParametersToString().toStdString();
+
+        for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            cout<< ","<<Individuals[i].toAssignmentText("MSE_Train",constituent)<<","<<Individuals[i].toAssignmentText("R2_Train",constituent);
+
+        for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
+            cout<< ","<<Individuals[i].toAssignmentText("MSE_Test",constituent)<<","<<Individuals[i].toAssignmentText("R2_Test",constituent);
+        cout<< endl;
     }
+
+
+
     vector<int> ranks = getRanks();
     for (unsigned int i=0; i<Individuals.size(); i++)
     {
