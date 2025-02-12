@@ -409,6 +409,7 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
 
 bool FFNWrapper_Multi:: Plotter() // Plotting the results
 {
+    /*
     // Train Data Plotter (Output 1)
     for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
     {   CTimeSeriesSet<double> Observed(ModelStructure.trainobservedaddress[i],true);
@@ -534,105 +535,101 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
         gp.send1d(plotdata1);  // Send the first dataset (Observed)
         gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
-
-/*
-    // Train and Test Plotter (Output 1)
-    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
-    {   CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
-
-        vector<pair<double, double>> plotdata1, plotdata2, plotdata3, plotdata4;
-        for (int i=0; i<Observed_Train.maxnumpoints(); i++)
-        {
-            plotdata1.push_back(make_pair(Observed_Train.BTC[0].GetT(i),Observed_Train.BTC[0].GetC(i)));
-
-        }
-        for (int i=0; i<Predicted_Train.maxnumpoints(); i++)
-        {
-            plotdata2.push_back(make_pair(Predicted_Train.BTC[0].GetT(i),Predicted_Train.BTC[0].GetC(i)));
-        }
-        //vector<pair<double, double>> plotdata3, plotdata4;
-        for (int i=0; i<Observed_Test.maxnumpoints(); i++)
-        {
-            plotdata3.push_back(make_pair(Observed_Test.BTC[0].GetT(i),Observed_Test.BTC[0].GetC(i)));
-
-        }
-        for (int i=0; i<Predicted_Test.maxnumpoints(); i++)
-        {
-            plotdata4.push_back(make_pair(Predicted_Test.BTC[0].GetT(i),Predicted_Test.BTC[0].GetC(i)));
-        }
-        // Create a Gnuplot object
-        Gnuplot gp;
-
-        // Set titles and labels
-        gp << "set title 'Data Comparison'\n";
-        gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Concentration'\n";
-        gp << "set grid\n";  // Optional: Add a grid for better visualization
-
-        // Plot all datasets on the same plot
-        gp << "plot '-' with lines title 'Observed Train', '-' with lines title 'Predicted Train'\n, '-' with lines title 'Observed Test'\n, '-' with lines title 'Predicted Test'\n";
-        //gp << "plot '.' with lines title 'Observed Test', '.' with lines title 'Predicted Test'\n";
-        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
-        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
-        //gp.send1d(plotdata3);  // Send the first dataset (Observed_Test)
-        //gp.send1d(plotdata4);  // Send the second dataset (Predicted_Test)
-    }
-
-    // Train and Test Plotter (Output 2)
-    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
-    {   CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
-
-        vector<pair<double, double>> plotdata1, plotdata2, plotdata3, plotdata4;
-        for (int i=0; i<Observed_Train.maxnumpoints(); i++)
-        {
-            plotdata1.push_back(make_pair(Observed_Train.BTC[1].GetT(i),Observed_Train.BTC[1].GetC(i)));
-
-        }
-        for (int i=0; i<Predicted_Train.maxnumpoints(); i++)
-        {
-            plotdata2.push_back(make_pair(Predicted_Train.BTC[1].GetT(i),Predicted_Train.BTC[1].GetC(i)));
-        }
-        //vector<pair<double, double>> plotdata3, plotdata4;
-        for (int i=0; i<Observed_Test.maxnumpoints(); i++)
-        {
-            plotdata3.push_back(make_pair(Observed_Test.BTC[1].GetT(i),Observed_Test.BTC[1].GetC(i)));
-
-        }
-        for (int i=0; i<Predicted_Test.maxnumpoints(); i++)
-        {
-            plotdata4.push_back(make_pair(Predicted_Test.BTC[1].GetT(i),Predicted_Test.BTC[1].GetC(i)));
-        }
-        // Create a Gnuplot object
-        Gnuplot gp;
-
-        // Set titles and labels
-        gp << "set title 'Data Comparison'\n";
-        gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Concentration'\n";
-        gp << "set grid\n";  // Optional: Add a grid for better visualization
-
-        // Plot all datasets on the same plot
-        gp << "plot '-' with lines title 'Observed Train', '-' with lines title 'Predicted Train'\n, '-' with lines title 'Observed Test'\n, '-' with lines title 'Predicted Test'\n";
-        //gp << "plot '.' with lines title 'Observed Test', '.' with lines title 'Predicted Test'\n";
-        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
-        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
-        //gp.send1d(plotdata3);  // Send the first dataset (Observed_Test)
-        //gp.send1d(plotdata4);  // Send the second dataset (Predicted_Test)
-    }
 */
 
+    // Train and Test Plotter (Output 1)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {
+        CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed = Observed_Train;
+        Observed.merge(Observed_Test,true);
+        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_try.csv",false);
+
+        CTimeSeriesSet<double> Predicted = Predicted_Train;
+        Predicted.merge(Predicted_Test,true);
+        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_try.csv",false);
+
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+        }
+
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
+        }
+
+
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot all datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+
+    }
+
+    // Train and Test Plotter (Output 1)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {
+        CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed = Observed_Train;
+        Observed.merge(Observed_Test,true);
+        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_try.csv",false);
+
+        CTimeSeriesSet<double> Predicted = Predicted_Train;
+        Predicted.merge(Predicted_Test,true);
+        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_try.csv",false);
+
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[1].GetT(i),Observed.BTC[1].GetC(i)));
+        }
+
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[1].GetT(i),Predicted.BTC[1].GetC(i)));
+        }
+
+
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot all datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+
+    }
 
 
     return true;
