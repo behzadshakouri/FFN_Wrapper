@@ -398,8 +398,8 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
         // Performance metrics
         for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
         {
-        cout<<"nMSE_Test_" + aquiutils::numbertostring(constituent) + "="<<nMSE_Train[constituent]<<endl;
-        cout<<"R2_Test_" + aquiutils::numbertostring(constituent) + "="<<_R2_Train[constituent]<<endl;
+        cout<<"nMSE_Test_" + aquiutils::numbertostring(constituent) + "="<<nMSE_Test[constituent]<<endl;
+        cout<<"R2_Test_" + aquiutils::numbertostring(constituent) + "="<<_R2_Test[constituent]<<endl;
         }
     }
 
