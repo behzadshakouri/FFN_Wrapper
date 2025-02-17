@@ -63,11 +63,21 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
     if (!dataprocess)
         FFN::operator=(FFN<MeanSquaredError>());
 
+    //ANN
     for (int layer = 0; layer<ModelStructure.n_layers; layer++)
     {
         Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
         Add<Sigmoid>(); // Activation Funchion
     }
+
+    /*
+    //LSTM
+    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
+    {
+        Add<LSTM>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
+        Add<LinearNoBias>(); // Activation Funchion
+    }
+    */
 
    //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
     //model.Add<Sigmoid>(); // Activation Funchion 2

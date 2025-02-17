@@ -35,8 +35,8 @@ int main()
 
     if (ASM)
     {
-    total_data_cols = 11; // Number of Inputs + Outputs (3+1+4+1)+(1+1)
-    number_of_outputs = 2; // Number of Outputs
+    total_data_cols = 12; // Number of Inputs + Outputs (3+1+4+1)+(1+1+1)
+    number_of_outputs = 3; // Number of Outputs
     }
     else
     {
@@ -44,7 +44,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 1000; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
