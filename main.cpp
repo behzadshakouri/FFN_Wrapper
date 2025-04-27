@@ -35,8 +35,8 @@ int main()
 
     if (ASM)
     {
-    total_data_cols = 12; // Number of Inputs + Outputs (3+1+4+1)+(1+1+1)
-    number_of_outputs = 3; // Number of Outputs
+    total_data_cols = 10; // Number of Inputs + Outputs (3+1+4+1)+(1)
+    number_of_outputs = 1; // Number of Outputs
     }
     else
     {
@@ -45,7 +45,7 @@ int main()
     }
 
     bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
-    const double GA_Nsim = 1000; // Number of GA simulations ???
+    const double GA_Nsim = 100; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 100; // Number of random model structure simulations
@@ -57,9 +57,9 @@ int main()
     modelCreator.lag_frequency = 3;
     modelCreator.maximum_superficial_lag = 5;
     modelCreator.total_number_of_columns = total_data_cols-number_of_outputs; // Inputs
-    modelCreator.max_number_of_layers = 4;
+    modelCreator.max_number_of_layers = 4; // 4 to 6
     modelCreator.max_lag_multiplier = 10;
-    modelCreator.max_number_of_nodes_in_layers = 10;
+    modelCreator.max_number_of_nodes_in_layers = 10; // 10 to 15
 
 
     string path;
