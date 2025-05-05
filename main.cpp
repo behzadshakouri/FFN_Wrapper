@@ -44,7 +44,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 100; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
@@ -163,8 +163,8 @@ int main()
     {
 
         if (ASM) {
-        mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_t10_NO" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_t11_NO" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_t10_NO" + ".txt");
+        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_t11_NO" + ".txt");
 
         //mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
         //mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
@@ -180,8 +180,8 @@ int main()
         }
 
         else if (!ASM) {
-        mymodelstruct.trainaddress.push_back(datapath + "observedoutput_t10_NO" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath + "observedoutput_t11_NO" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath + "observedoutput_t10_NO" + ".txt");
+        mymodelstruct.testaddress.push_back(datapath + "observedoutput_t11_NO" + ".txt");
 
         //mymodelstruct.trainaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
         //mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
