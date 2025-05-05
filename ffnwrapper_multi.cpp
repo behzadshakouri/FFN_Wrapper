@@ -81,6 +81,7 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
 
    //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
     //model.Add<Sigmoid>(); // Activation Funchion 2
+    Add<ReLU>();
     Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
     //Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers (Second output)
 

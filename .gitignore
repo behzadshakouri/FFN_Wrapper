@@ -24,3 +24,5 @@ ASM/
 build/Desktop_Qt_6_7_3-Debug/.qtc_clangd/
 
 chat
+
+*.txt

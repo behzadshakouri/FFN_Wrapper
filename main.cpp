@@ -87,7 +87,7 @@ int main()
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
     mymodelstruct.n_layers = 3;
-    mymodelstruct.n_nodes = {10,8,7};
+    mymodelstruct.n_nodes = {10*2,8*2,7*2};
 
     mymodelstruct.dt=0.1;
 
