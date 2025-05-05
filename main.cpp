@@ -59,7 +59,7 @@ int main()
     modelCreator.total_number_of_columns = total_data_cols-number_of_outputs; // Inputs
     modelCreator.max_number_of_layers = 4; // 4 to 6
     modelCreator.max_lag_multiplier = 10;
-    modelCreator.max_number_of_nodes_in_layers = 10; // 10 to 15
+    modelCreator.max_number_of_nodes_in_layers = 10*2; // 10 to 15
 
 
     string path;
