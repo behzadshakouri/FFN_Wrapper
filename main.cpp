@@ -163,8 +163,11 @@ int main()
     {
 
         if (ASM) {
-        mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_t10_NO" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_t11_NO" + to_string(r) + ".txt");
+
+        //mymodelstruct.trainaddress.push_back(datapath_ASM + "observedoutput_train_" + to_string(r) + ".txt");
+        //mymodelstruct.testaddress.push_back(datapath_ASM + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path_ASM + "Results/";
 
@@ -177,8 +180,11 @@ int main()
         }
 
         else if (!ASM) {
-        mymodelstruct.trainaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
-        mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
+        mymodelstruct.trainaddress.push_back(datapath + "observedoutput_t10_NO" + to_string(r) + ".txt");
+        mymodelstruct.testaddress.push_back(datapath + "observedoutput_t11_NO" + to_string(r) + ".txt");
+
+        //mymodelstruct.trainaddress.push_back(datapath + "observedoutput_train_" + to_string(r) + ".txt");
+        //mymodelstruct.testaddress.push_back(datapath + "observedoutput_test_" + to_string(r) + ".txt");
 
         mymodelstruct.outputpath = path + "Results/";
 
