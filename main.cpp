@@ -59,7 +59,7 @@ int main()
     modelCreator.total_number_of_columns = total_data_cols-number_of_outputs; // Inputs
     modelCreator.max_number_of_layers = 4; // 4 to 6
     modelCreator.max_lag_multiplier = 10;
-    modelCreator.max_number_of_nodes_in_layers = 10*2; // 10 to 15
+    modelCreator.max_number_of_nodes_in_layers = 10*4; // 10 to 15
 
 
     string path;
@@ -87,7 +87,7 @@ int main()
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
     mymodelstruct.n_layers = 3;
-    mymodelstruct.n_nodes = {10*2,8*2,7*2};
+    mymodelstruct.n_nodes = {10*4,8*4,7*4};
 
     mymodelstruct.dt=0.1;
 
@@ -113,7 +113,7 @@ int main()
     vector<int> lag5; lag5.push_back(6);
     vector<int> lag6; lag6.push_back(2); lag6.push_back(6);
     vector<int> lag7; lag7.push_back(2);
-    vector<int> lag8; lag8.push_back(4); lag8.push_back(10);
+    vector<int> lag8; lag8.push_back(4); lag8.push_back(8);
 
     mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
@@ -125,53 +125,6 @@ int main()
     mymodelstruct.lags.push_back(lag7);
     mymodelstruct.lags.push_back(lag8);
 
-    /*
-    mymodelstruct.inputcolumns.push_back(0);
-    mymodelstruct.inputcolumns.push_back(1);
-    //mymodelstruct.inputcolumns.push_back(2);
-    mymodelstruct.inputcolumns.push_back(3);
-    //mymodelstruct.inputcolumns.push_back(4);
-    //mymodelstruct.inputcolumns.push_back(5);
-    mymodelstruct.inputcolumns.push_back(6);
-    //mymodelstruct.inputcolumns.push_back(7);
-    //mymodelstruct.inputcolumns.push_back(8);
-    */
-
-    /*
-    // Lags definition
-    vector<int> lag0; lag0.push_back(1); lag0.push_back(2);
-    vector<int> lag1; lag1.push_back(1); lag1.push_back(3);
-    //vector<int> lag2; lag2.push_back(0);
-    vector<int> lag3; lag3.push_back(0); lag3.push_back(2); lag3.push_back(3); lag3.push_back(4);
-    //vector<int> lag4; lag4.push_back(0);
-    //vector<int> lag5; lag5.push_back(0);
-    vector<int> lag6; lag6.push_back(1); lag6.push_back(3); lag6.push_back(4);
-    //vector<int> lag7; lag7.push_back(0);
-    //vector<int> lag8; lag8.push_back(0);
-
-    // Lags definition
-    vector<int> lag0; lag0.push_back(9); lag0.push_back(36); //lag0.push_back(60);
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(36); //lag1.push_back(60);
-    vector<int> lag2; lag2.push_back(36); //lag2.push_back(60);
-    vector<int> lag3; lag3.push_back(36); lag3.push_back(60);
-    vector<int> lag4; lag4.push_back(0); lag4.push_back(36); lag4.push_back(60);
-    vector<int> lag5; lag5.push_back(0); lag5.push_back(27); lag5.push_back(60);
-    vector<int> lag6; lag6.push_back(0); lag6.push_back(27); lag6.push_back(60);
-    vector<int> lag7; lag7.push_back(18); lag7.push_back(27); lag7.push_back(36); lag7.push_back(60);
-
-    mymodelstruct.lags.push_back(lag0);
-    mymodelstruct.lags.push_back(lag1);
-    //mymodelstruct.lags.push_back(lag2);
-    mymodelstruct.lags.push_back(lag3);
-    //mymodelstruct.lags.push_back(lag4);
-    //mymodelstruct.lags.push_back(lag5);
-    mymodelstruct.lags.push_back(lag6);
-    //mymodelstruct.lags.push_back(lag7);
-    //mymodelstruct.lags.push_back(lag8);
-    */
-
-
-
     }
     else if (!ASM)
     {
@@ -180,7 +133,7 @@ int main()
     mymodelstruct.n_layers = 1;
     mymodelstruct.n_nodes = {4};
 
-    mymodelstruct.dt=0.01;
+    mymodelstruct.dt=0.1;
 
     // Defining Inputs
     for (int i=0; i<total_data_cols-1; i++)
@@ -279,6 +232,8 @@ int main()
 
     }
 
+    // ---------------------------------------------RMS---------------------------------------------------------
+
     else if (!GA) {
 
         if (randommodelstructure) {
@@ -317,6 +272,8 @@ int main()
         results.close();
 
         }
+
+    // ---------------------------------------------Optimized model---------------------------------------------------------
 
         else if (!randommodelstructure) {
 

@@ -67,23 +67,11 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
     for (int layer = 0; layer<ModelStructure.n_layers; layer++)
     {
         Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-        Add<Sigmoid>(); // Activation Funchion
+            Add<Sigmoid>(); // Activation Funchion
     }
 
-    /*
-    //LSTM
-    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
-    {
-        Add<LSTM>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-        Add<LinearNoBias>(); // Activation Funchion
-    }
-    */
-
-   //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
-    //model.Add<Sigmoid>(); // Activation Funchion 2
     Add<ReLU>();
     Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
-    //Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers (Second output)
 
     return true;
 }
@@ -136,9 +124,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("ShiftedInputsTrain.txt");
+        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTrain.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("ShiftedOutputsTrain.txt");
+        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTrain.txt");
     }
     else
     {
@@ -172,9 +160,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("ShiftedInputsTest.txt");
+        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTest.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("ShiftedOutputsTest.txt");
+        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTest.txt");
     }
     return true;
 }
@@ -224,7 +212,7 @@ bool FFNWrapper_Multi::Transformation()
     normalizedData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedidata.txt", arma::file_type::raw_ascii);
 
     // Save parameters
-    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");    
 
     // Load parameters for train data
     CTransformation traintransformer;
@@ -234,7 +222,7 @@ bool FFNWrapper_Multi::Transformation()
     CTransformation testtransformer;
     testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
 
-    // Test data transform
+    // Train data transform
     arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
     //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
     normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
@@ -247,6 +235,36 @@ bool FFNWrapper_Multi::Transformation()
     // Writing normalized data to matrices
     TrainInputData = normalizedTrainData;
     TestInputData = normalizedTestData;
+
+    /*
+    //---------------------------------------------Outputs--------------------------------------------
+    CTransformation alldatatransformer_OP;
+    arma::mat All_DATA_OP;
+    All_DATA_OP = arma::join_rows(TrainOutputData, TestOutputData);
+
+    arma::mat normalizedData_OP = alldatatransformer_OP.normalize(All_DATA_OP);
+    normalizedData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedidata_OP.txt", arma::file_type::raw_ascii);
+
+    alldatatransformer_OP.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    CTransformation traintransformer_OP;
+    traintransformer_OP.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    CTransformation testtransformer_OP;
+    testtransformer_OP.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    arma::mat normalizedTrainData_OP = traintransformer_OP.transform(TrainOutputData);
+    normalizedTrainData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata_OP.txt", arma::file_type::raw_ascii);
+
+    arma::mat normalizedTestData_OP = testtransformer_OP.transform(TestOutputData);
+    normalizedTestData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata_OP.txt", arma::file_type::raw_ascii);
+
+    TrainOutputData = normalizedTrainData_OP;
+    TestOutputData = normalizedTestData_OP;
+    */
+
+
+
 
     /*
     mat TrainInputData1;
