@@ -33,6 +33,7 @@ T GeneticAlgorithm<T>::Optimize()
 template<class T>
 void GeneticAlgorithm<T>::WriteToFile()
 {
+
     file.open(Settings.outputpath+"/GA_Output.txt", std::ios::app);
     file<<"Generation: "<< current_generation << endl;
     if (file.is_open())
