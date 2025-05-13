@@ -46,7 +46,7 @@ int main()
 
     string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 20; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
@@ -107,15 +107,15 @@ int main()
 
 
     // Lags definition
-    vector<int> lag0; lag0.push_back(2); lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
-    vector<int> lag1; lag1.push_back(0); lag1.push_back(2); lag1.push_back(4); lag1.push_back(8);
+    vector<int> lag0; lag0.push_back(2); //lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
+    vector<int> lag1; lag1.push_back(2); //lag1.push_back(2); lag1.push_back(4); lag1.push_back(8);
     vector<int> lag2; lag2.push_back(2);
-    vector<int> lag3; lag3.push_back(0); lag3.push_back(6);
-    vector<int> lag4; lag4.push_back(8);
-    vector<int> lag5; lag5.push_back(6);
-    vector<int> lag6; lag6.push_back(2); lag6.push_back(6);
+    vector<int> lag3; lag3.push_back(2); //lag3.push_back(6);
+    vector<int> lag4; lag4.push_back(2);
+    vector<int> lag5; lag5.push_back(2);
+    vector<int> lag6; lag6.push_back(2); //lag6.push_back(6);
     vector<int> lag7; lag7.push_back(2);
-    vector<int> lag8; lag8.push_back(4); lag8.push_back(8);
+    vector<int> lag8; lag8.push_back(2); //lag8.push_back(8);
 
     mymodelstruct.lags.push_back(lag0);
     mymodelstruct.lags.push_back(lag1);
