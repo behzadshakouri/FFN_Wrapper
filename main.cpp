@@ -44,9 +44,9 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "VSS"; // NO, NH, ND, sCOD, VSS, TKN
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 20; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
@@ -89,7 +89,7 @@ int main()
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
     mymodelstruct.n_layers = 3;
-    mymodelstruct.n_nodes = {10*4,8*4,7*4};
+    mymodelstruct.n_nodes = {10*4,8*4,7*4}; //{10*4,8*4,7*4}
 
     mymodelstruct.dt=0.1;
 

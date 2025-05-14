@@ -108,6 +108,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
             //Shifting by lags definition (Outputs)
             mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            //mat TrainOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {
@@ -144,7 +145,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            mat TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            //mat TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {
