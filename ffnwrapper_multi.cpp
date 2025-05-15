@@ -262,8 +262,11 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
     _R2_Train.resize(ModelStructure.outputcolumns.size());
     for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
     {
-    nMSE_Train[constituent] = diff2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent])/(norm2(TrainDataTarget.BTC[constituent])/TrainDataTarget.BTC[constituent].n);
-    _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
+        double MSE = diff2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
+        double VAR = TrainDataTarget.BTC[constituent].variance();
+
+        nMSE_Train[constituent] = MSE/VAR;
+        _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
     }
     // TestData
     CTimeSeriesSet<double> TestDataPrediction1 (TestDataPrediction,ModelStructure.dt,ModelStructure.lags);
@@ -283,8 +286,11 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
     _R2_Test.resize(ModelStructure.outputcolumns.size());
     for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
     {
-    nMSE_Test[constituent] = diff2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent])/(norm2(TestDataTarget.BTC[constituent])/TestDataTarget.BTC[constituent].n);
-    _R2_Test[constituent] = R2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
+        double MSE = diff2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
+        double VAR = TestDataTarget.BTC[constituent].variance();
+
+        nMSE_Test[constituent] = MSE/VAR;
+        _R2_Test[constituent] = R2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
     }
     return true;
 }
