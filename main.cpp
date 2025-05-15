@@ -44,9 +44,10 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "VSS"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
+    bool log_output_d = true; // true for log output data and false for normal output data
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 20; // Number of GA simulations ???
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
@@ -92,6 +93,7 @@ int main()
     mymodelstruct.n_nodes = {10*4,8*4,7*4}; //{10*4,8*4,7*4}
 
     mymodelstruct.dt=0.1;
+    mymodelstruct.log_output=log_output_d;
 
     // Defining Inputs
 
@@ -136,6 +138,7 @@ int main()
     mymodelstruct.n_nodes = {4};
 
     mymodelstruct.dt=0.1;
+    mymodelstruct.log_output=log_output_d;
 
     // Defining Inputs
     for (int i=0; i<total_data_cols-1; i++)

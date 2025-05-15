@@ -92,7 +92,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 {
     segment_sizes.clear();
 
-    if (DataCategory == datacategory::Train)
+    if (DataCategory == datacategory::Train) // Train
     {
         TrainInputData.clear();
         TrainOutputData.clear();
@@ -108,7 +108,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
             //Shifting by lags definition (Outputs)
             mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            //mat TrainOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
+            if (ModelStructure.log_output)
+                TrainOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {
@@ -129,7 +130,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
         ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTrain.txt");
     }
-    else
+    else //Test
     {
         TestInputData.clear();
         TestOutputData.clear();
@@ -145,8 +146,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
             //ShiftedInputs.writetofile("ShiftedInputs.txt");
 
             //Shifting by lags definition (Outputs)
-            mat TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            //mat TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
+            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            if (ModelStructure.log_output)
+                TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {

@@ -34,6 +34,7 @@ public:
     vector<int> outputcolumns;
     int input_lag_multiplier;
     string outputpath;
+    bool log_output = false;
     void Reset()
     {
         inputcolumns.clear();

@@ -28,8 +28,8 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     trainpredictedaddress = rhs.trainpredictedaddress;
     testobservedaddress = rhs.testobservedaddress;
     testpredictedaddress = rhs.testpredictedaddress;
-
     outputpath = rhs.outputpath;
+    log_output = rhs.log_output;
 
 
 }
@@ -55,6 +55,7 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     testobservedaddress = rhs.testobservedaddress;
     testpredictedaddress = rhs.testpredictedaddress;
     outputpath = rhs.outputpath;
+    log_output = rhs.log_output;
 
     return *this;
 }

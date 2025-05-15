@@ -28,6 +28,7 @@ CModelStructure::CModelStructure(const CModelStructure &rhs) // Copy constructor
     predictedaddress = rhs.predictedaddress;
     realization = rhs.realization;
     outputpath = rhs.outputpath;
+    log_output = rhs.log_output;
 
 
 }
@@ -52,6 +53,7 @@ CModelStructure& CModelStructure::operator = (const CModelStructure &rhs) // Ope
     predictedaddress = rhs.predictedaddress;
     realization = rhs.realization;
     outputpath = rhs.outputpath;
+    log_output = rhs.log_output;
 
     return *this;
 }

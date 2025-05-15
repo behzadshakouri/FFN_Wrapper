@@ -69,7 +69,6 @@ public:
     mlpack::data::MinMaxScaler minMaxScaler_te_i;
     mlpack::data::MinMaxScaler minMaxScaler_te_o;
 
-
 private:
     mat TrainInputData;
     mat TrainOutputData;
