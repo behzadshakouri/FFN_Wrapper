@@ -22,7 +22,7 @@ public:
     vector<string> trainpredictedaddress;
     vector<string> testobservedaddress;
     vector<string> testpredictedaddress;
-
+    int realization;
     int n_input_layers;
     string activation_function;
     int n_output_layers;

@@ -28,6 +28,7 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     trainpredictedaddress = rhs.trainpredictedaddress;
     testobservedaddress = rhs.testobservedaddress;
     testpredictedaddress = rhs.testpredictedaddress;
+    realization = rhs.realization;
     outputpath = rhs.outputpath;
     log_output = rhs.log_output;
 
@@ -54,6 +55,7 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     trainpredictedaddress = rhs.trainpredictedaddress;
     testobservedaddress = rhs.testobservedaddress;
     testpredictedaddress = rhs.testpredictedaddress;
+    realization = rhs.realization;
     outputpath = rhs.outputpath;
     log_output = rhs.log_output;
 

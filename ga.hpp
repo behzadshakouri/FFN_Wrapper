@@ -103,8 +103,8 @@ void GeneticAlgorithm<T>::AssignFitnesses()
             Individuals[i].fitness_measures = models[i].Fitness();
             Individuals[i].fitness=0;
             for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
-                Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)]; // MSE_Test
-                //Individuals[i].fitness += max(Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)],Individuals[i].fitness_measures["MSE_Train_" + aquiutils::numbertostring(constituent)]); // MSE_Test and MSE_Train
+                //Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)]; // MSE_Test
+                Individuals[i].fitness += max(Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)],Individuals[i].fitness_measures["MSE_Train_" + aquiutils::numbertostring(constituent)]); // MSE_Test and MSE_Train
         }
         else
         {

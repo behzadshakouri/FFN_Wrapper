@@ -89,11 +89,12 @@ int main()
     if (ASM)
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
-    mymodelstruct.n_layers = 2;
-    mymodelstruct.n_nodes = {7,25}; //{10*4,8*4,7*4}
+    mymodelstruct.n_layers = 3;
+    mymodelstruct.n_nodes = {14,7,2}; //{10*4,8*4,7*4}
 
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
+    mymodelstruct.realization=Realization;
 
     // Defining Inputs
 
@@ -105,14 +106,14 @@ int main()
     */
 
     mymodelstruct.inputcolumns.push_back(0); //
-    mymodelstruct.inputcolumns.push_back(1); //
+    //mymodelstruct.inputcolumns.push_back(1); //
     //mymodelstruct.inputcolumns.push_back(2); //
     mymodelstruct.inputcolumns.push_back(3); //
-    //mymodelstruct.inputcolumns.push_back(5); //
     mymodelstruct.inputcolumns.push_back(4); //
+    //mymodelstruct.inputcolumns.push_back(5); //
     mymodelstruct.inputcolumns.push_back(6); //
-    //mymodelstruct.inputcolumns.push_back(7); //
-    //mymodelstruct.inputcolumns.push_back(8); //
+    mymodelstruct.inputcolumns.push_back(7); //
+    mymodelstruct.inputcolumns.push_back(8); //
 
     // Defining Output(s)
     for (int i = 0; i<number_of_outputs; i++)
@@ -120,25 +121,25 @@ int main()
 
 
     // Lags definition
-    vector<int> lag0; lag0.push_back(4); //lag0.push_back(2); //lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
-    vector<int> lag1; lag1.push_back(6); lag1.push_back(8); //lag1.push_back(2);
+    vector<int> lag0; lag0.push_back(1); lag0.push_back(4); //lag0.push_back(2); //lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
+    //vector<int> lag1; lag1.push_back(6); lag1.push_back(8); //lag1.push_back(2);
     //vector<int> lag2; lag2.push_back(2);
-    vector<int> lag3; lag3.push_back(0); lag3.push_back(2); lag3.push_back(8);
-    vector<int> lag4; lag4.push_back(4); //lag4.push_back(2);
+    vector<int> lag3; lag3.push_back(1); //lag3.push_back(2); lag3.push_back(8);
+    vector<int> lag4; lag4.push_back(1); lag4.push_back(3); //lag4.push_back(2);
     //vector<int> lag5; lag5.push_back(2);
-    vector<int> lag6; lag6.push_back(0); lag6.push_back(2);
-    //vector<int> lag7; lag7.push_back(2);
-    //vector<int> lag8; lag8.push_back(2); //lag8.push_back(8);
+    vector<int> lag6; lag6.push_back(1); lag6.push_back(2); lag6.push_back(4);
+    vector<int> lag7; lag7.push_back(0); lag7.push_back(2); lag7.push_back(4);
+    vector<int> lag8; lag8.push_back(2); //lag8.push_back(8);
 
     mymodelstruct.lags.push_back(lag0);
-    mymodelstruct.lags.push_back(lag1);
+    //mymodelstruct.lags.push_back(lag1);
     //mymodelstruct.lags.push_back(lag2);
     mymodelstruct.lags.push_back(lag3);
     mymodelstruct.lags.push_back(lag4);
     //mymodelstruct.lags.push_back(lag5);
     mymodelstruct.lags.push_back(lag6);
-    //mymodelstruct.lags.push_back(lag7);
-    //mymodelstruct.lags.push_back(lag8);
+    mymodelstruct.lags.push_back(lag7);
+    mymodelstruct.lags.push_back(lag8);
 
     }
     else if (!ASM)
@@ -150,6 +151,7 @@ int main()
 
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
+    mymodelstruct.realization=Realization;
 
     // Defining Inputs
     for (int i=0; i<total_data_cols-1; i++)
@@ -313,6 +315,20 @@ int main()
             //F.Optimizer();
 
             //data::Save("model.xml","model", F);
+
+            FFNWrapper_Multi F1;
+            F1.silent = false;
+            F1.ModelStructure = mymodelstruct;
+            F1.Initiate();
+            F1.Train();
+            F1.Test();
+            F1.PerformanceMetrics();
+
+            //F1.silent = false;
+            F1.DataSave(datacategory::Train);
+            F1.DataSave(datacategory::Test);
+            F1.Plotter();
+            //F1.Optimizer();
 
         }
 
