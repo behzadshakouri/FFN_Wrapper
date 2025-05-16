@@ -275,6 +275,9 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
         nMSE_Train[constituent] = MSE/VAR;
         _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
     }
+
+    segment_sizes.clear();
+
     // TestData
     CTimeSeriesSet<double> TestDataPrediction1 (TestDataPrediction,ModelStructure.dt,ModelStructure.lags);
     segment_sizes.push_back(TestDataPrediction.n_cols);
