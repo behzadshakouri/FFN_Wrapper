@@ -31,7 +31,7 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     realization = rhs.realization;
     outputpath = rhs.outputpath;
     log_output = rhs.log_output;
-
+    seed_number = rhs.seed_number;
 
 }
 CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_Multi &rhs) // Operator =
@@ -58,6 +58,7 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     realization = rhs.realization;
     outputpath = rhs.outputpath;
     log_output = rhs.log_output;
+    seed_number = rhs.seed_number;
 
     return *this;
 }

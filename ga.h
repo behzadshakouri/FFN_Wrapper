@@ -12,6 +12,7 @@ struct GeneticAlgorithmsettings
     unsigned int generations = 100;
     double mutation_probability = 0.05;
     string outputpath = "";
+    bool MSE_optimization = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
 };
 
 using namespace std;

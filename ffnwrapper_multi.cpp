@@ -224,7 +224,7 @@ bool FFNWrapper_Multi::Train()
 
     // Train the model
 
-    mlpack::math::RandomSeed(42); // 42 is random number
+    mlpack::math::RandomSeed(ModelStructure.seed_number);
     //SGD<> optimizer(/* stepSize = */ 0.01, /* batchSize = */ 32, /* maxIterations = */ 1000, /* tolerance = */ 1e-5, /* shuffle = */ false);
 
     FFN::Train(TrainInputData, TrainOutputData);

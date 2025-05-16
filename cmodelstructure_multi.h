@@ -35,6 +35,7 @@ public:
     int input_lag_multiplier;
     string outputpath;
     bool log_output = false;
+    double seed_number = 42; // 42 is a random number
     void Reset()
     {
         inputcolumns.clear();

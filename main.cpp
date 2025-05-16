@@ -47,11 +47,14 @@ int main()
     string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    double Seed_number = 42; // 42 is a random number
+
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 20; // Number of GA simulations ???
+    bool MSE_Test = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
-    const double Random_Nsim = 2; // Number of random model structure simulations
+    const double Random_Nsim = 1000; // Number of random model structure simulations
 
     //------------------------------------------------------------------------------------------------------------------------------
 
@@ -95,6 +98,7 @@ int main()
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
     mymodelstruct.realization=Realization;
+    mymodelstruct.seed_number=Seed_number;
 
     // Defining Inputs
 
@@ -152,6 +156,8 @@ int main()
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
     mymodelstruct.realization=Realization;
+    mymodelstruct.seed_number=Seed_number;
+
 
     // Defining Inputs
     for (int i=0; i<total_data_cols-1; i++)
@@ -226,6 +232,7 @@ int main()
 
         GeneticAlgorithm<ModelCreator> GA;
         GA.Settings.generations = GA_Nsim;
+        GA.Settings.MSE_optimization = MSE_Test;
         GA.Settings.outputpath = mymodelstruct.outputpath;
         GA.model = modelCreator;
         GA.model.FFN.ModelStructure = mymodelstruct;
@@ -322,6 +329,7 @@ int main()
 
             //data::Save("model.xml","model", F);
 
+            /*
             FFNWrapper_Multi F1;
             F1.silent = false;
             F1.ModelStructure = mymodelstruct;
@@ -335,6 +343,7 @@ int main()
             F1.DataSave(datacategory::Test);
             F1.Plotter();
             //F1.Optimizer();
+            */
 
         }
 
