@@ -206,11 +206,17 @@ int main()
 
         mymodelstruct.outputpath = path + "Results/";
 
-        mymodelstruct.trainobservedaddress.push_back(mymodelstruct.outputpath + "TrainOutputDataTS_" + to_string(r) + ".csv");
-        mymodelstruct.trainpredictedaddress.push_back(mymodelstruct.outputpath + "TrainDataPredictionTS_" + to_string(r) + ".csv");
+        mymodelstruct.trainobservedaddress.push_back(mymodelstruct.outputpath + "TrainOutputDataTS_" + data_name + ".csv");
+        mymodelstruct.trainpredictedaddress.push_back(mymodelstruct.outputpath + "TrainDataPredictionTS_" + data_name + ".csv");
 
-        mymodelstruct.testobservedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
-        mymodelstruct.testpredictedaddress.push_back(mymodelstruct.outputpath + "TestDataPredictionTS_" + to_string(r) + ".csv");
+        mymodelstruct.testobservedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + data_name + ".csv");
+        mymodelstruct.testpredictedaddress.push_back(mymodelstruct.outputpath + "TestDataPredictionTS_" + data_name + ".csv");
+
+        //mymodelstruct.trainobservedaddress.push_back(mymodelstruct.outputpath + "TrainOutputDataTS_" + to_string(r) + ".csv");
+        //mymodelstruct.trainpredictedaddress.push_back(mymodelstruct.outputpath + "TrainDataPredictionTS_" + to_string(r) + ".csv");
+
+        //mymodelstruct.testobservedaddress.push_back(mymodelstruct.outputpath + "TestOutputDataTS_" + to_string(r) + ".csv");
+        //mymodelstruct.testpredictedaddress.push_back(mymodelstruct.outputpath + "TestDataPredictionTS_" + to_string(r) + ".csv");
 
         }
 

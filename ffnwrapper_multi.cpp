@@ -10,6 +10,9 @@ using namespace arma;
 #include <mlpack/methods/ann/layer/layer.hpp>
 #include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
 #include <armadillo>
+#include <mlpack/methods/ann/ann.hpp>
+
+
 using namespace mlpack::ann;
 
 #include <QVector>
@@ -220,6 +223,10 @@ bool FFNWrapper_Multi::Train()
 {
 
     // Train the model
+
+    mlpack::math::RandomSeed(42); // 42 is random number
+    //SGD<> optimizer(/* stepSize = */ 0.01, /* batchSize = */ 32, /* maxIterations = */ 1000, /* tolerance = */ 1e-5, /* shuffle = */ false);
+
     FFN::Train(TrainInputData, TrainOutputData);
 
     // Use the Predict method to get the predictions.
