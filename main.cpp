@@ -49,9 +49,10 @@ int main()
 
     double Seed_number = 42; // 42 is a random number
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
-    const double GA_Nsim = 20; // Number of GA simulations ???
+    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    const double GA_Nsim = 100; // Number of GA simulations ???
     bool MSE_Test = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
+    bool optimized_structure = true; // true for GA optimized network structures and false for my own structure
 
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 1000; // Number of random model structure simulations
@@ -92,32 +93,22 @@ int main()
     if (ASM)
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
-    mymodelstruct.n_layers = 3;
-    mymodelstruct.n_nodes = {14,7,2}; //{10*4,8*4,7*4}
-
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
     mymodelstruct.realization=Realization;
     mymodelstruct.seed_number=Seed_number;
 
-    // Defining Inputs
+    if (!optimized_structure)
+    {
+    // Network structure
+    mymodelstruct.n_layers = 3;
+    mymodelstruct.n_nodes = {10*4,8*4,7*4};
 
-    /*
+    // Defining Inputs
     for (int i=0; i<total_data_cols-number_of_outputs; i++)
     {
         mymodelstruct.inputcolumns.push_back(i); // Input 0: Inflow
     }
-    */
-
-    mymodelstruct.inputcolumns.push_back(0); //
-    //mymodelstruct.inputcolumns.push_back(1); //
-    //mymodelstruct.inputcolumns.push_back(2); //
-    mymodelstruct.inputcolumns.push_back(3); //
-    mymodelstruct.inputcolumns.push_back(4); //
-    //mymodelstruct.inputcolumns.push_back(5); //
-    mymodelstruct.inputcolumns.push_back(6); //
-    mymodelstruct.inputcolumns.push_back(7); //
-    mymodelstruct.inputcolumns.push_back(8); //
 
     // Defining Output(s)
     for (int i = 0; i<number_of_outputs; i++)
@@ -125,39 +116,301 @@ int main()
 
 
     // Lags definition
-    vector<int> lag0; lag0.push_back(1); lag0.push_back(4); //lag0.push_back(2); //lag0.push_back(4); lag0.push_back(6); lag0.push_back(8);
-    //vector<int> lag1; lag1.push_back(6); lag1.push_back(8); //lag1.push_back(2);
-    //vector<int> lag2; lag2.push_back(2);
-    vector<int> lag3; lag3.push_back(1); //lag3.push_back(2); lag3.push_back(8);
-    vector<int> lag4; lag4.push_back(1); lag4.push_back(3); //lag4.push_back(2);
-    //vector<int> lag5; lag5.push_back(2);
-    vector<int> lag6; lag6.push_back(1); lag6.push_back(2); lag6.push_back(4);
-    vector<int> lag7; lag7.push_back(0); lag7.push_back(2); lag7.push_back(4);
-    vector<int> lag8; lag8.push_back(2); //lag8.push_back(8);
+    vector<int> lag0; lag0.push_back(1);
+    vector<int> lag1; lag1.push_back(1);
+    vector<int> lag2; lag2.push_back(1);
+    vector<int> lag3; lag3.push_back(1);
+    vector<int> lag4; lag4.push_back(1);
+    vector<int> lag5; lag5.push_back(1);
+    vector<int> lag6; lag6.push_back(1);
+    vector<int> lag7; lag7.push_back(1);
+    vector<int> lag8; lag8.push_back(1);
 
     mymodelstruct.lags.push_back(lag0);
-    //mymodelstruct.lags.push_back(lag1);
-    //mymodelstruct.lags.push_back(lag2);
+    mymodelstruct.lags.push_back(lag1);
+    mymodelstruct.lags.push_back(lag2);
     mymodelstruct.lags.push_back(lag3);
     mymodelstruct.lags.push_back(lag4);
-    //mymodelstruct.lags.push_back(lag5);
+    mymodelstruct.lags.push_back(lag5);
     mymodelstruct.lags.push_back(lag6);
     mymodelstruct.lags.push_back(lag7);
     mymodelstruct.lags.push_back(lag8);
+    }
+
+    //------------------------------------------Manual approach for all constituents GA optimized structures
+
+    if (data_name == "NO") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 2;
+        mymodelstruct.n_nodes = {39,17}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(1); //
+        mymodelstruct.inputcolumns.push_back(2); //
+        mymodelstruct.inputcolumns.push_back(3); //
+        //mymodelstruct.inputcolumns.push_back(4); //
+        //mymodelstruct.inputcolumns.push_back(5); //
+        mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(0); lag0.push_back(22); lag0.push_back(33);
+        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag2; lag2.push_back(44);
+        vector<int> lag3; lag3.push_back(0); lag3.push_back(33); lag3.push_back(44);
+        //vector<int> lag4; lag4.push_back(0);
+        //vector<int> lag5; lag5.push_back(0);
+        vector<int> lag6; lag6.push_back(0); lag6.push_back(11); lag6.push_back(22);
+        vector<int> lag7; lag7.push_back(44);
+        vector<int> lag8; lag8.push_back(11); lag8.push_back(22);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag2);
+        mymodelstruct.lags.push_back(lag3);
+        //mymodelstruct.lags.push_back(lag4);
+        //mymodelstruct.lags.push_back(lag5);
+        mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        mymodelstruct.lags.push_back(lag8);
+    }
+
+    else if (data_name == "NH") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 3;
+        mymodelstruct.n_nodes = {19,8,4}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(1); //
+        //mymodelstruct.inputcolumns.push_back(2); //
+        mymodelstruct.inputcolumns.push_back(3); //
+        mymodelstruct.inputcolumns.push_back(4); //
+        //mymodelstruct.inputcolumns.push_back(5); //
+        mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        //mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(1);
+        //vector<int> lag1; lag1.push_back(0);
+        //vector<int> lag2; lag2.push_back(0);
+        vector<int> lag3; lag3.push_back(1); lag3.push_back(3);
+        vector<int> lag4; lag4.push_back(2);
+        //vector<int> lag5; lag5.push_back(0);
+        vector<int> lag6; lag6.push_back(0); lag6.push_back(2);
+        vector<int> lag7; lag7.push_back(1);
+        //vector<int> lag8; lag8.push_back(0);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        //mymodelstruct.lags.push_back(lag2);
+        mymodelstruct.lags.push_back(lag3);
+        mymodelstruct.lags.push_back(lag4);
+        //mymodelstruct.lags.push_back(lag5);
+        mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        //mymodelstruct.lags.push_back(lag8);
+    }
+
+    else if (data_name == "sCOD") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 3;
+        mymodelstruct.n_nodes = {36,37,7}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(0); //
+        mymodelstruct.inputcolumns.push_back(2); //
+        mymodelstruct.inputcolumns.push_back(3); //
+        //mymodelstruct.inputcolumns.push_back(0); //
+        mymodelstruct.inputcolumns.push_back(5); //
+        mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(0); lag0.push_back(1); lag0.push_back(3);
+        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag2; lag2.push_back(0); lag2.push_back(1); lag2.push_back(2); lag2.push_back(4);
+        vector<int> lag3; lag3.push_back(0); lag3.push_back(2);
+        //vector<int> lag4; lag4.push_back(0);
+        vector<int> lag5; lag5.push_back(0); lag5.push_back(1); lag5.push_back(2);
+        vector<int> lag6; lag6.push_back(2);
+        vector<int> lag7; lag7.push_back(0); lag7.push_back(1); lag7.push_back(3);
+        vector<int> lag8; lag8.push_back(0); lag8.push_back(2); lag8.push_back(3);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag2);
+        mymodelstruct.lags.push_back(lag3);
+        //mymodelstruct.lags.push_back(lag4);
+        mymodelstruct.lags.push_back(lag5);
+        mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        mymodelstruct.lags.push_back(lag8);
+    }
+
+    else if (data_name == "TKN") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 3;
+        mymodelstruct.n_nodes = {11,8,9}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(1); //
+        //mymodelstruct.inputcolumns.push_back(2); //
+        mymodelstruct.inputcolumns.push_back(3); //
+        //mymodelstruct.inputcolumns.push_back(4); //
+        mymodelstruct.inputcolumns.push_back(5); //
+        mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(1);
+        //vector<int> lag1; lag1.push_back(0);
+        //vector<int> lag2; lag2.push_back(0);
+        vector<int> lag3; lag3.push_back(1); lag3.push_back(2); lag3.push_back(3);
+        //vector<int> lag4; lag4.push_back(0);
+        vector<int> lag5; lag5.push_back(0);
+        vector<int> lag6; lag6.push_back(0); lag6.push_back(3); lag6.push_back(4);
+        vector<int> lag7; lag7.push_back(4);
+        vector<int> lag8; lag8.push_back(0); lag8.push_back(4);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        //mymodelstruct.lags.push_back(lag2);
+        mymodelstruct.lags.push_back(lag3);
+        //mymodelstruct.lags.push_back(lag4);
+        mymodelstruct.lags.push_back(lag5);
+        mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        mymodelstruct.lags.push_back(lag8);
+    }
+
+    else if (data_name == "VSS") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 3;
+        mymodelstruct.n_nodes = {11,5,2}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(1); //
+        //mymodelstruct.inputcolumns.push_back(2); //
+        //mymodelstruct.inputcolumns.push_back(3); //
+        //mymodelstruct.inputcolumns.push_back(4); //
+        //mymodelstruct.inputcolumns.push_back(5); //
+        //mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        //mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(0); lag0.push_back(12); lag0.push_back(60);
+        //vector<int> lag1; lag1.push_back(0);
+        //vector<int> lag2; lag2.push_back(0);
+        //vector<int> lag3; lag3.push_back(0);
+        //vector<int> lag4; lag4.push_back(0);
+        //vector<int> lag5; lag5.push_back(0);
+        //vector<int> lag6; lag6.push_back(0);
+        vector<int> lag7; lag7.push_back(0); lag7.push_back(48);
+        //vector<int> lag8; lag8.push_back(0);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        //mymodelstruct.lags.push_back(lag2);
+        //mymodelstruct.lags.push_back(lag3);
+        //mymodelstruct.lags.push_back(lag4);
+        //mymodelstruct.lags.push_back(lag5);
+        //mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        //mymodelstruct.lags.push_back(lag8);
+    }
+
+    else if (data_name == "ND") // ----------------------------------
+    {
+        // Network structure
+        mymodelstruct.n_layers = 3;
+        mymodelstruct.n_nodes = {21,15,4}; //{10*4,8*4,7*4}
+
+        // Defining Inputs
+        mymodelstruct.inputcolumns.push_back(0); //
+        //mymodelstruct.inputcolumns.push_back(1); //
+        //mymodelstruct.inputcolumns.push_back(2); //
+        mymodelstruct.inputcolumns.push_back(3); //
+        //mymodelstruct.inputcolumns.push_back(4); //
+        //mymodelstruct.inputcolumns.push_back(5); //
+        mymodelstruct.inputcolumns.push_back(6); //
+        mymodelstruct.inputcolumns.push_back(7); //
+        //mymodelstruct.inputcolumns.push_back(8); //
+
+        // Defining Output(s)
+        for (int i = 0; i<number_of_outputs; i++)
+            mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
+
+        // Lags definition
+        vector<int> lag0; lag0.push_back(0);
+        //vector<int> lag1; lag1.push_back(0);
+        //vector<int> lag2; lag2.push_back(0);
+        vector<int> lag3; lag3.push_back(0); lag3.push_back(18); lag3.push_back(27); lag3.push_back(36);
+        //vector<int> lag4; lag4.push_back(0);
+        //vector<int> lag5; lag5.push_back(0);
+        vector<int> lag6; lag6.push_back(0); lag6.push_back(9);
+        vector<int> lag7; lag7.push_back(9); lag7.push_back(18); lag7.push_back(36);
+        //vector<int> lag8; lag8.push_back(0);
+
+        mymodelstruct.lags.push_back(lag0);
+        //mymodelstruct.lags.push_back(lag1);
+        //mymodelstruct.lags.push_back(lag2);
+        mymodelstruct.lags.push_back(lag3);
+        //mymodelstruct.lags.push_back(lag4);
+        //mymodelstruct.lags.push_back(lag5);
+        mymodelstruct.lags.push_back(lag6);
+        mymodelstruct.lags.push_back(lag7);
+        //mymodelstruct.lags.push_back(lag8);
+    }
 
     }
+
     else if (!ASM)
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
     // Defining Model Structure
-    mymodelstruct.n_layers = 1;
-    mymodelstruct.n_nodes = {4};
-
     mymodelstruct.dt=0.1;
     mymodelstruct.log_output=log_output_d;
     mymodelstruct.realization=Realization;
     mymodelstruct.seed_number=Seed_number;
 
+    //Network structure
+    mymodelstruct.n_layers = 1;
+    mymodelstruct.n_nodes = {4};
 
     // Defining Inputs
     for (int i=0; i<total_data_cols-1; i++)
