@@ -44,7 +44,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "TKN"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number
@@ -147,7 +147,7 @@ int main()
 
         // Defining Inputs
         mymodelstruct.inputcolumns.push_back(0); //
-        //mymodelstruct.inputcolumns.push_back(1); //
+        mymodelstruct.inputcolumns.push_back(1); // WAS
         mymodelstruct.inputcolumns.push_back(2); //
         mymodelstruct.inputcolumns.push_back(3); //
         //mymodelstruct.inputcolumns.push_back(4); //
@@ -162,7 +162,7 @@ int main()
 
         // Lags definition
         vector<int> lag0; lag0.push_back(0); lag0.push_back(22); lag0.push_back(33);
-        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag1; lag1.push_back(22); lag1.push_back(33); // WAS
         vector<int> lag2; lag2.push_back(44);
         vector<int> lag3; lag3.push_back(0); lag3.push_back(33); lag3.push_back(44);
         //vector<int> lag4; lag4.push_back(0);
@@ -172,7 +172,7 @@ int main()
         vector<int> lag8; lag8.push_back(11); lag8.push_back(22);
 
         mymodelstruct.lags.push_back(lag0);
-        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag1); // WAS
         mymodelstruct.lags.push_back(lag2);
         mymodelstruct.lags.push_back(lag3);
         //mymodelstruct.lags.push_back(lag4);
@@ -190,7 +190,7 @@ int main()
 
         // Defining Inputs
         mymodelstruct.inputcolumns.push_back(0); //
-        //mymodelstruct.inputcolumns.push_back(1); //
+        mymodelstruct.inputcolumns.push_back(1); // WAS
         //mymodelstruct.inputcolumns.push_back(2); //
         mymodelstruct.inputcolumns.push_back(3); //
         mymodelstruct.inputcolumns.push_back(4); //
@@ -205,7 +205,7 @@ int main()
 
         // Lags definition
         vector<int> lag0; lag0.push_back(1);
-        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag1; lag1.push_back(2); lag1.push_back(3); // WAS
         //vector<int> lag2; lag2.push_back(0);
         vector<int> lag3; lag3.push_back(1); lag3.push_back(3);
         vector<int> lag4; lag4.push_back(2);
@@ -215,7 +215,7 @@ int main()
         //vector<int> lag8; lag8.push_back(0);
 
         mymodelstruct.lags.push_back(lag0);
-        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag1); // WAS
         //mymodelstruct.lags.push_back(lag2);
         mymodelstruct.lags.push_back(lag3);
         mymodelstruct.lags.push_back(lag4);
@@ -233,7 +233,7 @@ int main()
 
         // Defining Inputs
         mymodelstruct.inputcolumns.push_back(0); //
-        //mymodelstruct.inputcolumns.push_back(0); //
+        mymodelstruct.inputcolumns.push_back(0); // WAS
         mymodelstruct.inputcolumns.push_back(2); //
         mymodelstruct.inputcolumns.push_back(3); //
         //mymodelstruct.inputcolumns.push_back(0); //
@@ -248,7 +248,7 @@ int main()
 
         // Lags definition
         vector<int> lag0; lag0.push_back(0); lag0.push_back(1); lag0.push_back(3);
-        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag1; lag1.push_back(0); lag1.push_back(1); lag1.push_back(2); lag1.push_back(4); // WAS
         vector<int> lag2; lag2.push_back(0); lag2.push_back(1); lag2.push_back(2); lag2.push_back(4);
         vector<int> lag3; lag3.push_back(0); lag3.push_back(2);
         //vector<int> lag4; lag4.push_back(0);
@@ -258,7 +258,7 @@ int main()
         vector<int> lag8; lag8.push_back(0); lag8.push_back(2); lag8.push_back(3);
 
         mymodelstruct.lags.push_back(lag0);
-        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag1); // WAS
         mymodelstruct.lags.push_back(lag2);
         mymodelstruct.lags.push_back(lag3);
         //mymodelstruct.lags.push_back(lag4);
@@ -276,7 +276,7 @@ int main()
 
         // Defining Inputs
         mymodelstruct.inputcolumns.push_back(0); //
-        //mymodelstruct.inputcolumns.push_back(1); //
+        mymodelstruct.inputcolumns.push_back(1); // WAS
         //mymodelstruct.inputcolumns.push_back(2); //
         mymodelstruct.inputcolumns.push_back(3); //
         //mymodelstruct.inputcolumns.push_back(4); //
@@ -291,7 +291,7 @@ int main()
 
         // Lags definition
         vector<int> lag0; lag0.push_back(1);
-        //vector<int> lag1; lag1.push_back(0);
+        vector<int> lag1; lag1.push_back(0); lag1.push_back(2); // WAS
         //vector<int> lag2; lag2.push_back(0);
         vector<int> lag3; lag3.push_back(1); lag3.push_back(2); lag3.push_back(3);
         //vector<int> lag4; lag4.push_back(0);
@@ -301,7 +301,7 @@ int main()
         vector<int> lag8; lag8.push_back(0); lag8.push_back(4);
 
         mymodelstruct.lags.push_back(lag0);
-        //mymodelstruct.lags.push_back(lag1);
+        mymodelstruct.lags.push_back(lag1); // WAS
         //mymodelstruct.lags.push_back(lag2);
         mymodelstruct.lags.push_back(lag3);
         //mymodelstruct.lags.push_back(lag4);
