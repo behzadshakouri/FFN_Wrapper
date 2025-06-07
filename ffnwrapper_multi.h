@@ -9,7 +9,7 @@
 
 using namespace mlpack;
 using namespace std;
-using namespace arma;
+using namespace arma; 
 
 enum class datacategory {Train, Test};
 
@@ -23,6 +23,8 @@ public:
 
     bool Initiate(bool dataprocess = true);
     bool DataProcess();
+    arma::mat A;
+
     bool Shifter(datacategory);
     bool Transformation();
     bool Train();
@@ -55,8 +57,9 @@ public:
         return CTimeSeriesSet<double>(TestOutputData,ModelStructure.dt,ModelStructure.lags);
     }
 
-    mat TrainDataPrediction;
-    mat TestDataPrediction;
+    arma::mat Prediction;
+    double nMSE = -999;
+    double _R2 = -999;
 
     vector<double> nMSE_Train;
     vector<double> _R2_Train;
