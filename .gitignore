@@ -26,3 +26,9 @@ build/Desktop_Qt_6_7_3-Debug/.qtc_clangd/
 chat
 
 *.txt
+
+.vs/FFNWrapper/FileContentIndex/
+
+.vs/FFNWrapper/v17/
+
+FFNWrapper/x64/Debug/
