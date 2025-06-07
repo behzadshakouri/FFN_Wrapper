@@ -10,6 +10,9 @@ using namespace arma;
 #include <mlpack/methods/ann/layer/layer.hpp>
 #include <mlpack/methods/ann/loss_functions/mean_squared_error.hpp>
 #include <armadillo>
+#include <mlpack/methods/ann/ann.hpp>
+
+
 using namespace mlpack::ann;
 
 #include <QVector>
@@ -67,22 +70,11 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
     for (int layer = 0; layer<ModelStructure.n_layers; layer++)
     {
         Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-        Add<Sigmoid>(); // Activation Funchion
+            Add<Sigmoid>(); // Activation Funchion
     }
 
-    /*
-    //LSTM
-    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
-    {
-        Add<LSTM>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-        Add<LinearNoBias>(); // Activation Funchion
-    }
-    */
-
-   //model.Add<Linear>(3); // Connection Layer 2: ModelStructure.n_input_layers
-    //model.Add<Sigmoid>(); // Activation Funchion 2
+    Add<ReLU>();
     Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
-    //Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers (Second output)
 
     return true;
 }
@@ -103,7 +95,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 {
     segment_sizes.clear();
 
-    if (DataCategory == datacategory::Train)
+    if (DataCategory == datacategory::Train) // Train
     {
         TrainInputData.clear();
         TrainOutputData.clear();
@@ -119,6 +111,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
             //Shifting by lags definition (Outputs)
             mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            if (ModelStructure.log_output)
+                TrainOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {
@@ -135,11 +129,11 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("ShiftedInputsTrain.txt");
+        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTrain.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("ShiftedOutputsTrain.txt");
+        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTrain.txt");
     }
-    else
+    else //Test
     {
         TestInputData.clear();
         TestOutputData.clear();
@@ -156,6 +150,8 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
             //Shifting by lags definition (Outputs)
             mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+            if (ModelStructure.log_output)
+                TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
 
             if (i==0)
             {
@@ -171,9 +167,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("ShiftedInputsTest.txt");
+        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTest.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("ShiftedOutputsTest.txt");
+        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTest.txt");
     }
     return true;
 }
@@ -181,34 +177,6 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
 
 bool FFNWrapper_Multi::Transformation()
 {
-
-    /*
-    // Train data transform
-    CTransformation traintransformer;
-
-    //std::cout << "Original Data:\n" << inputdata << std::endl;
-
-    // Normalize train input data
-    arma::mat normalizedTrainData = traintransformer.normalize(TrainInputData);
-    //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
-    normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
-
-    // Save parameters
-    traintransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
-
-    // Load parameters
-    CTransformation testtransformer;
-    testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
-
-    // Test data transform
-    arma::mat normalizedTestData = testtransformer.transform(TestInputData);
-    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
-    normalizedTestData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata.txt", arma::file_type::raw_ascii);
-
-    // Writing normalized data to matrices
-    TrainInputData = normalizedTrainData;
-    TestInputData = normalizedTestData;
-    */
 
     // Train data transform
     CTransformation alldatatransformer;
@@ -223,7 +191,7 @@ bool FFNWrapper_Multi::Transformation()
     normalizedData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedidata.txt", arma::file_type::raw_ascii);
 
     // Save parameters
-    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");    
 
     // Load parameters for train data
     CTransformation traintransformer;
@@ -233,7 +201,7 @@ bool FFNWrapper_Multi::Transformation()
     CTransformation testtransformer;
     testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
 
-    // Test data transform
+    // Train data transform
     arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
     //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
     normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
@@ -247,27 +215,6 @@ bool FFNWrapper_Multi::Transformation()
     TrainInputData = normalizedTrainData;
     TestInputData = normalizedTestData;
 
-    /*
-    mat TrainInputData1;
-    mat TestInputData1;
-
-    // Normalize train data using Min-Max scaling
-    minMaxScaler_te_i.Fit(TrainInputData);        // Fit the scaler to the train data
-    minMaxScaler_te_i.Transform(TrainInputData,TrainInputData1);  // Normalize the train data
-
-    // Normalize test data using Standard Scaling (z-score normalization)
-    minMaxScaler_te_i.Fit(TestInputData);  // Normalize the test data
-    minMaxScaler_te_i.Transform(TestInputData,TestInputData1);  // Normalize the test data
-
-    // Save normalized data (if needed)
-    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TrainInputData1);
-    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestInputData1);
-
-    TrainInputData = TrainInputData1;
-    TestInputData = TestInputData1;
-    */
-
-
     return true;
 }
 
@@ -276,6 +223,10 @@ bool FFNWrapper_Multi::Train()
 {
 
     // Train the model
+
+    mlpack::math::RandomSeed(ModelStructure.seed_number);
+    //SGD<> optimizer(/* stepSize = */ 0.01, /* batchSize = */ 32, /* maxIterations = */ 1000, /* tolerance = */ 1e-5, /* shuffle = */ false);
+
     FFN::Train(TrainInputData, TrainOutputData);
 
     // Use the Predict method to get the predictions.
@@ -298,9 +249,11 @@ bool FFNWrapper_Multi::Test() // Predicting test data
 
 bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
 {
+    segment_sizes.clear();
 
     // TrainData
     CTimeSeriesSet<double> TrainDataPrediction1 (TrainDataPrediction,ModelStructure.dt,ModelStructure.lags);
+    segment_sizes.push_back(TrainDataPrediction.n_cols);
     vector<CTimeSeriesSet<double>> TrainDataPredictionSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TrainDataPrediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
     if (!silent)
         for (unsigned int i=0; i<TrainDataPredictionSplit.size(); i++)
@@ -316,11 +269,18 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
     _R2_Train.resize(ModelStructure.outputcolumns.size());
     for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
     {
-    nMSE_Train[constituent] = diff2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent])/(norm2(TrainDataTarget.BTC[constituent])/TrainDataTarget.BTC[constituent].n);
-    _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
+        double MSE = diff2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
+        double VAR = TrainDataTarget.BTC[constituent].variance();
+
+        nMSE_Train[constituent] = MSE/VAR;
+        _R2_Train[constituent] = R2(TrainDataPrediction1.BTC[constituent],TrainDataTarget.BTC[constituent]);
     }
+
+    segment_sizes.clear();
+
     // TestData
     CTimeSeriesSet<double> TestDataPrediction1 (TestDataPrediction,ModelStructure.dt,ModelStructure.lags);
+    segment_sizes.push_back(TestDataPrediction.n_cols);
     vector<CTimeSeriesSet<double>> TestDataPredictionSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestDataPrediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
     if (!silent)
         for (unsigned int i=0; i<TestDataPredictionSplit.size(); i++)
@@ -336,8 +296,11 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
     _R2_Test.resize(ModelStructure.outputcolumns.size());
     for (int constituent = 0; constituent<ModelStructure.outputcolumns.size(); constituent++)
     {
-    nMSE_Test[constituent] = diff2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent])/(norm2(TestDataTarget.BTC[constituent])/TestDataTarget.BTC[constituent].n);
-    _R2_Test[constituent] = R2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
+        double MSE = diff2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
+        double VAR = TestDataTarget.BTC[constituent].variance();
+
+        nMSE_Test[constituent] = MSE/VAR;
+        _R2_Test[constituent] = R2(TestDataPrediction1.BTC[constituent],TestDataTarget.BTC[constituent]);
     }
     return true;
 }
@@ -345,6 +308,8 @@ bool FFNWrapper_Multi::PerformanceMetrics() // Calculating performance metrics
 
 bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
 {
+    segment_sizes.clear();
+
     if (silent) return false;
 
     if (DataCategory==datacategory::Train)
@@ -352,6 +317,7 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
         TrainInputData.save(ModelStructure.outputpath + "TrainInputData.csv", arma::file_type::raw_ascii);
         TrainOutputData.save(ModelStructure.outputpath + "TrainOutputData.csv", arma::file_type::raw_ascii);
 
+        segment_sizes.push_back(TrainDataPrediction.n_cols);
         vector<CTimeSeriesSet<double>> TrainInputSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TrainInputData,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<TrainInputSplit.size(); i++)
             TrainInputSplit[i].writetofile(ModelStructure.outputpath + "TrainInputDataTS_" + to_string(i) + ".csv");
@@ -383,6 +349,7 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
     {   //Prediction results
         TestDataPrediction.save(ModelStructure.outputpath + "TestDataPrediction.csv",arma::file_type::raw_ascii);
 
+        segment_sizes.push_back(TestDataPrediction.n_cols);
         vector<CTimeSeriesSet<double>> PredictionSplit = CTimeSeriesSet<double>::GetFromArmaMatandSplit(TestDataPrediction,ModelStructure.dt,ModelStructure.lags,segment_sizes);
         for (unsigned int i=0; i<PredictionSplit.size(); i++)
             PredictionSplit[i].writetofile(ModelStructure.outputpath + "TestDataPredictionTS_" + to_string(i) + ".csv");
@@ -419,7 +386,185 @@ bool FFNWrapper_Multi::DataSave(datacategory DataCategory) // Saving data
 
 bool FFNWrapper_Multi:: Plotter() // Plotting the results
 {
-    /*
+
+    // Train and Test Plotter (Output 1)
+    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+    {
+        CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+        CTimeSeriesSet<double> Observed = Observed_Train;
+        Observed.merge(Observed_Test,true);
+        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_Data.csv",false);
+
+        CTimeSeriesSet<double> Predicted = Predicted_Train;
+        Predicted.merge(Predicted_Test,true);
+        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_Data.csv",false);
+
+        vector<pair<double, double>> plotdata1, plotdata2;
+        for (int i=0; i<Observed.maxnumpoints(); i++)
+        {
+            plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
+        }
+
+        for (int i=0; i<Predicted.maxnumpoints(); i++)
+        {
+            plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
+        }
+
+
+        // Create a Gnuplot object
+        Gnuplot gp;
+
+        // Set titles and labels
+        gp << "set title 'Data Comparison'\n";
+        gp << "set xlabel 'Time'\n";
+        gp << "set ylabel 'Concentration'\n";
+        gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+        // Plot all datasets on the same plot
+        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+
+    }
+
+    return true;
+}
+
+/*
+    // Train data transform
+    CTransformation traintransformer;
+
+    //std::cout << "Original Data:\n" << inputdata << std::endl;
+
+    // Normalize train input data
+    arma::mat normalizedTrainData = traintransformer.normalize(TrainInputData);
+    //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
+    normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
+
+    // Save parameters
+    traintransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
+
+    // Load parameters
+    CTransformation testtransformer;
+    testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params.txt");
+
+    // Test data transform
+    arma::mat normalizedTestData = testtransformer.transform(TestInputData);
+    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
+    normalizedTestData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata.txt", arma::file_type::raw_ascii);
+
+    // Writing normalized data to matrices
+    TrainInputData = normalizedTrainData;
+    TestInputData = normalizedTestData;
+    */
+
+/*
+    //---------------------------------------------Outputs--------------------------------------------
+    CTransformation alldatatransformer_OP;
+    arma::mat All_DATA_OP;
+    All_DATA_OP = arma::join_rows(TrainOutputData, TestOutputData);
+
+    arma::mat normalizedData_OP = alldatatransformer_OP.normalize(All_DATA_OP);
+    normalizedData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedodata.txt", arma::file_type::raw_ascii);
+
+    alldatatransformer_OP.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    CTransformation traintransformer_OP;
+    traintransformer_OP.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    CTransformation testtransformer_OP;
+    testtransformer_OP.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all_OP.txt");
+
+    arma::mat normalizedTrainData_OP = traintransformer_OP.transform(TrainOutputData);
+    normalizedTrainData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainodata.txt", arma::file_type::raw_ascii);
+
+    arma::mat normalizedTestData_OP = testtransformer_OP.transform(TestOutputData);
+    normalizedTestData_OP.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestodata.txt", arma::file_type::raw_ascii);
+
+    TrainOutputData = normalizedTrainData_OP;
+    TestOutputData = normalizedTestData_OP;
+    */
+
+
+
+
+/*
+    mat TrainInputData1;
+    mat TestInputData1;
+
+    // Normalize train data using Min-Max scaling
+    minMaxScaler_te_i.Fit(TrainInputData);        // Fit the scaler to the train data
+    minMaxScaler_te_i.Transform(TrainInputData,TrainInputData1);  // Normalize the train data
+
+    // Normalize test data using Standard Scaling (z-score normalization)
+    minMaxScaler_te_i.Fit(TestInputData);  // Normalize the test data
+    minMaxScaler_te_i.Transform(TestInputData,TestInputData1);  // Normalize the test data
+
+    // Save normalized data (if needed)
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testinputdata.csv", TrainInputData1);
+    mlpack::data::Save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalized_testoutputdata.csv", TestInputData1);
+
+    TrainInputData = TrainInputData1;
+    TestInputData = TestInputData1;
+    */
+
+/*
+// Train and Test Plotter (Output 2)
+for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
+{
+    CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
+
+    CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
+
+    CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
+
+    CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
+
+    CTimeSeriesSet<double> Observed = Observed_Train;
+    Observed.merge(Observed_Test,true);
+    Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_try.csv",false);
+
+    CTimeSeriesSet<double> Predicted = Predicted_Train;
+    Predicted.merge(Predicted_Test,true);
+    Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_try.csv",false);
+
+    vector<pair<double, double>> plotdata1, plotdata2;
+    for (int i=0; i<Observed.maxnumpoints(); i++)
+    {
+        plotdata1.push_back(make_pair(Observed.BTC[1].GetT(i),Observed.BTC[1].GetC(i)));
+    }
+
+    for (int i=0; i<Predicted.maxnumpoints(); i++)
+    {
+        plotdata2.push_back(make_pair(Predicted.BTC[1].GetT(i),Predicted.BTC[1].GetC(i)));
+    }
+
+
+    // Create a Gnuplot object
+    Gnuplot gp;
+
+    // Set titles and labels
+    gp << "set title 'Data Comparison'\n";
+    gp << "set xlabel 'Time'\n";
+    gp << "set ylabel 'Concentration'\n";
+    gp << "set grid\n";  // Optional: Add a grid for better visualization
+
+    // Plot all datasets on the same plot
+    gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
+    gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
+    gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
+
+}
+*/
+
+/*
     // Train Data Plotter (Output 1)
     for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
     {   CTimeSeriesSet<double> Observed(ModelStructure.trainobservedaddress[i],true);
@@ -546,105 +691,6 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
         gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
 */
-
-    // Train and Test Plotter (Output 1)
-    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
-    {
-        CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed = Observed_Train;
-        Observed.merge(Observed_Test,true);
-        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_try.csv",false);
-
-        CTimeSeriesSet<double> Predicted = Predicted_Train;
-        Predicted.merge(Predicted_Test,true);
-        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_try.csv",false);
-
-        vector<pair<double, double>> plotdata1, plotdata2;
-        for (int i=0; i<Observed.maxnumpoints(); i++)
-        {
-            plotdata1.push_back(make_pair(Observed.BTC[0].GetT(i),Observed.BTC[0].GetC(i)));
-        }
-
-        for (int i=0; i<Predicted.maxnumpoints(); i++)
-        {
-            plotdata2.push_back(make_pair(Predicted.BTC[0].GetT(i),Predicted.BTC[0].GetC(i)));
-        }
-
-
-        // Create a Gnuplot object
-        Gnuplot gp;
-
-        // Set titles and labels
-        gp << "set title 'Data Comparison'\n";
-        gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Concentration'\n";
-        gp << "set grid\n";  // Optional: Add a grid for better visualization
-
-        // Plot all datasets on the same plot
-        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
-        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
-        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
-
-    }
-
-    // Train and Test Plotter (Output 1)
-    for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
-    {
-        CTimeSeriesSet<double> Observed_Train(ModelStructure.trainobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Train(ModelStructure.trainpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed_Test(ModelStructure.testobservedaddress[i],true);
-
-        CTimeSeriesSet<double> Predicted_Test(ModelStructure.testpredictedaddress[i],true);
-
-        CTimeSeriesSet<double> Observed = Observed_Train;
-        Observed.merge(Observed_Test,true);
-        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_try.csv",false);
-
-        CTimeSeriesSet<double> Predicted = Predicted_Train;
-        Predicted.merge(Predicted_Test,true);
-        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_try.csv",false);
-
-        vector<pair<double, double>> plotdata1, plotdata2;
-        for (int i=0; i<Observed.maxnumpoints(); i++)
-        {
-            plotdata1.push_back(make_pair(Observed.BTC[1].GetT(i),Observed.BTC[1].GetC(i)));
-        }
-
-        for (int i=0; i<Predicted.maxnumpoints(); i++)
-        {
-            plotdata2.push_back(make_pair(Predicted.BTC[1].GetT(i),Predicted.BTC[1].GetC(i)));
-        }
-
-
-        // Create a Gnuplot object
-        Gnuplot gp;
-
-        // Set titles and labels
-        gp << "set title 'Data Comparison'\n";
-        gp << "set xlabel 'Time'\n";
-        gp << "set ylabel 'Concentration'\n";
-        gp << "set grid\n";  // Optional: Add a grid for better visualization
-
-        // Plot all datasets on the same plot
-        gp << "plot '-' with lines title 'Observed', '-' with lines title 'Predicted'\n";
-        gp.send1d(plotdata1);  // Send the first dataset (Observed_Train)
-        gp.send1d(plotdata2);  // Send the second dataset (Predicted_Train)
-
-    }
-
-
-    return true;
-}
-
 
 bool FFNWrapper_Multi:: Optimizer()
 {

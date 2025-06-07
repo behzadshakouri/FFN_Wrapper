@@ -85,6 +85,7 @@ bool ModelCreator::CreateRandomModelStructure(CModelStructure_Multi *modelstruct
     parameters[total_number_of_columns+2] = gsl_rng_uniform_int(r, max_node_selection-1)+1;
     clear(modelstructure);
     CreateModel(modelstructure);
+
     return true;
 }
 

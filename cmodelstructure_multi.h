@@ -22,7 +22,7 @@ public:
     vector<string> trainpredictedaddress;
     vector<string> testobservedaddress;
     vector<string> testpredictedaddress;
-
+    int realization;
     int n_input_layers;
     string activation_function;
     int n_output_layers;
@@ -34,6 +34,8 @@ public:
     vector<int> outputcolumns;
     int input_lag_multiplier;
     string outputpath;
+    bool log_output = false;
+    double seed_number = 42; // 42 is a random number
     void Reset()
     {
         inputcolumns.clear();

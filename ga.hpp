@@ -33,6 +33,7 @@ T GeneticAlgorithm<T>::Optimize()
 template<class T>
 void GeneticAlgorithm<T>::WriteToFile()
 {
+
     file.open(Settings.outputpath+"/GA_Output.txt", std::ios::app);
     file<<"Generation: "<< current_generation << endl;
     if (file.is_open())
@@ -102,7 +103,10 @@ void GeneticAlgorithm<T>::AssignFitnesses()
             Individuals[i].fitness_measures = models[i].Fitness();
             Individuals[i].fitness=0;
             for (int constituent = 0; constituent<models[i].FFN.ModelStructure.outputcolumns.size(); constituent++)
-                Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)];
+                if (Settings.MSE_optimization) // true for MSE_Test and false for (MSE_Test + MSE_Train)
+                Individuals[i].fitness += Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)]; // MSE_Test
+                else
+                Individuals[i].fitness += max(Individuals[i].fitness_measures["MSE_Test_" + aquiutils::numbertostring(constituent)],Individuals[i].fitness_measures["MSE_Train_" + aquiutils::numbertostring(constituent)]); // MSE_Test and MSE_Train
         }
         else
         {

@@ -32,6 +32,7 @@ public:
     vector<int> outputcolumns;
     int input_lag_multiplier;
     string outputpath;
+    bool log_output = false;
 
     bool operator==(const CModelStructure &m2)
     {
