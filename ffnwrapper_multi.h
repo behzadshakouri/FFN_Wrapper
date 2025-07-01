@@ -55,6 +55,7 @@ public:
         return CTimeSeriesSet<double>(TestOutputData,ModelStructure.dt,ModelStructure.lags);
     }
 
+    // Prediction Data
     mat TrainDataPrediction;
     mat TestDataPrediction;
 
