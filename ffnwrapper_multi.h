@@ -9,7 +9,7 @@
 
 using namespace mlpack;
 using namespace std;
-using namespace arma; 
+using namespace arma;
 
 enum class datacategory {Train, Test};
 
@@ -23,8 +23,6 @@ public:
 
     bool Initiate(bool dataprocess = true);
     bool DataProcess();
-    arma::mat A;
-
     bool Shifter(datacategory);
     bool Transformation();
     bool Train();
