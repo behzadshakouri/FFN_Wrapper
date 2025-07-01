@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+#include <vector>
 
 class BinaryNumber {
 private:
