@@ -26,6 +26,7 @@ public:
     bool Shifter(datacategory);
     bool Transformation();
     bool Train();
+    bool Train_kfold(int n_folds);
     bool Test();
     bool PerformanceMetrics();
     bool DataSave(datacategory);
@@ -79,5 +80,58 @@ private:
 
 };
 
+
+
+/**
+ * @brief Split data and labels into training and validation subsets for
+ *        k-fold cross-validation.
+ *
+ * This function divides a dataset into @p k equally sized folds and returns
+ * the training and validation subsets for a specific fold index.
+ *
+ * Each column of @p data corresponds to one sample, following the mlpack
+ * convention where samples are stored as columns.
+ *
+ * @param data   Matrix of input features (each column is a sample).
+ * @param labels Matrix of corresponding labels (one column per sample).
+ * @param k      Total number of folds (must be > 0).
+ * @param fold   Index of the validation fold, in the range [0, k-1].
+ *
+ * @return A nested std::pair structured as:
+ *   { {trainData, trainLabels}, {validData, validLabels} }
+ *   where:
+ *     - trainData  : matrix of training samples
+ *     - trainLabels: matrix of corresponding labels
+ *     - validData  : matrix of validation samples
+ *     - validLabels: matrix of corresponding labels
+ *
+ * @throws std::invalid_argument if k == 0 or fold >= k.
+ *
+ * @note
+ *  - The data is split by contiguous column ranges (no shuffling). If your
+ *    dataset is ordered (e.g., sorted by class), you should randomize it
+ *    before calling this function using arma::randperm().
+ *  - The last fold may contain slightly more samples if n_cols is not
+ *    perfectly divisible by k.
+ *
+ * @example
+ *  arma::mat data, labels;
+ *  data.load("X.csv");
+ *  labels.load("Y.csv");
+ *
+ *  auto [trainPair, validPair] = KFoldSplit(data, labels, 5, 0);
+ *  arma::mat trainX = trainPair.first;
+ *  arma::mat trainY = trainPair.second;
+ *  arma::mat validX = validPair.first;
+ *  arma::mat validY = validPair.second;
+ *
+ *  std::cout << "Training samples: " << trainX.n_cols
+ *            << ", Validation samples: " << validX.n_cols << std::endl;
+ */
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>> KFoldSplit(const arma::mat& data,
+           const arma::mat& labels,
+           size_t k,
+           size_t fold);
 
 #endif // FFNWrapper_MULTI_H

@@ -236,6 +236,77 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
+bool FFNWrapper_Multi::Train_kfold(int n_folds)
+{
+    if (n_folds < 2)
+    {
+        std::cerr << "Error: n_folds must be >= 2.\n";
+        return false;
+    }
+
+    mlpack::math::RandomSeed(ModelStructure.seed_number);
+
+    const size_t nSamples = TrainInputData.n_cols;
+    if (nSamples < n_folds)
+    {
+        std::cerr << "Error: not enough samples for " << n_folds << " folds.\n";
+        return false;
+    }
+
+    // Shuffle before splitting
+    arma::arma_rng::set_seed(ModelStructure.seed_number);
+    arma::uvec indices = arma::randperm(nSamples);
+    arma::mat shuffledX = TrainInputData.cols(indices);
+    arma::mat shuffledY = TrainOutputData.cols(indices);
+
+    double totalValLoss = 0.0;
+
+    std::cout << "Starting " << n_folds << "-fold cross-validation..." << std::endl;
+
+    for (int fold = 0; fold < n_folds; ++fold)
+    {
+        // Split training/validation sets for this fold
+        auto [trainPair, validPair] = KFoldSplit(shuffledX, shuffledY, n_folds, fold);
+        arma::mat trainX = trainPair.first;
+        arma::mat trainY = trainPair.second;
+        arma::mat valX = validPair.first;
+        arma::mat valY = validPair.second;
+
+        std::cout << "\nFold " << fold + 1 << " / " << n_folds
+                  << " | Train samples: " << trainX.n_cols
+                  << " | Validation samples: " << valX.n_cols << std::endl;
+
+        // Reset model parameters (keep same architecture)
+        this->ResetParameters();
+
+        // Train the existing FFN on this fold’s training data
+        this->Train(trainX, trainY);
+
+        // Evaluate on validation fold
+        arma::mat valPred;
+        this->Predict(valX, valPred);
+
+        double valMSE = mlpack::metric::MSE::Evaluate(valPred, valY);
+        totalValLoss += valMSE;
+
+        std::cout << "  Validation MSE: " << valMSE << std::endl;
+    }
+
+    double avgValLoss = totalValLoss / n_folds;
+    std::cout << "\nAverage validation MSE across " << n_folds
+              << " folds: " << avgValLoss << std::endl;
+
+    // Retrain final model on full dataset
+    std::cout << "Retraining final model on full data..." << std::endl;
+    this->ResetParameters();
+    this->Train(TrainInputData, TrainOutputData);
+
+    // Store predictions for later use
+    this->Predict(TrainInputData, TrainDataPrediction);
+
+    return true;
+}
+
 bool FFNWrapper_Multi::Test() // Predicting test data
 {
 
@@ -732,4 +803,36 @@ bool FFNWrapper_Multi:: Optimizer()
         std::cout << "Optimal value: " << f.Evaluate(initialPoint) << std::endl;
 */
         return true;
+}
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>>
+KFoldSplit(const arma::mat& data,
+           const arma::mat& labels,
+           size_t k,
+           size_t fold)
+{
+    if (k == 0 || fold >= k)
+        throw std::invalid_argument("fold index must be in [0, k-1] and k > 0");
+
+    size_t nSamples = data.n_cols;
+    size_t foldSize = nSamples / k;
+
+    size_t start = fold * foldSize;
+    size_t end = (fold == k - 1) ? nSamples : start + foldSize;
+
+    // Validation indices
+    arma::uvec validIndices = arma::regspace<arma::uvec>(start, end - 1);
+
+    // Create mask for training samples
+    arma::uvec mask = arma::ones<arma::uvec>(nSamples);
+    mask(validIndices).zeros();
+    arma::uvec trainIdx = arma::find(mask == 1);
+
+    // Subset data and labels
+    arma::mat trainData = data.cols(trainIdx);
+    arma::mat trainLabels = labels.cols(trainIdx);
+    arma::mat validData = data.cols(validIndices);
+    arma::mat validLabels = labels.cols(validIndices);
+
+    return {{trainData, trainLabels}, {validData, validLabels}};
 }

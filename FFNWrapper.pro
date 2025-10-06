@@ -13,14 +13,22 @@ DEFINES += USING_PCH
 
 DEFINES += GSL
 
-CONFIG += Behzad
-DEFINES += Behzad
+CONFIG += PowerEdge
+DEFINES += PowerEdge
+
+#CONFIG += Behzad
+#DEFINES += Behzad
 
 #CONFIG += Arash
 #DEFINES += Arash
 
 QMAKE_CXXFLAGS *= "-Xpreprocessor -fopenmp"
 QMAKE_LFLAGS +=  -fopenmp
+
+PowerEdge {
+    OHQPATH = /mnt/3rd900/Projects/Utilities
+
+}
 
 Behzad {
     OHQPATH = /home/behzad/Projects/Utilities
@@ -31,6 +39,7 @@ Arash {
     OHQPATH = /home/arash/Projects/Utilities
 
 }
+
 
 SOURCES += \
         $$OHQPATH/Utilities.cpp \
