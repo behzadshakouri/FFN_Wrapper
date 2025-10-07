@@ -24,8 +24,8 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
-    int kfold_num = 10; // k = 10 for 90/10
-    int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed 90/10
+    int kfold_num = 20; // k = 10 for 90/10
+    int kfold_splitMode = 2; // 0 = random K-fold, 1 = expanding window, 2 = fixed
 
     enum class _model {Settling, ASM} model = _model::ASM;
 
