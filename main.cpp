@@ -57,6 +57,27 @@ int main()
     bool randommodelstructure = false; // true for random model structure usage and false for no random model structure usage
     const double Random_Nsim = 1000; // Number of random model structure simulations
 
+#ifdef PowerEdge
+    string path = "/mnt/3rd900/Projects/FFN_Wrapper/";
+    string path_ASM = "/mnt/3rd900/Projects/FFN_Wrapper/ASM/";
+    string datapath = "/mnt/3rd900/Projects/FFN_Wrapper/";
+    string datapath_ASM = "/mnt/3rd900/Projects/FFN_Wrapper/ASM/";
+    string buildpath = "Build-Debug-6.9.0";
+
+#elif Arash
+    string path = "/home/arash/Projects/FFNWrapper/";
+    string path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
+    string datapath = "/home/arash/Projects/FFNWrapper/";
+    string datapath_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
+#elif
+    string path = "/home/behzad/Projects/FFNWrapper2/";
+    string path_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
+    string datapath = "/home/behzad/Projects/FFNWrapper2/";
+    string datapath_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
+    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
+#endif
+
     //------------------------------------------------------------------------------------------------------------------------------
 
     //Model creator (Random model structure)
@@ -67,25 +88,6 @@ int main()
     modelCreator.max_number_of_layers = 5; // 4 to 6
     modelCreator.max_lag_multiplier = 10;
     modelCreator.max_number_of_nodes_in_layers = 10*4; // 10 to 15
-
-
-    string path;
-    string path_ASM;
-
-#ifdef Arash
-    path = "/home/arash/Projects/FFNWrapper/";
-    path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
-    string datapath = "/home/arash/Projects/FFNWrapper/";
-    string datapath_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
-    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
-#else
-    path = "/home/behzad/Projects/FFNWrapper2/";
-    path_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
-    string datapath = "/home/behzad/Projects/FFNWrapper2/";
-    string datapath_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
-    string buildpath = "build/Desktop_Qt_5_15_2_GCC_64bit-Debug/";
-#endif
-
 
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct; //randommodelstructure

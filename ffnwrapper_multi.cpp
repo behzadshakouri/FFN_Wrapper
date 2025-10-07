@@ -129,9 +129,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTrain.txt");
+        ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputsTrain.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTrain.txt");
+        ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputsTrain.txt");
     }
     else //Test
     {
@@ -167,9 +167,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data a
         }
 
         CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedInputsTest.txt");
+        ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputsTest.txt");
         CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/ShiftedOutputsTest.txt");
+        ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputsTest.txt");
     }
     return true;
 }
@@ -188,28 +188,28 @@ bool FFNWrapper_Multi::Transformation()
     // Normalize train input data
     arma::mat normalizedData = alldatatransformer.normalize(All_DATA);
     //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
-    normalizedData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedidata.txt", arma::file_type::raw_ascii);
+    normalizedData.save(ModelStructure.outputpath + "normalizedidata.txt", arma::file_type::raw_ascii);
 
     // Save parameters
-    alldatatransformer.saveParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");    
+    alldatatransformer.saveParameters(ModelStructure.outputpath + "scaling_params_all.txt");
 
     // Load parameters for train data
     CTransformation traintransformer;
-    traintransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+    traintransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
 
     // Load parameters for test
     CTransformation testtransformer;
-    testtransformer.loadParameters("/home/behzad/Projects/FFNWrapper2/ASM/Results/scaling_params_all.txt");
+    testtransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
 
     // Train data transform
     arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
     //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
-    normalizedTrainData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtrainidata.txt", arma::file_type::raw_ascii);
+    normalizedTrainData.save(ModelStructure.outputpath + "normalizedtrainidata.txt", arma::file_type::raw_ascii);
 
     // Test data transform
     arma::mat normalizedTestData = testtransformer.transform(TestInputData);
     //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
-    normalizedTestData.save("/home/behzad/Projects/FFNWrapper2/ASM/Results/normalizedtestidata.txt", arma::file_type::raw_ascii);
+    normalizedTestData.save(ModelStructure.outputpath + "normalizedtestidata.txt", arma::file_type::raw_ascii);
 
     // Writing normalized data to matrices
     TrainInputData = normalizedTrainData;
@@ -236,6 +236,7 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
+/*
 bool FFNWrapper_Multi::Train_kfold(int n_folds)
 {
     if (n_folds < 2)
@@ -306,6 +307,8 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
 
     return true;
 }
+
+*/
 
 bool FFNWrapper_Multi::Test() // Predicting test data
 {
@@ -471,11 +474,11 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
 
         CTimeSeriesSet<double> Observed = Observed_Train;
         Observed.merge(Observed_Test,true);
-        Observed.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Observed_Data.csv",false);
+        Observed.writetofile(ModelStructure.outputpath + "Observed_Data.csv",false);
 
         CTimeSeriesSet<double> Predicted = Predicted_Train;
         Predicted.merge(Predicted_Test,true);
-        Predicted.writetofile("/home/behzad/Projects/FFNWrapper2/ASM/Results/Predicted_Data.csv",false);
+        Predicted.writetofile(ModelStructure.outputpath + "Predicted_Data.csv",false);
 
         vector<pair<double, double>> plotdata1, plotdata2;
         for (int i=0; i<Observed.maxnumpoints(); i++)
