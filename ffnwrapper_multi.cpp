@@ -267,6 +267,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
     arma::mat X = TrainInputData;
     arma::mat Y = TrainOutputData;
 
+<<<<<<< HEAD
     // Random shuffle only for mode 0
     if (splitMode == 0)
     {
@@ -274,6 +275,10 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
         X = X.cols(indices);
         Y = Y.cols(indices);
     }
+=======
+    double totalValLoss = 0.0;
+    double totalValR2   = 0.0;
+>>>>>>> origin/main
 
     double totalMSE = 0.0, totalR2 = 0.0;
     std::vector<double> foldMSE, foldR2, foldTime;
@@ -282,6 +287,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
 
     for (int fold = 0; fold < n_folds; ++fold)
     {
+<<<<<<< HEAD
         arma::mat trainX, trainY, valX, valY;
 
         //------------------- SPLIT SELECTION --------------------
@@ -319,12 +325,24 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
             std::cout << "Skipping fold " << fold + 1 << " (too few samples)\n";
             continue;
         }
+=======
+        // Split training/validation sets for this fold
+        auto [trainPair, validPair] = KFoldSplit(shuffledX, shuffledY, n_folds, fold);
+        arma::mat trainX = trainPair.first;
+        arma::mat trainY = trainPair.second;
+        arma::mat valX   = validPair.first;
+        arma::mat valY   = validPair.second;
+>>>>>>> origin/main
 
         std::cout << "\nFold " << fold + 1 << " / " << n_folds
                   << " | Train samples: " << trainX.n_cols
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
+<<<<<<< HEAD
         auto start = std::chrono::high_resolution_clock::now();
+=======
+        // Train on this fold’s data
+>>>>>>> origin/main
         this->Train(trainX, trainY);
         auto end = std::chrono::high_resolution_clock::now();
         double timeSec = std::chrono::duration<double>(end - start).count();
@@ -333,6 +351,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
         this->Predict(valX, valPred);
 
         // --- MSE ---
+<<<<<<< HEAD
         double mse = arma::mean(arma::mean(arma::square(valPred - valY)));
 
         // --- R² ---
@@ -370,6 +389,34 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
 
     // Retrain on full data
     std::cout << "Retraining final model on full data...\n";
+=======
+        double valMSE = arma::mean(arma::mean(arma::square(valPred - valY)));
+
+        // --- R² ---
+        arma::rowvec meanY = arma::mean(valY, 1);
+        arma::mat diffRes  = valPred - valY;
+        arma::mat diffTot  = valY.each_col() - meanY;
+        double SSres = arma::accu(arma::square(diffRes));
+        double SStot = arma::accu(arma::square(diffTot));
+        double valR2 = 1.0 - (SSres / (SStot + 1e-12));
+
+        totalValLoss += valMSE;
+        totalValR2   += valR2;
+
+        std::cout << "  Validation MSE: " << valMSE
+                  << " | R²: " << valR2 << std::endl;
+    }
+
+    double avgValLoss = totalValLoss / n_folds;
+    double avgValR2   = totalValR2   / n_folds;
+
+    std::cout << "\nAverage validation MSE across " << n_folds
+              << " folds: " << avgValLoss
+              << "\nAverage validation R²: " << avgValR2 << std::endl;
+
+    // Retrain final model on full dataset
+    std::cout << "Retraining final model on full data..." << std::endl;
+>>>>>>> origin/main
     this->Train(TrainInputData, TrainOutputData);
     this->Predict(TrainInputData, TrainDataPrediction);
 
