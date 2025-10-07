@@ -254,7 +254,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
     mlpack::math::RandomSeed(ModelStructure.seed_number);
 
     const size_t nSamples = TrainInputData.n_cols;
-    if (nSamples < n_folds)
+    if (nSamples < static_cast<size_t>(n_folds))
     {
         std::cerr << "Error: not enough samples for " << n_folds << " folds.\n";
         return false;
@@ -267,6 +267,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
     arma::mat shuffledY = TrainOutputData.cols(indices);
 
     double totalValLoss = 0.0;
+    double totalValR2   = 0.0;
 
     std::cout << "Starting " << n_folds << "-fold cross-validation..." << std::endl;
 
@@ -276,36 +277,47 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
         auto [trainPair, validPair] = KFoldSplit(shuffledX, shuffledY, n_folds, fold);
         arma::mat trainX = trainPair.first;
         arma::mat trainY = trainPair.second;
-        arma::mat valX = validPair.first;
-        arma::mat valY = validPair.second;
+        arma::mat valX   = validPair.first;
+        arma::mat valY   = validPair.second;
 
         std::cout << "\nFold " << fold + 1 << " / " << n_folds
                   << " | Train samples: " << trainX.n_cols
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
-        // Reset model parameters (keep same architecture)
-        //this->Reset();
-
-        // Train the existing FFN on this fold’s training data
+        // Train on this fold’s data
         this->Train(trainX, trainY);
 
         // Evaluate on validation fold
         arma::mat valPred;
         this->Predict(valX, valPred);
 
+        // --- MSE ---
         double valMSE = arma::mean(arma::mean(arma::square(valPred - valY)));
-        totalValLoss += valMSE;
 
-        std::cout << "  Validation MSE: " << valMSE << std::endl;
+        // --- R² ---
+        arma::rowvec meanY = arma::mean(valY, 1);
+        arma::mat diffRes  = valPred - valY;
+        arma::mat diffTot  = valY.each_col() - meanY;
+        double SSres = arma::accu(arma::square(diffRes));
+        double SStot = arma::accu(arma::square(diffTot));
+        double valR2 = 1.0 - (SSres / (SStot + 1e-12));
+
+        totalValLoss += valMSE;
+        totalValR2   += valR2;
+
+        std::cout << "  Validation MSE: " << valMSE
+                  << " | R²: " << valR2 << std::endl;
     }
 
     double avgValLoss = totalValLoss / n_folds;
+    double avgValR2   = totalValR2   / n_folds;
+
     std::cout << "\nAverage validation MSE across " << n_folds
-              << " folds: " << avgValLoss << std::endl;
+              << " folds: " << avgValLoss
+              << "\nAverage validation R²: " << avgValR2 << std::endl;
 
     // Retrain final model on full dataset
     std::cout << "Retraining final model on full data..." << std::endl;
-    //this->Reset();            // resets weights and gradients
     this->Train(TrainInputData, TrainOutputData);
 
     // Store predictions for later use
