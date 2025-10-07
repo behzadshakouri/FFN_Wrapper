@@ -24,7 +24,8 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
-    int kfold_num = 10; // k = 10
+    int kfold_num = 10; // k = 10 for 90/10
+    int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed 90/10
 
     enum class _model {Settling, ASM} model = _model::ASM;
 
@@ -575,7 +576,7 @@ int main()
             F.ModelStructure = mymodelstruct;
             F.Initiate();
             //F.Train();
-            F.Train_kfold(kfold_num); // Using kfold
+            F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
             F.Test();
             F.PerformanceMetrics();
 

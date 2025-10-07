@@ -243,7 +243,12 @@ bool FFNWrapper_Multi::Train(const arma::mat& input, const arma::mat& output)
     return Train();  // Call your existing no-argument version
 }
 
-bool FFNWrapper_Multi::Train_kfold(int n_folds)
+
+#include <fstream>
+#include <chrono>
+
+// 0 = random K-fold, 1 = expanding window, 2 = fixed 90/10
+bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
 {
     if (n_folds < 2)
     {
@@ -252,68 +257,235 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
     }
 
     mlpack::math::RandomSeed(ModelStructure.seed_number);
-
     const size_t nSamples = TrainInputData.n_cols;
-    if (nSamples < n_folds)
+    if (nSamples < static_cast<size_t>(n_folds))
     {
         std::cerr << "Error: not enough samples for " << n_folds << " folds.\n";
         return false;
     }
 
-    // Shuffle before splitting
-    arma::arma_rng::set_seed(ModelStructure.seed_number);
-    arma::uvec indices = arma::randperm(nSamples);
-    arma::mat shuffledX = TrainInputData.cols(indices);
-    arma::mat shuffledY = TrainOutputData.cols(indices);
+    arma::mat X = TrainInputData;
+    arma::mat Y = TrainOutputData;
 
-    double totalValLoss = 0.0;
+    // Random shuffle only for mode 0
+    if (splitMode == 0)
+    {
+        arma::uvec indices = arma::randperm(nSamples);
+        X = X.cols(indices);
+        Y = Y.cols(indices);
+    }
 
-    std::cout << "Starting " << n_folds << "-fold cross-validation..." << std::endl;
+    double totalMSE = 0.0, totalR2 = 0.0;
+    std::vector<double> foldMSE, foldR2, foldTime;
+
+    std::cout << "Starting " << n_folds << "-fold cross-validation (mode " << splitMode << ")...\n";
 
     for (int fold = 0; fold < n_folds; ++fold)
     {
-        // Split training/validation sets for this fold
-        auto [trainPair, validPair] = KFoldSplit(shuffledX, shuffledY, n_folds, fold);
-        arma::mat trainX = trainPair.first;
-        arma::mat trainY = trainPair.second;
-        arma::mat valX = validPair.first;
-        arma::mat valY = validPair.second;
+        arma::mat trainX, trainY, valX, valY;
+
+        //------------------- SPLIT SELECTION --------------------
+        if (splitMode == 0)
+        {
+            // --- Randomized standard K-fold ---
+            auto [trainPair, validPair] = KFoldSplit(X, Y, n_folds, fold);
+            trainX = trainPair.first; trainY = trainPair.second;
+            valX = validPair.first;   valY = validPair.second;
+        }
+        else if (splitMode == 1)
+        {
+            // --- Expanding window ---
+            auto [trainPair, validPair] = KFoldSplit_TimeSeries(X, Y, n_folds, fold);
+            trainX = trainPair.first; trainY = trainPair.second;
+            valX = validPair.first;   valY = validPair.second;
+        }
+        else if (splitMode == 2)
+        {
+            // --- Fixed 90/10 (no shuffle) ---
+            auto [trainPair, validPair] = KFoldSplit_FixedRatio(X, Y, n_folds, fold, 0.8);
+            trainX = trainPair.first; trainY = trainPair.second;
+            valX = validPair.first;   valY = validPair.second;
+        }
+        else
+        {
+            std::cerr << "Invalid split mode.\n";
+            return false;
+        }
+
+        //-------------------------------------------------------
+
+        if (trainX.n_cols < 2 || valX.n_cols < 2)
+        {
+            std::cout << "Skipping fold " << fold + 1 << " (too few samples)\n";
+            continue;
+        }
 
         std::cout << "\nFold " << fold + 1 << " / " << n_folds
                   << " | Train samples: " << trainX.n_cols
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
-        // Reset model parameters (keep same architecture)
-        //this->Reset();
-
-        // Train the existing FFN on this fold’s training data
+        auto start = std::chrono::high_resolution_clock::now();
         this->Train(trainX, trainY);
+        auto end = std::chrono::high_resolution_clock::now();
+        double timeSec = std::chrono::duration<double>(end - start).count();
 
-        // Evaluate on validation fold
         arma::mat valPred;
         this->Predict(valX, valPred);
 
-        double valMSE = arma::mean(arma::mean(arma::square(valPred - valY)));
-        totalValLoss += valMSE;
+        // --- MSE ---
+        double mse = arma::mean(arma::mean(arma::square(valPred - valY)));
 
-        std::cout << "  Validation MSE: " << valMSE << std::endl;
+        // --- R² ---
+        arma::rowvec meanY = arma::mean(valY, 1);
+        double SSres = arma::accu(arma::square(valPred - valY));
+        double SStot = arma::accu(arma::square(valY.each_col() - meanY));
+        double r2 = 1.0 - (SSres / (SStot + 1e-12));
+
+        foldMSE.push_back(mse);
+        foldR2.push_back(r2);
+        foldTime.push_back(timeSec);
+        totalMSE += mse;
+        totalR2  += r2;
+
+        std::cout << "  Validation MSE: " << mse
+                  << " | R²: " << r2
+                  << " | Time: " << timeSec << " s" << std::endl;
     }
 
-    double avgValLoss = totalValLoss / n_folds;
-    std::cout << "\nAverage validation MSE across " << n_folds
-              << " folds: " << avgValLoss << std::endl;
+    double avgMSE = totalMSE / foldMSE.size();
+    double avgR2  = totalR2  / foldR2.size();
 
-    // Retrain final model on full dataset
-    std::cout << "Retraining final model on full data..." << std::endl;
-    //this->Reset();            // resets weights and gradients
+    std::cout << "\nAverage validation MSE: " << avgMSE
+              << " | R²: " << avgR2 << std::endl;
+
+    //----------------- SAVE CSV --------------------
+    const std::string csvPath = ModelStructure.outputpath + "kfold_results.csv";
+    std::ofstream file(csvPath);
+    file << "Fold,MSE,R2,Time_sec\n";
+    for (size_t i = 0; i < foldMSE.size(); ++i)
+        file << (i + 1) << "," << foldMSE[i] << "," << foldR2[i] << "," << foldTime[i] << "\n";
+    file << "Average," << avgMSE << "," << avgR2 << ",-\n";
+    file.close();
+    std::cout << "Results saved to: " << csvPath << std::endl;
+
+    // Retrain on full data
+    std::cout << "Retraining final model on full data...\n";
     this->Train(TrainInputData, TrainOutputData);
-
-    // Store predictions for later use
     this->Predict(TrainInputData, TrainDataPrediction);
 
     return true;
 }
 
+
+// Fixed-size blocked K-fold for time-series (no shuffle, 90% train / 20% validate)
+std::pair<std::pair<arma::mat, arma::mat>,
+          std::pair<arma::mat, arma::mat>>
+KFoldSplit_FixedRatio(const arma::mat& data,
+                      const arma::mat& labels,
+                      size_t k,
+                      size_t fold,
+                      double trainRatio = 0.9)
+{
+    if (k < 2)
+        throw std::invalid_argument("KFoldSplit_FixedRatio: k must be >= 2.");
+    if (fold >= k)
+        throw std::invalid_argument("KFoldSplit_FixedRatio: fold index must be in [0, k-1].");
+
+    const size_t nSamples = data.n_cols;
+    if (nSamples < 10)
+        throw std::invalid_argument("KFoldSplit_FixedRatio: dataset too small.");
+
+    // Size of each fold (validation block)
+    const size_t foldSize = nSamples / k;
+
+    // Determine validation range for this fold
+    const size_t valStart = fold * foldSize;
+    const size_t valEnd   = (fold == k - 1) ? nSamples : (fold + 1) * foldSize;
+
+    // Compute training region indices for fixed 90/10 rule (no shuffle)
+    const size_t trainEnd = static_cast<size_t>(trainRatio * nSamples);
+    const size_t trainStart = 0;
+
+    // Training always uses the first 90% of total samples
+    arma::mat trainData   = data.cols(trainStart, trainEnd - 1);
+    arma::mat trainLabels = labels.cols(trainStart, trainEnd - 1);
+
+    // Validation segment slides along the remaining timeline (each fold covers different 20%)
+    arma::mat validData   = data.cols(valStart, valEnd - 1);
+    arma::mat validLabels = labels.cols(valStart, valEnd - 1);
+
+    return {{trainData, trainLabels}, {validData, validLabels}};
+}
+
+
+// Time-series aware expanding-window K-fold split
+std::pair<std::pair<arma::mat, arma::mat>,
+          std::pair<arma::mat, arma::mat>>
+KFoldSplit_TimeSeries(const arma::mat& data,
+                      const arma::mat& labels,
+                      size_t k,
+                      size_t fold)
+{
+    if (k < 2)
+        throw std::invalid_argument("KFoldSplit_TimeSeries: k must be >= 2.");
+    if (fold >= k)
+        throw std::invalid_argument("KFoldSplit_TimeSeries: fold index must be in [0, k-1].");
+
+    const size_t nSamples = data.n_cols;
+    if (nSamples < k)
+        throw std::invalid_argument("KFoldSplit_TimeSeries: not enough samples for the requested number of folds.");
+
+    const size_t foldSize = nSamples / k;
+
+    // Validation block boundaries
+    const size_t valStart = fold * foldSize;
+    const size_t valEnd   = (fold == k - 1) ? nSamples : (fold + 1) * foldSize;
+
+    // ---- Expanding window logic ----
+    // Train on everything *before* current validation block
+    size_t trainEnd = (valStart == 0) ? foldSize : valStart;
+    if (trainEnd < 2) trainEnd = 2;  // safety: ensure at least 2 samples
+
+    arma::mat trainData   = data.cols(0, trainEnd - 1);
+    arma::mat trainLabels = labels.cols(0, trainEnd - 1);
+
+    arma::mat validData   = data.cols(valStart, valEnd - 1);
+    arma::mat validLabels = labels.cols(valStart, valEnd - 1);
+
+    return {{trainData, trainLabels}, {validData, validLabels}};
+}
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>>
+KFoldSplit(const arma::mat& data,
+           const arma::mat& labels,
+           size_t k,
+           size_t fold)
+{
+    if (k == 0 || fold >= k)
+        throw std::invalid_argument("fold index must be in [0, k-1] and k > 0");
+
+    size_t nSamples = data.n_cols;
+    size_t foldSize = nSamples / k;
+
+    size_t start = fold * foldSize;
+    size_t end = (fold == k - 1) ? nSamples : start + foldSize;
+
+    // Validation indices
+    arma::uvec validIndices = arma::regspace<arma::uvec>(start, end - 1);
+
+    // Create mask for training samples
+    arma::uvec mask = arma::ones<arma::uvec>(nSamples);
+    mask(validIndices).zeros();
+    arma::uvec trainIdx = arma::find(mask == 1);
+
+    // Subset data and labels
+    arma::mat trainData = data.cols(trainIdx);
+    arma::mat trainLabels = labels.cols(trainIdx);
+    arma::mat validData = data.cols(validIndices);
+    arma::mat validLabels = labels.cols(validIndices);
+
+    return {{trainData, trainLabels}, {validData, validLabels}};
+}
 
 bool FFNWrapper_Multi::Test() // Predicting test data
 {
@@ -557,38 +729,6 @@ bool FFNWrapper_Multi:: Optimizer()
         std::cout << "Optimal value: " << f.Evaluate(initialPoint) << std::endl;
 */
         return true;
-}
-
-std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>>
-KFoldSplit(const arma::mat& data,
-           const arma::mat& labels,
-           size_t k,
-           size_t fold)
-{
-    if (k == 0 || fold >= k)
-        throw std::invalid_argument("fold index must be in [0, k-1] and k > 0");
-
-    size_t nSamples = data.n_cols;
-    size_t foldSize = nSamples / k;
-
-    size_t start = fold * foldSize;
-    size_t end = (fold == k - 1) ? nSamples : start + foldSize;
-
-    // Validation indices
-    arma::uvec validIndices = arma::regspace<arma::uvec>(start, end - 1);
-
-    // Create mask for training samples
-    arma::uvec mask = arma::ones<arma::uvec>(nSamples);
-    mask(validIndices).zeros();
-    arma::uvec trainIdx = arma::find(mask == 1);
-
-    // Subset data and labels
-    arma::mat trainData = data.cols(trainIdx);
-    arma::mat trainLabels = labels.cols(trainIdx);
-    arma::mat validData = data.cols(validIndices);
-    arma::mat validLabels = labels.cols(validIndices);
-
-    return {{trainData, trainLabels}, {validData, validLabels}};
 }
 
 

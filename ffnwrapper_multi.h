@@ -27,7 +27,7 @@ public:
     bool Transformation();
     bool Train();
     bool Train(const arma::mat& input, const arma::mat& output);
-    bool Train_kfold(int n_folds);
+    bool Train_kfold(int n_folds, int splitMode);
     bool Test();
     bool PerformanceMetrics();
     bool DataSave(datacategory);
@@ -129,6 +129,17 @@ private:
  *  std::cout << "Training samples: " << trainX.n_cols
  *            << ", Validation samples: " << validX.n_cols << std::endl;
  */
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>> KFoldSplit_FixedRatio(const arma::mat& data,
+          const arma::mat& labels,
+          size_t k,
+          size_t fold,
+          double trainRatio);
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>> KFoldSplit_TimeSeries(const arma::mat& data,
+          const arma::mat& labels,
+          size_t k,
+          size_t fold);
 
 std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>> KFoldSplit(const arma::mat& data,
            const arma::mat& labels,
