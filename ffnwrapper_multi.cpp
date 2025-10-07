@@ -284,7 +284,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
         // Reset model parameters (keep same architecture)
-        this->Reset();
+        //this->Reset();
 
         // Train the existing FFN on this fold’s training data
         this->Train(trainX, trainY);
@@ -305,7 +305,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
 
     // Retrain final model on full dataset
     std::cout << "Retraining final model on full data..." << std::endl;
-    this->Reset();            // resets weights and gradients
+    //this->Reset();            // resets weights and gradients
     this->Train(TrainInputData, TrainOutputData);
 
     // Store predictions for later use

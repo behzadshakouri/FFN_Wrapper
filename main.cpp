@@ -24,6 +24,8 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
+    int kfold_num = 10; // k = 10
+
     enum class _model {Settling, ASM} model = _model::ASM;
 
     if (model==_model::ASM)
@@ -572,7 +574,8 @@ int main()
             F.silent = false;
             F.ModelStructure = mymodelstruct;
             F.Initiate();
-            F.Train();
+            //F.Train();
+            F.Train_kfold(kfold_num); // Using kfold
             F.Test();
             F.PerformanceMetrics();
 
