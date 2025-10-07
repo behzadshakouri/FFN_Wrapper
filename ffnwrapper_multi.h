@@ -26,6 +26,7 @@ public:
     bool Shifter(datacategory);
     bool Transformation();
     bool Train();
+    bool Train(const arma::mat& input, const arma::mat& output);
     bool Train_kfold(int n_folds);
     bool Test();
     bool PerformanceMetrics();

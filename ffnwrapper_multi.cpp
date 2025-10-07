@@ -236,7 +236,13 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
-/*
+bool FFNWrapper_Multi::Train(const arma::mat& input, const arma::mat& output)
+{
+    TrainInputData = input;
+    TrainOutputData = output;
+    return Train();  // Call your existing no-argument version
+}
+
 bool FFNWrapper_Multi::Train_kfold(int n_folds)
 {
     if (n_folds < 2)
@@ -278,7 +284,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
         // Reset model parameters (keep same architecture)
-        this->ResetParameters();
+        this->Reset();
 
         // Train the existing FFN on this fold’s training data
         this->Train(trainX, trainY);
@@ -287,7 +293,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
         arma::mat valPred;
         this->Predict(valX, valPred);
 
-        double valMSE = mlpack::metric::MSE::Evaluate(valPred, valY);
+        double valMSE = arma::mean(arma::mean(arma::square(valPred - valY)));
         totalValLoss += valMSE;
 
         std::cout << "  Validation MSE: " << valMSE << std::endl;
@@ -299,7 +305,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
 
     // Retrain final model on full dataset
     std::cout << "Retraining final model on full data..." << std::endl;
-    this->ResetParameters();
+    this->Reset();            // resets weights and gradients
     this->Train(TrainInputData, TrainOutputData);
 
     // Store predictions for later use
@@ -308,7 +314,6 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds)
     return true;
 }
 
-*/
 
 bool FFNWrapper_Multi::Test() // Predicting test data
 {
@@ -510,6 +515,84 @@ bool FFNWrapper_Multi:: Plotter() // Plotting the results
 
     return true;
 }
+
+
+bool FFNWrapper_Multi:: Optimizer()
+{
+/*
+    // Define the objective function to minimize (f(x) = x^2 + 4x + 4).
+    class QuadraticFunction
+    {
+    public:
+        // Function value at a given point x.
+        double Evaluate(const rowvec& parameters)
+        {
+            // f(x) = x^2 + 4x + 4
+            double x = parameters(0);
+            return x * x + 4 * x + 4;
+        }
+
+        // Gradient of the objective function.
+        void Gradient(const rowvec& parameters, rowvec& gradient)
+        {
+            // Derivative of f(x) = 2x + 4
+            double x = parameters(0);
+            gradient(0) = 2 * x + 4;
+        }
+    };
+        // Create an instance of the quadratic function.
+        QuadraticFunction f;
+
+        // Initial parameters (let's start at x = 10).
+        rowvec initialPoint = {10};
+
+        // Create the optimizer (using Stochastic Gradient Descent in this case).
+        ens::SGD optimizer(0.1, 1000, 1e-6);
+
+        // Optimize the function using the gradient descent algorithm.
+        optimizer.Optimize(f, initialPoint);
+
+        // Output the result.
+        std::cout << "Optimal point: " << initialPoint(0) << std::endl;
+        std::cout << "Optimal value: " << f.Evaluate(initialPoint) << std::endl;
+*/
+        return true;
+}
+
+std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>>
+KFoldSplit(const arma::mat& data,
+           const arma::mat& labels,
+           size_t k,
+           size_t fold)
+{
+    if (k == 0 || fold >= k)
+        throw std::invalid_argument("fold index must be in [0, k-1] and k > 0");
+
+    size_t nSamples = data.n_cols;
+    size_t foldSize = nSamples / k;
+
+    size_t start = fold * foldSize;
+    size_t end = (fold == k - 1) ? nSamples : start + foldSize;
+
+    // Validation indices
+    arma::uvec validIndices = arma::regspace<arma::uvec>(start, end - 1);
+
+    // Create mask for training samples
+    arma::uvec mask = arma::ones<arma::uvec>(nSamples);
+    mask(validIndices).zeros();
+    arma::uvec trainIdx = arma::find(mask == 1);
+
+    // Subset data and labels
+    arma::mat trainData = data.cols(trainIdx);
+    arma::mat trainLabels = labels.cols(trainIdx);
+    arma::mat validData = data.cols(validIndices);
+    arma::mat validLabels = labels.cols(validIndices);
+
+    return {{trainData, trainLabels}, {validData, validLabels}};
+}
+
+
+
 
 /*
     // Train data transform
@@ -765,77 +848,3 @@ for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
         gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
 */
-
-bool FFNWrapper_Multi:: Optimizer()
-{
-/*
-    // Define the objective function to minimize (f(x) = x^2 + 4x + 4).
-    class QuadraticFunction
-    {
-    public:
-        // Function value at a given point x.
-        double Evaluate(const rowvec& parameters)
-        {
-            // f(x) = x^2 + 4x + 4
-            double x = parameters(0);
-            return x * x + 4 * x + 4;
-        }
-
-        // Gradient of the objective function.
-        void Gradient(const rowvec& parameters, rowvec& gradient)
-        {
-            // Derivative of f(x) = 2x + 4
-            double x = parameters(0);
-            gradient(0) = 2 * x + 4;
-        }
-    };
-        // Create an instance of the quadratic function.
-        QuadraticFunction f;
-
-        // Initial parameters (let's start at x = 10).
-        rowvec initialPoint = {10};
-
-        // Create the optimizer (using Stochastic Gradient Descent in this case).
-        ens::SGD optimizer(0.1, 1000, 1e-6);
-
-        // Optimize the function using the gradient descent algorithm.
-        optimizer.Optimize(f, initialPoint);
-
-        // Output the result.
-        std::cout << "Optimal point: " << initialPoint(0) << std::endl;
-        std::cout << "Optimal value: " << f.Evaluate(initialPoint) << std::endl;
-*/
-        return true;
-}
-
-std::pair<std::pair<arma::mat, arma::mat>, std::pair<arma::mat, arma::mat>>
-KFoldSplit(const arma::mat& data,
-           const arma::mat& labels,
-           size_t k,
-           size_t fold)
-{
-    if (k == 0 || fold >= k)
-        throw std::invalid_argument("fold index must be in [0, k-1] and k > 0");
-
-    size_t nSamples = data.n_cols;
-    size_t foldSize = nSamples / k;
-
-    size_t start = fold * foldSize;
-    size_t end = (fold == k - 1) ? nSamples : start + foldSize;
-
-    // Validation indices
-    arma::uvec validIndices = arma::regspace<arma::uvec>(start, end - 1);
-
-    // Create mask for training samples
-    arma::uvec mask = arma::ones<arma::uvec>(nSamples);
-    mask(validIndices).zeros();
-    arma::uvec trainIdx = arma::find(mask == 1);
-
-    // Subset data and labels
-    arma::mat trainData = data.cols(trainIdx);
-    arma::mat trainLabels = labels.cols(trainIdx);
-    arma::mat validData = data.cols(validIndices);
-    arma::mat validLabels = labels.cols(validIndices);
-
-    return {{trainData, trainLabels}, {validData, validLabels}};
-}
