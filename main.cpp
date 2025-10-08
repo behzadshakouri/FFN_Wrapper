@@ -1,4 +1,10 @@
-//Our main
+/**
+ * FFN Wrapper with K-fold (Random / Expanding / Fixed-ratio) Training
+ * for ASM-type time-series prediction using mlpack::FNN and GA.
+ *
+ * @authors
+ *   Behzad Shakouri & Arash Massoudieh
+ */
 
 #include <mlpack.hpp>
 #include <iostream>
