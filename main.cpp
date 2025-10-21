@@ -54,7 +54,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "TKN"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number

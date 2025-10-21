@@ -86,9 +86,11 @@ void GeneticAlgorithm<T>::Initialize()
 template<class T>
 void GeneticAlgorithm<T>::AssignFitnesses()
 {
-    //#pragma omp parallel for
+    #pragma omp parallel for
     for (unsigned int i=0; i<models.size(); i++)
     {
+
+        std::cout<<"Number of threads: " << omp_get_num_threads() << ", This thread: " << omp_get_thread_num() << std::endl;
         vector<unsigned long int> parameterset;
         for (unsigned int j=0; j<models[i].ParametersSize(); j++)
         {
