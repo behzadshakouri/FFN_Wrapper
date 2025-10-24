@@ -59,22 +59,20 @@ FFNWrapper_Multi::~FFNWrapper_Multi()
 bool FFNWrapper_Multi::Initiate(bool dataprocess)
 {
     // ───────────────────────────────────────────────
-    // 1️⃣ Data preparation: shifting, normalization
+    // 1️⃣ Data preparation: shifting + normalization
     // ───────────────────────────────────────────────
     DataProcess();
 
     // ───────────────────────────────────────────────
-    // 2️⃣ Initialize a fresh network if needed
+    // 2️⃣ Initialize (or reuse) network
     // ───────────────────────────────────────────────
     if (!dataprocess)
     {
-        // Reset the underlying FFN model to a clean state
+        // Clear previous architecture
         FFN<MeanSquaredError> newFFN;
         FFN<MeanSquaredError>::operator=(newFFN);
 
-        // For reproducibility
         mlpack::math::RandomSeed(ModelStructure.seed_number);
-
         qInfo() << "[Init] Network cleared and random seed set to"
                 << ModelStructure.seed_number;
     }
@@ -84,7 +82,7 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
     }
 
     // ───────────────────────────────────────────────
-    // 3️⃣ Build architecture layer by layer
+    // 3️⃣ Define architecture
     // ───────────────────────────────────────────────
     qInfo() << "[Init] Building network architecture:";
     qInfo() << "       Input dimension =" << TrainInputData.n_rows
@@ -95,7 +93,6 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
         const size_t n_nodes = ModelStructure.n_nodes[layer];
         Add<Linear>(n_nodes);
         Add<Sigmoid>();
-
         qInfo().noquote() << QString("       Layer %1: Linear(%2) → Sigmoid")
                              .arg(layer + 1)
                              .arg(n_nodes);
@@ -108,10 +105,25 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
                          .arg(TrainOutputData.n_rows);
 
     // ───────────────────────────────────────────────
-    // 4️⃣ Summary of layer counts and total parameters
+    // 4️⃣ Initialize parameters (cross-version safe)
+    // ───────────────────────────────────────────────
+#if MLPACK_VERSION_MAJOR >= 4
+    // Explicitly define input size before reset (required in mlpack ≥4)
+    FFN::InputDimensions() = { TrainInputData.n_rows };
+    FFN::Reset();
+#else
+    FFN::ResetParameters();
+#endif
+
+    // ───────────────────────────────────────────────
+    // 5️⃣ Diagnostic summary
     // ───────────────────────────────────────────────
     const size_t totalParams = FFN::Parameters().n_elem;
     qInfo() << "[Init] Total trainable parameters:" << totalParams;
+
+    if (totalParams == 0)
+        qWarning() << "[Init] ⚠️ Warning: network has 0 parameters! Check architecture setup.";
+
     qInfo() << "[Init] Network initialization completed successfully.";
 
     return true;
@@ -290,7 +302,7 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
-
+/*
 bool FFNWrapper_Multi::Train(const arma::mat& input, const arma::mat& output)
 {
     TrainInputData = input;
@@ -573,7 +585,7 @@ KFoldSplit_FixedRatio(const arma::mat& data,
 
   return {{trainData, trainLabels}, {validData, validLabels}};
 }
-
+*/
 
 bool FFNWrapper_Multi::Test() // Predicting test data
 {

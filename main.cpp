@@ -54,7 +54,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NH"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number
@@ -555,11 +555,14 @@ int main()
                     F.ModelStructure = mymodelstruct;
                     F.Initiate();
 
-                    if (!kfold)
+                    if (!kfold) {
+                        qDebug() << "Not kfold!";
                     F.Train();
-
-                    else if (kfold)
-                    F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+                    }
+                    else if (kfold) {
+                       qDebug() << "kfold!";
+                    //F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+                    }
 
                     F.Test();
 
@@ -596,7 +599,7 @@ int main()
             }
             else if (kfold) {
                qDebug() << "kfold!";
-            F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+            //F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
             }
 
             F.Test();
