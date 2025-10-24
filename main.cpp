@@ -30,7 +30,7 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
-    int kfold = 0; // 0 for not using kfold, 1 for using kfold
+    int kfold = 1; // 0 for not using kfold, 1 for using kfold
     int kfold_num = 10; // k = 10 for 90/10
     int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed
 

@@ -368,16 +368,12 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
     arma::mat X_full = TrainInputData;
     arma::mat Y_full = TrainOutputData;
 
-    // Save the unmodified data before any shuffle
-    //CTimeSeriesSet<double> TrainInputDataTS_before(X_full, ModelStructure.dt);
-    //TrainInputDataTS_before.writetofile(ModelStructure.outputpath + "data_before.csv");
-
     arma::mat X = TrainInputData;
     arma::mat Y = TrainOutputData;
 
-    arma::uvec indices; // for shuffle bookkeeping
+    arma::uvec indices;
 
-    // Shuffle only for mode 0 (random K-fold)
+    // Shuffle only for random K-fold (mode 0)
     if (splitMode == 0)
     {
         indices = arma::randperm(nSamples);
@@ -387,7 +383,6 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
         std::cout << "[Info] Random shuffle applied and saved to shuffle_indices.csv\n";
     }
 
-    // Derived ratio from folds (e.g., 10-fold → 90 % train)
     const double trainRatio = 1.0 - (1.0 / static_cast<double>(n_folds));
 
     std::vector<double> foldMSE, foldR2, foldTime;
@@ -402,7 +397,7 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
     {
         arma::mat trainX, trainY, valX, valY;
 
-        // --- Split selection ---
+        // ─────── Split selection ───────
         if (splitMode == 0)
         {
             auto [trainPair, validPair] = KFoldSplit(X, Y, n_folds, fold);
@@ -438,67 +433,66 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
                   << " | Train samples: " << trainX.n_cols
                   << " | Validation samples: " << valX.n_cols << std::endl;
 
+        // ⚠️ Reinitialize model to avoid cumulative training
+        FFN::operator=(FFN<MeanSquaredError>());
+        Initiate(false); // rebuild architecture with fresh random weights
+
+        // ─────── Train this fold ───────
         auto start = std::chrono::high_resolution_clock::now();
         this->Train(trainX, trainY);
         auto end = std::chrono::high_resolution_clock::now();
         double timeSec = std::chrono::duration<double>(end - start).count();
 
-        // -------- Evaluate Training --------
-        {
-            arma::mat predTrain;
-            this->Predict(trainX, predTrain);
+        // ─────── Evaluate Training ───────
+        arma::mat predTrain;
+        this->Predict(trainX, predTrain);
+        double mseTrain = arma::mean(arma::mean(arma::square(predTrain - trainY)));
+        arma::rowvec meanYTrain = arma::mean(trainY, 1);
+        double SSresTrain = arma::accu(arma::square(predTrain - trainY));
+        double SStotTrain = arma::accu(arma::square(trainY.each_col() - meanYTrain));
+        double r2Train = 1.0 - (SSresTrain / (SStotTrain + 1e-12));
 
-            double mse = arma::mean(arma::mean(arma::square(predTrain - trainY)));
-            arma::rowvec meanY = arma::mean(trainY, 1);
-            double SSres = arma::accu(arma::square(predTrain - trainY));
-            double SStot = arma::accu(arma::square(trainY.each_col() - meanY));
-            double r2 = 1.0 - (SSres / (SStot + 1e-12));
+        trainfoldMSE.push_back(mseTrain);
+        trainfoldR2.push_back(r2Train);
+        traintotalMSE += mseTrain;
+        traintotalR2  += r2Train;
 
-            trainfoldMSE.push_back(mse);
-            trainfoldR2.push_back(r2);
-            traintotalMSE += mse;
-            traintotalR2  += r2;
+        std::cout << "  Training  MSE: " << std::setw(10) << mseTrain
+                  << " | R²: " << std::setw(8) << r2Train
+                  << " | Time: " << timeSec << " s" << std::endl;
 
-            std::cout << "  Training  MSE: " << std::setw(10) << mse
-                      << " | R²: " << std::setw(8) << r2
-                      << " | Time: " << timeSec << " s" << std::endl;
-        }
+        // ─────── Evaluate Validation ───────
+        arma::mat predVal;
+        this->Predict(valX, predVal);
+        double mseVal = arma::mean(arma::mean(arma::square(predVal - valY)));
+        arma::rowvec meanYVal = arma::mean(valY, 1);
+        double SSresVal = arma::accu(arma::square(predVal - valY));
+        double SStotVal = arma::accu(arma::square(valY.each_col() - meanYVal));
+        double r2Val = 1.0 - (SSresVal / (SStotVal + 1e-12));
 
-        // -------- Evaluate Validation --------
-        {
-            arma::mat predVal;
-            this->Predict(valX, predVal);
+        foldMSE.push_back(mseVal);
+        foldR2.push_back(r2Val);
+        foldTime.push_back(timeSec);
+        totalMSE += mseVal;
+        totalR2  += r2Val;
 
-            double mse = arma::mean(arma::mean(arma::square(predVal - valY)));
-            arma::rowvec meanY = arma::mean(valY, 1);
-            double SSres = arma::accu(arma::square(predVal - valY));
-            double SStot = arma::accu(arma::square(valY.each_col() - meanY));
-            double r2 = 1.0 - (SSres / (SStot + 1e-12));
-
-            foldMSE.push_back(mse);
-            foldR2.push_back(r2);
-            foldTime.push_back(timeSec);
-            totalMSE += mse;
-            totalR2  += r2;
-
-            std::cout << "  Validation MSE: " << std::setw(10) << mse
-                      << " | R²: " << std::setw(8) << r2
-                      << " | Time: " << timeSec << " s" << std::endl;
-        }
+        std::cout << "  Validation MSE: " << std::setw(10) << mseVal
+                  << " | R²: " << std::setw(8) << r2Val
+                  << " | Time: " << timeSec << " s" << std::endl;
     }
 
-    // ---------- Averages ----------
-    const double avgValMSE = totalMSE / foldMSE.size();
-    const double avgValR2  = totalR2  / foldR2.size();
+    // ─────── Aggregate Results ───────
     const double avgTrainMSE = traintotalMSE / trainfoldMSE.size();
     const double avgTrainR2  = traintotalR2  / trainfoldR2.size();
+    const double avgValMSE   = totalMSE / foldMSE.size();
+    const double avgValR2    = totalR2  / foldR2.size();
 
     std::cout << "\nAverage training   MSE: " << avgTrainMSE
               << " | R²: " << avgTrainR2 << std::endl;
     std::cout << "Average validation MSE: " << avgValMSE
               << " | R²: " << avgValR2 << std::endl;
 
-    // ---------- Save CSV summary ----------
+    // ─────── Save CSV ───────
     const std::string csvPath = ModelStructure.outputpath + "kfold_results.csv";
     std::ofstream file(csvPath);
     file << "Fold,TrainMSE,TrainR2,ValMSE,ValR2,Time_sec\n";
@@ -513,34 +507,17 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
     file.close();
     std::cout << "Results saved to: " << csvPath << std::endl;
 
-
-    // ====================== FINAL FULL RETRAIN =========================
+    // ─────── Final full retrain on entire dataset ───────
     std::cout << "Retraining final model on full dataset...\n";
-
-    std::cout << "[Debug] Pre-retrain full data dims: "
-              << X_full.n_rows << "×" << X_full.n_cols
-              << " | outputs: " << Y_full.n_rows << "×"
-              << Y_full.n_cols << std::endl;
+    FFN::operator=(FFN<MeanSquaredError>()); // fresh start again
+    Initiate(false);
 
     this->Train(X_full, Y_full);
 
-    // Predict after retraining
     arma::mat fullPred;
     this->Predict(X_full, fullPred);
-
-    std::cout << "[Debug] Post-Train effective samples: "
-              << fullPred.n_cols << " (expected "
-              << X_full.n_cols << ")" << std::endl;
-
-    std::cout << "[Info] Full-data prediction completed on "
-              << fullPred.n_cols << " samples (expected "
-              << X_full.n_cols << ").\n";
-
-    // Save directly
     fullPred.save(ModelStructure.outputpath + "final_pred_full.csv", arma::csv_ascii);
-    std::cout << "[Saved] Final predictions on full dataset: final_pred_full.csv\n";
 
-    // ---------- Compute final overall metrics ----------
     double mse_final = arma::mean(arma::mean(arma::square(fullPred - Y_full)));
     arma::rowvec meanY = arma::mean(Y_full, 1);
     double SSres = arma::accu(arma::square(fullPred - Y_full));
@@ -550,14 +527,9 @@ bool FFNWrapper_Multi::Train_kfold(int n_folds, int splitMode)
     std::cout << "\nFinal full-data MSE: " << mse_final
               << " | R²: " << r2_final << std::endl;
 
-    // Append to CSV
     std::ofstream csvAppend(csvPath, std::ios::app);
     csvAppend << "FullDataset," << mse_final << "," << r2_final << ",,,\n";
     csvAppend.close();
-
-    // ---------- Write post-training snapshot ----------
-    //CTimeSeriesSet<double> TrainInputDataTS_after(X_full, ModelStructure.dt);
-    //TrainInputDataTS_after.writetofile(ModelStructure.outputpath + "data_after.csv");
 
     std::cout << "[Done] All results successfully written to: "
               << ModelStructure.outputpath << std::endl;
