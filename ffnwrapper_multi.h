@@ -27,7 +27,7 @@ public:
     bool Transformation();
     bool Train();
     bool Train(const arma::mat& input, const arma::mat& output);
-    bool Train_Single(bool shuffle = true);
+    //bool Train_Single(bool shuffle = true);
     bool Train_kfold(int n_folds, int splitMode);
     bool Test();
     bool PerformanceMetrics();

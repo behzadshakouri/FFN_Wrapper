@@ -30,7 +30,7 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
-    int kfold = 1; // 0 for not using kfold, 1 for using kfold
+    int kfold = 0; // 0 for not using kfold, 1 for using kfold
     int kfold_num = 10; // k = 10 for 90/10
     int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed
 
@@ -54,7 +54,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "NH"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number

@@ -56,27 +56,67 @@ FFNWrapper_Multi::~FFNWrapper_Multi()
 }
 
 
-bool FFNWrapper_Multi::Initiate(bool dataprocess) // Initiating data
+bool FFNWrapper_Multi::Initiate(bool dataprocess)
 {
-
+    // ───────────────────────────────────────────────
+    // 1️⃣ Data preparation: shifting, normalization
+    // ───────────────────────────────────────────────
     DataProcess();
 
-    //Initialize the network
+    // ───────────────────────────────────────────────
+    // 2️⃣ Initialize a fresh network if needed
+    // ───────────────────────────────────────────────
     if (!dataprocess)
-        FFN::operator=(FFN<MeanSquaredError>());
-
-    //ANN
-    for (int layer = 0; layer<ModelStructure.n_layers; layer++)
     {
-        Add<Linear>(ModelStructure.n_nodes[layer]); // Connection Layer : ModelStructure.n_input_layers
-            Add<Sigmoid>(); // Activation Funchion
+        // Reset the underlying FFN model to a clean state
+        FFN<MeanSquaredError> newFFN;
+        FFN<MeanSquaredError>::operator=(newFFN);
+
+        // For reproducibility
+        mlpack::math::RandomSeed(ModelStructure.seed_number);
+
+        qInfo() << "[Init] Network cleared and random seed set to"
+                << ModelStructure.seed_number;
+    }
+    else
+    {
+        qInfo() << "[Init] Re-using existing network (no reset).";
+    }
+
+    // ───────────────────────────────────────────────
+    // 3️⃣ Build architecture layer by layer
+    // ───────────────────────────────────────────────
+    qInfo() << "[Init] Building network architecture:";
+    qInfo() << "       Input dimension =" << TrainInputData.n_rows
+            << ", Output dimension =" << TrainOutputData.n_rows;
+
+    for (int layer = 0; layer < ModelStructure.n_layers; ++layer)
+    {
+        const size_t n_nodes = ModelStructure.n_nodes[layer];
+        Add<Linear>(n_nodes);
+        Add<Sigmoid>();
+
+        qInfo().noquote() << QString("       Layer %1: Linear(%2) → Sigmoid")
+                             .arg(layer + 1)
+                             .arg(n_nodes);
     }
 
     Add<ReLU>();
-    Add<Linear>(TrainOutputData.n_rows); // Output Layer : ModelStructure.n_output_layers
+    Add<Linear>(TrainOutputData.n_rows);
+
+    qInfo().noquote() << QString("       Output: ReLU → Linear(%1)")
+                         .arg(TrainOutputData.n_rows);
+
+    // ───────────────────────────────────────────────
+    // 4️⃣ Summary of layer counts and total parameters
+    // ───────────────────────────────────────────────
+    const size_t totalParams = FFN::Parameters().n_elem;
+    qInfo() << "[Init] Total trainable parameters:" << totalParams;
+    qInfo() << "[Init] Network initialization completed successfully.";
 
     return true;
 }
+
 
 bool FFNWrapper_Multi::DataProcess()
 {
@@ -257,93 +297,6 @@ bool FFNWrapper_Multi::Train(const arma::mat& input, const arma::mat& output)
     TrainOutputData = output;
 
     return Train();  // Call your existing no-argument version
-}
-
-
-bool FFNWrapper_Multi::Train_Single(bool shuffle)
-{
-    std::cout << "\n==============================\n";
-    std::cout << "   Running Single FFN Train   \n";
-    std::cout << "==============================\n";
-
-    mlpack::math::RandomSeed(ModelStructure.seed_number);
-
-    arma::mat X_full = TrainInputData;
-    arma::mat Y_full = TrainOutputData;
-
-
-    arma::mat X = TrainInputData;
-    arma::mat Y = TrainOutputData;
-
-    const size_t nSamples = X.n_cols;
-    if (nSamples < 2)
-    {
-        std::cerr << "Error: not enough samples (" << nSamples << ").\n";
-        return false;
-    }
-
-    // ------------------------------------------------------------
-    // 1️⃣ Shuffle (optional)
-    // ------------------------------------------------------------
-    if (shuffle)
-    {
-        arma::uvec idx = arma::randperm(nSamples);
-        X = X.cols(idx);
-        Y = Y.cols(idx);
-        idx.save(ModelStructure.outputpath + "shuffle_indices_single.csv", arma::csv_ascii);
-        std::cout << "[Info] Data shuffled and saved to shuffle_indices_single.csv\n";
-    }
-
-    std::cout << "[Info] Training on raw dataset: "
-              << X.n_rows << "×" << X.n_cols
-              << " | Outputs: " << Y.n_rows << "×" << Y.n_cols << std::endl;
-
-    // ------------------------------------------------------------
-    // 2️⃣ Train the model (raw data)
-    // ------------------------------------------------------------
-    auto start = std::chrono::high_resolution_clock::now();
-
-    this->Train(X, Y);  // ✅ no scaling, no transformation
-
-    auto end = std::chrono::high_resolution_clock::now();
-    double timeSec = std::chrono::duration<double>(end - start).count();
-
-    std::cout << "[Training Completed in " << timeSec << " s]\n";
-
-    // ------------------------------------------------------------
-    // 3️⃣ Predict on training set
-    // ------------------------------------------------------------
-    arma::mat pred;
-    this->Predict(X, pred);
-
-    // ------------------------------------------------------------
-    // 4️⃣ Compute metrics directly on raw data
-    // ------------------------------------------------------------
-    double mse = arma::mean(arma::mean(arma::square(pred - Y)));
-    arma::rowvec meanY = arma::mean(Y, 1);
-    double SSres = arma::accu(arma::square(pred - Y));
-    double SStot = arma::accu(arma::square(Y.each_col() - meanY));
-    double r2 = 1.0 - (SSres / (SStot + 1e-12));
-
-    std::cout << std::fixed << std::setprecision(6);
-    std::cout << "\nFinal Metrics (raw data):\n";
-    std::cout << "  MSE = " << mse << "\n";
-    std::cout << "  R²  = " << r2  << "\n";
-    std::cout << "  Time = " << timeSec << " s\n";
-
-    // ------------------------------------------------------------
-    // 5️⃣ Save predictions and summary
-    // ------------------------------------------------------------
-    pred.save(ModelStructure.outputpath + "final_pred_single.csv", arma::csv_ascii);
-
-    std::ofstream file(ModelStructure.outputpath + "single_train_results.csv");
-    file << "MSE,R2,Time_sec\n" << mse << "," << r2 << "," << timeSec << "\n";
-    file.close();
-
-    std::cout << "[Saved] Predictions: final_pred_single.csv\n";
-    std::cout << "[Saved] Summary CSV: single_train_results.csv\n";
-
-    return true;
 }
 
 
@@ -1140,4 +1093,92 @@ for (unsigned int i=0; i<ModelStructure.trainobservedaddress.size(); i++)
         gp.send1d(plotdata1);  // Send the first dataset (Observed)
         gp.send1d(plotdata2);  // Send the second dataset (Predicted)
     }
+*/
+
+/*
+bool FFNWrapper_Multi::Train_Single(bool shuffle)
+{
+    std::cout << "\n==============================\n";
+    std::cout << "   Running Single FFN Train   \n";
+    std::cout << "==============================\n";
+
+    mlpack::math::RandomSeed(ModelStructure.seed_number);
+
+    arma::mat X_full = TrainInputData;
+    arma::mat Y_full = TrainOutputData;
+
+
+    arma::mat X = TrainInputData;
+    arma::mat Y = TrainOutputData;
+
+    const size_t nSamples = X.n_cols;
+    if (nSamples < 2)
+    {
+        std::cerr << "Error: not enough samples (" << nSamples << ").\n";
+        return false;
+    }
+
+    // ------------------------------------------------------------
+    // 1️⃣ Shuffle (optional)
+    // ------------------------------------------------------------
+    if (shuffle)
+    {
+        arma::uvec idx = arma::randperm(nSamples);
+        X = X.cols(idx);
+        Y = Y.cols(idx);
+        idx.save(ModelStructure.outputpath + "shuffle_indices_single.csv", arma::csv_ascii);
+        std::cout << "[Info] Data shuffled and saved to shuffle_indices_single.csv\n";
+    }
+
+    std::cout << "[Info] Training on raw dataset: "
+              << X.n_rows << "×" << X.n_cols
+              << " | Outputs: " << Y.n_rows << "×" << Y.n_cols << std::endl;
+
+    // ------------------------------------------------------------
+    // 2️⃣ Train the model (raw data)
+    // ------------------------------------------------------------
+    auto start = std::chrono::high_resolution_clock::now();
+
+    this->Train(X, Y);  // ✅ no scaling, no transformation
+
+    auto end = std::chrono::high_resolution_clock::now();
+    double timeSec = std::chrono::duration<double>(end - start).count();
+
+    std::cout << "[Training Completed in " << timeSec << " s]\n";
+
+    // ------------------------------------------------------------
+    // 3️⃣ Predict on training set
+    // ------------------------------------------------------------
+    arma::mat pred;
+    this->Predict(X, pred);
+
+    // ------------------------------------------------------------
+    // 4️⃣ Compute metrics directly on raw data
+    // ------------------------------------------------------------
+    double mse = arma::mean(arma::mean(arma::square(pred - Y)));
+    arma::rowvec meanY = arma::mean(Y, 1);
+    double SSres = arma::accu(arma::square(pred - Y));
+    double SStot = arma::accu(arma::square(Y.each_col() - meanY));
+    double r2 = 1.0 - (SSres / (SStot + 1e-12));
+
+    std::cout << std::fixed << std::setprecision(6);
+    std::cout << "\nFinal Metrics (raw data):\n";
+    std::cout << "  MSE = " << mse << "\n";
+    std::cout << "  R²  = " << r2  << "\n";
+    std::cout << "  Time = " << timeSec << " s\n";
+
+    // ------------------------------------------------------------
+    // 5️⃣ Save predictions and summary
+    // ------------------------------------------------------------
+    pred.save(ModelStructure.outputpath + "final_pred_single.csv", arma::csv_ascii);
+
+    std::ofstream file(ModelStructure.outputpath + "single_train_results.csv");
+    file << "MSE,R2,Time_sec\n" << mse << "," << r2 << "," << timeSec << "\n";
+    file.close();
+
+    std::cout << "[Saved] Predictions: final_pred_single.csv\n";
+    std::cout << "[Saved] Summary CSV: single_train_results.csv\n";
+
+    return true;
+}
 */
