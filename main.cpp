@@ -30,7 +30,7 @@ int main()
     double total_data_cols; // Number of Inputs + Outputs
     double number_of_outputs; // Number of Outputs
 
-    int kfold = 1; // 0 for not using kfold, 1 for using kfold
+    int kfold = 0; // 0 for not using kfold, 1 for using kfold
     int kfold_num = 10; // k = 10 for 90/10
     int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed
 
@@ -590,11 +590,14 @@ int main()
             F.ModelStructure = mymodelstruct;
             F.Initiate();
 
-            if (!kfold)
+            if (!kfold) {
+                qDebug() << "Not kfold!";
             F.Train();
-
-            else if (kfold)
+            }
+            else if (kfold) {
+               qDebug() << "kfold!";
             F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+            }
 
             F.Test();
 
