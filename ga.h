@@ -11,7 +11,13 @@ struct GeneticAlgorithmsettings
     unsigned int totalpopulation = 40;
     unsigned int generations = 100;
     double mutation_probability = 0.05;
-    string outputpath = "";
+#ifdef PowerEdge
+    string outputpath = "/mnt/3rd900/Projects/FFN_Wrapper/ASM/Results/";
+#elif Arash
+    string outputpath = "/home/arash/Projects/FFNWrapper/ASM/Results/";
+#elif
+    string outputpath = "/home/behzad/Projects/FFNWrapper2/ASM/Results/";
+#endif
     bool MSE_optimization = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
 };
 

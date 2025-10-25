@@ -32,7 +32,7 @@ int main()
 
     int kfold = 0; // 0 for not using kfold, 1 for using kfold
     int kfold_num = 10; // k = 10 for 90/10
-    int kfold_splitMode = 0; // 0 = random K-fold, 1 = expanding window, 2 = fixed
+    int kfold_splitMode = 2; // 0 = random K-fold, 1 = expanding window, 2 = fixed
 
     enum class _model {Settling, ASM} model = _model::ASM;
 
@@ -54,7 +54,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "TKN"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number
@@ -510,7 +510,7 @@ int main()
         //We can test here:
 
         if (ASM) {
-            QFile results(QString::fromStdString(path_ASM) + "modelresults.txt");
+            QFile results(QString::fromStdString(path_ASM) + "Results/GA_results.txt");
             //QTextStream out;
             if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 out.setDevice(&results);
@@ -522,7 +522,7 @@ int main()
         }
 
         else if(!ASM) {
-            QFile results(QString::fromStdString(path) + "modelresults.txt");
+            QFile results(QString::fromStdString(path) + "Results/GA_results.txt");
             //QTextStream out;
             if (results.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 out.setDevice(&results);
