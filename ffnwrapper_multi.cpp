@@ -267,8 +267,8 @@ bool FFNWrapper_Multi::Transformation()
     TestInputData = normalizedTestData;
 
     // --- Post-transform stats ---
-    PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
-    PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
+    //PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
+    //PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
 
     return true;
 }
@@ -281,7 +281,7 @@ bool FFNWrapper_Multi::Train()
 
     mlpack::math::RandomSeed(ModelStructure.seed_number);
     //SGD<> optimizer(/* stepSize = */ 0.01, /* batchSize = */ 32, /* maxIterations = */ 1000, /* tolerance = */ 1e-5, /* shuffle = */ false);
-
+/*
     qDebug() << "[Training] Input:" << TrainInputData.n_rows << "×" << TrainInputData.n_cols
              << "| Output:" << TrainOutputData.n_rows << "×" << TrainOutputData.n_cols << Qt::endl;
 
@@ -290,10 +290,39 @@ bool FFNWrapper_Multi::Train()
              << "| Output range:"
              << "[" << TrainOutputData.min() << "," << TrainOutputData.max() << "]"
              << Qt::endl;
+*/
+    //PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
 
-    PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
 
-    FFN::Train(TrainInputData, TrainOutputData);
+    ens::StandardSGD opt_SSGD(
+                0.1, // step size (learning rate)
+                1,  // batch size
+                10 * TrainInputData.n_cols, // max iterations (epochs × samples)
+                -100);
+
+
+    ens::SGD opt_SGD(
+        0.001,     // step size (learning rate)
+        1,        // batch size
+        TrainInputData.n_cols * 10,  // max iterations (epochs × samples)
+        1e-6,      // tolerance
+        true       // shuffle
+    );
+
+
+    ens::Adam opt_Adam(
+        0.001,    // step size (learning rate)
+        1,       // batch size
+        0.9,      // beta1
+        0.999,    // beta2
+        1e-8,     // epsilon
+        TrainInputData.n_cols * 10,  // max iterations (epochs × samples)
+        1e-8,     // tolerance
+        true      // shuffle
+    );
+
+
+    FFN::Train(TrainInputData, TrainOutputData, opt_Adam);
 
     // Use the Predict method to get the predictions.
     FFN::Predict(TrainInputData, TrainDataPrediction);
@@ -302,7 +331,7 @@ bool FFNWrapper_Multi::Train()
     return true;
 }
 
-/*
+
 bool FFNWrapper_Multi::Train(const arma::mat& input, const arma::mat& output)
 {
     TrainInputData = input;
@@ -585,7 +614,7 @@ KFoldSplit_FixedRatio(const arma::mat& data,
 
   return {{trainData, trainLabels}, {validData, validLabels}};
 }
-*/
+
 
 bool FFNWrapper_Multi::Test() // Predicting test data
 {

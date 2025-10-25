@@ -54,7 +54,7 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NO"; // NO, NH, ND, sCOD, VSS, TKN
+    string data_name = "TKN"; // NO, NH, ND, sCOD, VSS, TKN
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number
@@ -561,7 +561,7 @@ int main()
                     }
                     else if (kfold) {
                        qDebug() << "kfold!";
-                    //F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+                    F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
                     }
 
                     F.Test();
@@ -599,7 +599,7 @@ int main()
             }
             else if (kfold) {
                qDebug() << "kfold!";
-            //F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
+            F.Train_kfold(kfold_num, kfold_splitMode); // Using kfold
             }
 
             F.Test();
