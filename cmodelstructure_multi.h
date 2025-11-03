@@ -74,6 +74,8 @@ public:
         return false;
     }
 
+    bool GA = true;
+
 };
 
 #endif // CModelStructure_MULTI_H

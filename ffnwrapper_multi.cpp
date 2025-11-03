@@ -73,36 +73,46 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
         FFN<MeanSquaredError>::operator=(newFFN);
 
         mlpack::math::RandomSeed(ModelStructure.seed_number);
-        //qInfo() << "[Init] Network cleared and random seed set to"
-                //<< ModelStructure.seed_number;
+        if(!ModelStructure.GA)
+        {   qInfo() << "[Init] Network cleared and random seed set to"
+                << ModelStructure.seed_number;
+        }
     }
     else
     {
-        //qInfo() << "[Init] Re-using existing network (no reset).";
+        if(!ModelStructure.GA)
+        {   qInfo() << "[Init] Re-using existing network (no reset).";
+        }
     }
 
     // ───────────────────────────────────────────────
     // 3️⃣ Define architecture
     // ───────────────────────────────────────────────
-    //qInfo() << "[Init] Building network architecture:";
-    //qInfo() << "       Input dimension =" << TrainInputData.n_rows
-            //<< ", Output dimension =" << TrainOutputData.n_rows;
+        if(!ModelStructure.GA)
+        {   qInfo() << "[Init] Building network architecture:";
+            qInfo() << "       Input dimension =" << TrainInputData.n_rows
+                << ", Output dimension =" << TrainOutputData.n_rows;
+        }
 
     for (int layer = 0; layer < ModelStructure.n_layers; ++layer)
     {
         const size_t n_nodes = ModelStructure.n_nodes[layer];
         Add<Linear>(n_nodes);
         Add<Sigmoid>();
-        //qInfo().noquote() << QString("       Layer %1: Linear(%2) → Sigmoid")
-                             //.arg(layer + 1)
-                             //.arg(n_nodes);
+        if(!ModelStructure.GA)
+        {   qInfo().noquote() << QString("       Layer %1: Linear(%2) → Sigmoid")
+                             .arg(layer + 1)
+                             .arg(n_nodes);
+        }
     }
 
     Add<ReLU>();
     Add<Linear>(TrainOutputData.n_rows);
 
-    //qInfo().noquote() << QString("       Output: ReLU → Linear(%1)")
-                         //.arg(TrainOutputData.n_rows);
+        if(!ModelStructure.GA)
+        {   qInfo().noquote() << QString("       Output: ReLU → Linear(%1)")
+                         .arg(TrainOutputData.n_rows);
+        }
 
     // ───────────────────────────────────────────────
     // 4️⃣ Initialize parameters (cross-version safe)
@@ -119,12 +129,16 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
     // 5️⃣ Diagnostic summary
     // ───────────────────────────────────────────────
     const size_t totalParams = FFN::Parameters().n_elem;
-    //qInfo() << "[Init] Total trainable parameters:" << totalParams;
+        if(!ModelStructure.GA)
+        {   qInfo() << "[Init] Total trainable parameters:" << totalParams;
+        }
 
     if (totalParams == 0)
-        //qWarning() << "[Init] ⚠️ Warning: network has 0 parameters! Check architecture setup.";
+        if(!ModelStructure.GA)
+        {   qWarning() << "[Init] ⚠️ Warning: network has 0 parameters! Check architecture setup.";
 
-    //qInfo() << "[Init] Network initialization completed successfully.";
+            qInfo() << "[Init] Network initialization completed successfully.";
+        }
 
     return true;
 }

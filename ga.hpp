@@ -90,7 +90,7 @@ void GeneticAlgorithm<T>::AssignFitnesses()
     for (unsigned int i=0; i<models.size(); i++)
     {
 
-        std::cout<<"Number of threads: " << omp_get_num_threads() << ", This thread: " << omp_get_thread_num() << std::endl;
+        //std::cout<<"Number of threads: " << omp_get_num_threads() << ", This thread: " << omp_get_thread_num() << std::endl;
         vector<unsigned long int> parameterset;
         for (unsigned int j=0; j<models[i].ParametersSize(); j++)
         {

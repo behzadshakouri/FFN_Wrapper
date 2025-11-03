@@ -59,7 +59,7 @@ int main()
 
     double Seed_number = 42; // 42 is a random number
 
-    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA_switch = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 100; // Number of GA simulations ???
     bool MSE_Test = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
     bool optimized_structure = true; // true for GA optimized network structures and false for my own structure
@@ -102,6 +102,7 @@ int main()
     // Defining Model Structure
     CModelStructure_Multi mymodelstruct; //randommodelstructure
 
+    mymodelstruct.GA = GA_switch;
     if (ASM)
     {
     // ------------------------simple model properties for optimized structure----------------------------------------------------
@@ -493,7 +494,7 @@ int main()
 
     }
 
-    if (GA) {
+    if (GA_switch) {
 
         GeneticAlgorithm<ModelCreator> GA;
         GA.Settings.generations = GA_Nsim;
@@ -537,7 +538,7 @@ int main()
 
     // ---------------------------------------------RMS---------------------------------------------------------
 
-    else if (!GA) {
+    else if (!GA_switch) {
 
         if (randommodelstructure) {
 
