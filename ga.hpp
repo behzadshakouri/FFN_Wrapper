@@ -86,7 +86,7 @@ void GeneticAlgorithm<T>::Initialize()
 template<class T>
 void GeneticAlgorithm<T>::AssignFitnesses()
 {
-    #pragma omp parallel for
+    //#pragma omp parallel for
     for (unsigned int i=0; i<models.size(); i++)
     {
 

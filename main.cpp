@@ -59,7 +59,7 @@ int main()
 
     double Seed_number = 42; // 42 is a random number
 
-    bool GA = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 100; // Number of GA simulations ???
     bool MSE_Test = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
     bool optimized_structure = true; // true for GA optimized network structures and false for my own structure
