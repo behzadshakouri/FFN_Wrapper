@@ -156,86 +156,121 @@ bool FFNWrapper_Multi::DataProcess()
 
 
 
-bool FFNWrapper_Multi::Shifter(datacategory DataCategory) // Shifting the data according to lags
+bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 {
     segment_sizes.clear();
 
-    if (DataCategory == datacategory::Train) // Train
-    {
-        TrainInputData.clear();
-        TrainOutputData.clear();
-        for (unsigned int i=0; i<ModelStructure.trainaddress.size(); i++)
-        {   CTimeSeriesSet<double> InputTimeSeries(ModelStructure.trainaddress[i],true);
+    qInfo() << "\n[Shifter] Starting data lag shifting for"
+            << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
 
-            //Shifting by lags definition (Inputs)
+    // Choose appropriate references
+    arma::mat& InputDataRef  = (DataCategory == datacategory::Train) ? TrainInputData : TestInputData;
+    arma::mat& OutputDataRef = (DataCategory == datacategory::Train) ? TrainOutputData : TestOutputData;
 
-            mat TrainInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+    InputDataRef.clear();
+    OutputDataRef.clear();
 
-            //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
-            //ShiftedInputs.writetofile("ShiftedInputs.txt");
+    const auto& addressList = (DataCategory == datacategory::Train)
+        ? ModelStructure.trainaddress
+        : ModelStructure.testaddress;
 
-            //Shifting by lags definition (Outputs)
-            mat TrainOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            if (ModelStructure.log_output)
-                TrainOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
-
-            if (i==0)
-            {
-                TrainInputData = TrainInputData1;
-                TrainOutputData = TrainOutputData1;
-            }
-            else
-            {
-                TrainInputData = arma::join_rows(TrainInputData, TrainInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
-                TrainOutputData = arma::join_rows(TrainOutputData, TrainOutputData1);
-            }
-            segment_sizes.push_back(TrainInputData1.n_cols);
-
-        }
-
-        CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputsTrain.txt");
-        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TrainOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputsTrain.txt");
+    if (addressList.empty()) {
+        qCritical() << "[Shifter] ❌ No data files specified for"
+                    << ((DataCategory == datacategory::Train) ? "training" : "testing") << "!";
+        return false;
     }
-    else //Test
+
+    for (unsigned int i = 0; i < addressList.size(); ++i)
     {
-        TestInputData.clear();
-        TestOutputData.clear();
-        for (unsigned int i=0; i<ModelStructure.testaddress.size(); i++)
+        const QString filePath = QString::fromStdString(addressList[i]);
+        qInfo() << "[Shifter]" << ((DataCategory == datacategory::Train) ? "Train" : "Test")
+                << "segment" << i+1 << "→ Loading:" << filePath;
+
+        try
         {
-            CTimeSeriesSet<double> InputTimeSeries(ModelStructure.testaddress[i],true);
+            CTimeSeriesSet<double> InputTimeSeries(addressList[i], true);
 
-            //Shifting by lags definition (Inputs)
+            // ───────────────────────────────────────────────
+            // Shift inputs and outputs based on lag structure
+            // ───────────────────────────────────────────────
+            arma::mat InputMatrix  = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
+            arma::mat OutputMatrix = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
-            mat TestInputData1 = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
-
-            //CTimeSeriesSet<double> ShiftedInputs(TrainInputData,ModelStructure.dt,ModelStructure.lags);
-            //ShiftedInputs.writetofile("ShiftedInputs.txt");
-
-            //Shifting by lags definition (Outputs)
-            mat TestOutputData1 = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
-            if (ModelStructure.log_output)
-                TestOutputData1 = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags); // Log
-
-            if (i==0)
-            {
-                TestInputData = TestInputData1;
-                TestOutputData = TestOutputData1;
+            if (ModelStructure.log_output) {
+                qInfo() << "[Shifter] Applying logarithmic transform to outputs...";
+                OutputMatrix = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
             }
-            else
-            {
-                TestInputData = arma::join_rows(TestInputData, TestInputData1); // Behzad, not sure if it should be join_cols or join_rows, we need to test
-                TestOutputData = arma::join_rows(TestOutputData, TestOutputData1);
+
+            qInfo() << QString("  InputMatrix:  %1 × %2").arg(InputMatrix.n_rows).arg(InputMatrix.n_cols);
+            qInfo() << QString("  OutputMatrix: %1 × %2").arg(OutputMatrix.n_rows).arg(OutputMatrix.n_cols);
+
+            // Sanity check
+            if (InputMatrix.is_empty() || OutputMatrix.is_empty()) {
+                qWarning() << "[Shifter] ⚠️ Empty matrix generated from file:" << filePath;
+                continue;
             }
-            segment_sizes.push_back(TestInputData1.n_cols);
+
+            // Check column alignment
+            if (i == 0) {
+                InputDataRef = InputMatrix;
+                OutputDataRef = OutputMatrix;
+            } else {
+                if (InputDataRef.n_rows != InputMatrix.n_rows)
+                    qWarning() << "[Shifter] ⚠️ Input row mismatch ("
+                               << InputDataRef.n_rows << " vs " << InputMatrix.n_rows
+                               << ") — skipping join!";
+                else
+                    InputDataRef = arma::join_rows(InputDataRef, InputMatrix);
+
+                if (OutputDataRef.n_rows != OutputMatrix.n_rows)
+                    qWarning() << "[Shifter] ⚠️ Output row mismatch ("
+                               << OutputDataRef.n_rows << " vs " << OutputMatrix.n_rows
+                               << ") — skipping join!";
+                else
+                    OutputDataRef = arma::join_rows(OutputDataRef, OutputMatrix);
+            }
+
+            segment_sizes.push_back(InputMatrix.n_cols);
+            qInfo() << QString("  → Segment %1 added. Current total columns: %2")
+                       .arg(i+1).arg(InputDataRef.n_cols);
         }
-
-        CTimeSeriesSet<double> ShiftedInputs(TestInputData,ModelStructure.dt,ModelStructure.lags); // Behzad, This part is to test the shifter. We can comment out after the test.
-        ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputsTest.txt");
-        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(TestOutputData,ModelStructure.dt,ModelStructure.lags);
-        ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputsTest.txt");
+        catch (const std::exception& e)
+        {
+            qCritical() << "[Shifter] ❌ Exception while processing file" << filePath
+                        << ":" << e.what();
+            return false;
+        }
     }
+
+    // ───────────────────────────────────────────────
+    // Export shifted data for inspection
+    // ───────────────────────────────────────────────
+    const std::string prefix = (DataCategory == datacategory::Train)
+        ? "Train"
+        : "Test";
+
+    try
+    {
+        CTimeSeriesSet<double> ShiftedInputs(InputDataRef, ModelStructure.dt, ModelStructure.lags);
+        ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputs" + prefix + ".txt");
+
+        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(OutputDataRef, ModelStructure.dt, ModelStructure.lags);
+        ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputs" + prefix + ".txt");
+    }
+    catch (const std::exception& e)
+    {
+        qWarning() << "[Shifter] ⚠️ Could not write shifted files:" << e.what();
+    }
+
+    qInfo() << "[Shifter] Completed for" << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
+    qInfo() << "  Final InputData size:  " << InputDataRef.n_rows << " × " << InputDataRef.n_cols;
+    qInfo() << "  Final OutputData size: " << OutputDataRef.n_rows << " × " << OutputDataRef.n_cols;
+    QStringList segList;
+    for (size_t i = 0; i < segment_sizes.size(); ++i)
+        segList << QString::number(segment_sizes[i]);
+
+    qInfo() << "  Segment sizes:" << segList.join(", ");
+
     return true;
 }
 
