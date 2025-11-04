@@ -160,8 +160,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 {
     segment_sizes.clear();
 
-    qInfo() << "\n[Shifter] Starting data lag shifting for"
-            << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
+    if (!ModelStructure.GA)
+        qInfo() << "\n[Shifter] Starting data lag shifting for"
+                << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
 
     // Choose appropriate references
     arma::mat& InputDataRef  = (DataCategory == datacategory::Train) ? TrainInputData : TestInputData;
@@ -175,16 +176,18 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         : ModelStructure.testaddress;
 
     if (addressList.empty()) {
-        qCritical() << "[Shifter] ❌ No data files specified for"
-                    << ((DataCategory == datacategory::Train) ? "training" : "testing") << "!";
+        if (!ModelStructure.GA)
+            qCritical() << "[Shifter] ❌ No data files specified for"
+                        << ((DataCategory == datacategory::Train) ? "training" : "testing") << "!";
         return false;
     }
 
     for (unsigned int i = 0; i < addressList.size(); ++i)
     {
         const QString filePath = QString::fromStdString(addressList[i]);
-        qInfo() << "[Shifter]" << ((DataCategory == datacategory::Train) ? "Train" : "Test")
-                << "segment" << i+1 << "→ Loading:" << filePath;
+        if (!ModelStructure.GA)
+            qInfo() << "[Shifter]" << ((DataCategory == datacategory::Train) ? "Train" : "Test")
+                    << "segment" << i + 1 << "→ Loading:" << filePath;
 
         try
         {
@@ -197,16 +200,20 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             arma::mat OutputMatrix = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
             if (ModelStructure.log_output) {
-                qInfo() << "[Shifter] Applying logarithmic transform to outputs...";
+                if (!ModelStructure.GA)
+                    qInfo() << "[Shifter] Applying logarithmic transform to outputs...";
                 OutputMatrix = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
             }
 
-            qInfo() << QString("  InputMatrix:  %1 × %2").arg(InputMatrix.n_rows).arg(InputMatrix.n_cols);
-            qInfo() << QString("  OutputMatrix: %1 × %2").arg(OutputMatrix.n_rows).arg(OutputMatrix.n_cols);
+            if (!ModelStructure.GA) {
+                qInfo() << QString("  InputMatrix:  %1 × %2").arg(InputMatrix.n_rows).arg(InputMatrix.n_cols);
+                qInfo() << QString("  OutputMatrix: %1 × %2").arg(OutputMatrix.n_rows).arg(OutputMatrix.n_cols);
+            }
 
             // Sanity check
             if (InputMatrix.is_empty() || OutputMatrix.is_empty()) {
-                qWarning() << "[Shifter] ⚠️ Empty matrix generated from file:" << filePath;
+                if (!ModelStructure.GA)
+                    qWarning() << "[Shifter] ⚠️ Empty matrix generated from file:" << filePath;
                 continue;
             }
 
@@ -215,29 +222,36 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 InputDataRef = InputMatrix;
                 OutputDataRef = OutputMatrix;
             } else {
-                if (InputDataRef.n_rows != InputMatrix.n_rows)
-                    qWarning() << "[Shifter] ⚠️ Input row mismatch ("
-                               << InputDataRef.n_rows << " vs " << InputMatrix.n_rows
-                               << ") — skipping join!";
-                else
+                if (InputDataRef.n_rows != InputMatrix.n_rows) {
+                    if (!ModelStructure.GA)
+                        qWarning() << "[Shifter] ⚠️ Input row mismatch ("
+                                   << InputDataRef.n_rows << " vs " << InputMatrix.n_rows
+                                   << ") — skipping join!";
+                } else {
                     InputDataRef = arma::join_rows(InputDataRef, InputMatrix);
+                }
 
-                if (OutputDataRef.n_rows != OutputMatrix.n_rows)
-                    qWarning() << "[Shifter] ⚠️ Output row mismatch ("
-                               << OutputDataRef.n_rows << " vs " << OutputMatrix.n_rows
-                               << ") — skipping join!";
-                else
+                if (OutputDataRef.n_rows != OutputMatrix.n_rows) {
+                    if (!ModelStructure.GA)
+                        qWarning() << "[Shifter] ⚠️ Output row mismatch ("
+                                   << OutputDataRef.n_rows << " vs " << OutputMatrix.n_rows
+                                   << ") — skipping join!";
+                } else {
                     OutputDataRef = arma::join_rows(OutputDataRef, OutputMatrix);
+                }
             }
 
             segment_sizes.push_back(InputMatrix.n_cols);
-            qInfo() << QString("  → Segment %1 added. Current total columns: %2")
-                       .arg(i+1).arg(InputDataRef.n_cols);
+
+            if (!ModelStructure.GA)
+                qInfo() << QString("  → Segment %1 added. Current total columns: %2")
+                           .arg(i + 1).arg(InputDataRef.n_cols);
         }
         catch (const std::exception& e)
         {
-            qCritical() << "[Shifter] ❌ Exception while processing file" << filePath
-                        << ":" << e.what();
+            if (!ModelStructure.GA)
+                qCritical() << "[Shifter] ❌ Exception while processing file" << filePath
+                            << ":" << e.what();
             return false;
         }
     }
@@ -254,25 +268,30 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         CTimeSeriesSet<double> ShiftedInputs(InputDataRef, ModelStructure.dt, ModelStructure.lags);
         ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputs" + prefix + ".txt");
 
-        CTimeSeriesSet<double> ShiftedOutputs = CTimeSeriesSet<double>::OutputShifter(OutputDataRef, ModelStructure.dt, ModelStructure.lags);
+        CTimeSeriesSet<double> ShiftedOutputs =
+            CTimeSeriesSet<double>::OutputShifter(OutputDataRef, ModelStructure.dt, ModelStructure.lags);
         ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputs" + prefix + ".txt");
     }
     catch (const std::exception& e)
     {
-        qWarning() << "[Shifter] ⚠️ Could not write shifted files:" << e.what();
+        if (!ModelStructure.GA)
+            qWarning() << "[Shifter] ⚠️ Could not write shifted files:" << e.what();
     }
 
-    qInfo() << "[Shifter] Completed for" << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
-    qInfo() << "  Final InputData size:  " << InputDataRef.n_rows << " × " << InputDataRef.n_cols;
-    qInfo() << "  Final OutputData size: " << OutputDataRef.n_rows << " × " << OutputDataRef.n_cols;
-    QStringList segList;
-    for (size_t i = 0; i < segment_sizes.size(); ++i)
-        segList << QString::number(segment_sizes[i]);
+    if (!ModelStructure.GA) {
+        qInfo() << "[Shifter] Completed for" << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
+        qInfo() << "  Final InputData size:  " << InputDataRef.n_rows << " × " << InputDataRef.n_cols;
+        qInfo() << "  Final OutputData size: " << OutputDataRef.n_rows << " × " << OutputDataRef.n_cols;
 
-    qInfo() << "  Segment sizes:" << segList.join(", ");
+        QStringList segList;
+        for (size_t i = 0; i < segment_sizes.size(); ++i)
+            segList << QString::number(segment_sizes[i]);
+        qInfo() << "  Segment sizes:" << segList.join(", ");
+    }
 
     return true;
 }
+
 
 
 bool FFNWrapper_Multi::Transformation()
