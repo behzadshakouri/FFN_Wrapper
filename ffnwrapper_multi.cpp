@@ -304,7 +304,18 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     }
 
     // ───────────────────────────────────────────────
-    // Load pre-transform parameters ONCE if active
+    // Determine maximum lag for trimming
+    // ───────────────────────────────────────────────
+    int maxLag = 0;
+    for (const auto& lagList : ModelStructure.lags)
+        if (!lagList.empty())
+            maxLag = std::max(maxLag, *std::max_element(lagList.begin(), lagList.end()));
+
+    if (!ModelStructure.GA)
+        qInfo() << "[Shifter] Maximum lag detected:" << maxLag;
+
+    // ───────────────────────────────────────────────
+    // Optional pre-transform (scaling)
     // ───────────────────────────────────────────────
     CTransformation pretransformer;
     bool usePreTransform = ModelStructure.preTransformed;
@@ -320,12 +331,30 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         }
         catch (const std::exception& e) {
             qWarning() << "[Shifter] ⚠️ Could not load pre-transform parameters:" << e.what();
-            usePreTransform = false; // fallback
+            usePreTransform = false;
         }
     }
 
     // ───────────────────────────────────────────────
-    // Main loop: process each input file
+    // Helper lambdas
+    // ───────────────────────────────────────────────
+    auto sanitizeMatrix = [](arma::mat& M, const QString& tag) {
+        if (M.has_inf() || M.has_nan()) {
+            qWarning() << "[Shifter] ⚠️" << tag << "contains Inf/NaN — replacing with 0.";
+            M.replace(arma::datum::nan, 0.0);
+            M.elem(arma::find_nonfinite(M)).fill(0.0);
+        }
+    };
+
+    auto trim_by_maxlag = [&](arma::mat& X, arma::mat& Y, int lag) {
+        if (lag > 0 && X.n_cols > lag && Y.n_cols > lag) {
+            X = X.cols(lag, X.n_cols - 1);
+            Y = Y.cols(lag, Y.n_cols - 1);
+        }
+    };
+
+    // ───────────────────────────────────────────────
+    // Process each input file
     // ───────────────────────────────────────────────
     for (unsigned int i = 0; i < addressList.size(); ++i)
     {
@@ -336,16 +365,12 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
         try
         {
-            // Load raw or pre-normalized time series
             CTimeSeriesSet<double> InputTimeSeries(addressList[i], true);
 
-            // ───────────────────────────────────────────────
-            // Convert to input/output matrices with lag structure
-            // ───────────────────────────────────────────────
             arma::mat InputMatrix  = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
             arma::mat OutputMatrix = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
 
-            // Apply pre-transform scaling if active
+            // Pre-transform if requested
             if (usePreTransform)
             {
                 if (!ModelStructure.GA)
@@ -353,7 +378,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 InputMatrix = pretransformer.transform(InputMatrix);
             }
 
-            // Logarithmic transformation of outputs if requested
+            // Log-transform outputs if requested
             if (ModelStructure.log_output)
             {
                 if (!ModelStructure.GA)
@@ -361,9 +386,14 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 OutputMatrix = InputTimeSeries.Log().ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
             }
 
-            // ───────────────────────────────────────────────
-            // Append to cumulative matrices
-            // ───────────────────────────────────────────────
+            // Defensive cleaning
+            sanitizeMatrix(InputMatrix, "InputMatrix");
+            sanitizeMatrix(OutputMatrix, "OutputMatrix");
+
+            // Trim invalid lagged samples
+            trim_by_maxlag(InputMatrix, OutputMatrix, maxLag);
+
+            // Log sizes
             if (!ModelStructure.GA) {
                 qInfo() << QString("  InputMatrix:  %1 × %2").arg(InputMatrix.n_rows).arg(InputMatrix.n_cols);
                 qInfo() << QString("  OutputMatrix: %1 × %2").arg(OutputMatrix.n_rows).arg(OutputMatrix.n_cols);
@@ -374,8 +404,9 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 continue;
             }
 
+            // Append to cumulative matrices
             if (i == 0) {
-                InputDataRef = InputMatrix;
+                InputDataRef  = InputMatrix;
                 OutputDataRef = OutputMatrix;
             } else {
                 if (InputDataRef.n_rows == InputMatrix.n_rows)
@@ -404,10 +435,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     // ───────────────────────────────────────────────
     // Export shifted data for inspection
     // ───────────────────────────────────────────────
-    const std::string prefix = (DataCategory == datacategory::Train)
-        ? "Train"
-        : "Test";
-
+    const std::string prefix = (DataCategory == datacategory::Train) ? "Train" : "Test";
     try
     {
         CTimeSeriesSet<double> ShiftedInputs(InputDataRef, ModelStructure.dt, ModelStructure.lags);
@@ -423,7 +451,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     }
 
     // ───────────────────────────────────────────────
-    // Final report
+    // Final summary
     // ───────────────────────────────────────────────
     if (!ModelStructure.GA)
     {
@@ -439,6 +467,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
     return true;
 }
+
 
 
 

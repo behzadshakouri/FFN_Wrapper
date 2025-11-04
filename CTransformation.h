@@ -1,3 +1,11 @@
+/**
+ * @class CTransformation
+ * @brief Handles feature-wise normalization and inverse transformation using min-max scaling.
+ *
+ * Each row represents a feature and each column a sample.
+ * Normalization: (x - min) / (max - min)
+ */
+
 #ifndef CTRANSFORMATION_H
 #define CTRANSFORMATION_H
 
@@ -20,6 +28,12 @@ public:
     // ───────────────────────────────────────────────
     arma::mat normalize(const arma::mat& data)
     {
+        if (data.has_nan())
+            std::cerr << "⚠️ [Normalize] Data contains NaN values!" << std::endl;
+
+        if (data.has_inf())
+            std::cerr << "⚠️ [Normalize] Data contains Inf values!" << std::endl;
+
         std::cout << "\n[Normalize] Starting normalization..." << std::endl;
         std::cout << "  Input size: " << data.n_rows << " × " << data.n_cols << std::endl;
 

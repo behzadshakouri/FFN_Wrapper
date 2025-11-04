@@ -346,7 +346,7 @@ int main()
             mymodelstruct.outputcolumns.push_back(total_data_cols-(i+1)); // Output: Settling element (1)_Solids:concentration
 
         // Lags definition
-        vector<int> lag0; lag0.push_back(0); lag0.push_back(12); lag0.push_back(20);
+        vector<int> lag0; lag0.push_back(0); lag0.push_back(12); lag0.push_back(60);
         //vector<int> lag1; lag1.push_back(0); // WAS
         //vector<int> lag2; lag2.push_back(0);
         //vector<int> lag3; lag3.push_back(0);
