@@ -156,9 +156,11 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
 
 bool FFNWrapper_Multi::DataProcess()
 {
-    PreTransform();                 // Normalize raw data first
+    //PreTransform();                 // Normalize raw data first
     Shifter(datacategory::Train);   // Load + lag normalized data
     Shifter(datacategory::Test);
+    Transformation();
+
     return true;
 }
 
