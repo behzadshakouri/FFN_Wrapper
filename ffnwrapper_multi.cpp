@@ -24,6 +24,16 @@ using namespace mlpack::ann;
 using namespace arma;
 using namespace std;
 
+#include <sstream>
+inline QDebug operator<<(QDebug dbg, const arma::mat& m)
+{
+    std::ostringstream oss;
+    oss << m;
+    dbg.noquote() << QString::fromStdString(oss.str());
+    return dbg;
+}
+
+
 FFNWrapper_Multi::FFNWrapper_Multi():FFN<MeanSquaredError>()
 {
 
@@ -296,49 +306,113 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
 
 bool FFNWrapper_Multi::Transformation()
 {
+    if (!ModelStructure.GA)
+        qInfo() << "\n[Transformation] Starting data normalization and parameter scaling...";
 
-    // Train data transform
-    CTransformation alldatatransformer;
-    arma::mat All_DATA;
-    All_DATA = arma::join_rows(TrainInputData, TestInputData);
+    try
+    {
+        // ───────────────────────────────────────────────
+        // 1️⃣ Combine Train and Test for unified normalization
+        // ───────────────────────────────────────────────
+        arma::mat All_DATA = arma::join_rows(TrainInputData, TestInputData);
 
-    //std::cout << "Original Data:\n" << inputdata << std::endl;
+        if (!ModelStructure.GA)
+            qInfo() << "[Normalize] Input size:" << All_DATA.n_rows << "×" << All_DATA.n_cols;
 
-    // Normalize train input data
-    arma::mat normalizedData = alldatatransformer.normalize(All_DATA);
-    //std::cout << "Normalized Data:\n" << normalizedInputData << std::endl;
-    normalizedData.save(ModelStructure.outputpath + "normalizedidata.txt", arma::file_type::raw_ascii);
+        CTransformation alldatatransformer;
 
-    // Save parameters
-    alldatatransformer.saveParameters(ModelStructure.outputpath + "scaling_params_all.txt");
+        // Normalize all data
+        arma::mat normalizedData = alldatatransformer.normalize(All_DATA);
 
-    // Load parameters for train data
-    CTransformation traintransformer;
-    traintransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
+        if (!ModelStructure.GA) {
+            qInfo() << "[Normalize] Completed.";
+            arma::rowvec mins = alldatatransformer.GetMinValues().t();
+            arma::rowvec maxs = alldatatransformer.GetMaxValues().t();
+            qInfo() << "  First 5 min values:" << mins.head(std::min((size_t)5, (size_t)mins.n_elem)).t();
+            qInfo() << "  First 5 max values:" << maxs.head(std::min((size_t)5, (size_t)maxs.n_elem)).t();
+        }
 
-    // Load parameters for test
-    CTransformation testtransformer;
-    testtransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
+        // Save normalized joined data
+        normalizedData.save(ModelStructure.outputpath + "normalizedidata.txt", arma::file_type::raw_ascii);
+        if (!ModelStructure.GA)
+            qInfo() << "[SaveData] Saved normalized joined data →"
+                    << QString::fromStdString(ModelStructure.outputpath + "normalizedidata.txt");
 
-    // Train data transform
-    arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
-    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
-    normalizedTrainData.save(ModelStructure.outputpath + "normalizedtrainidata.txt", arma::file_type::raw_ascii);
+        // ───────────────────────────────────────────────
+        // 2️⃣ Save and reload scaling parameters
+        // ───────────────────────────────────────────────
+        alldatatransformer.saveParameters(ModelStructure.outputpath + "scaling_params_all.txt");
 
-    // Test data transform
-    arma::mat normalizedTestData = testtransformer.transform(TestInputData);
-    //std::cout << "Restored Data:\n" << restoredInputData << std::endl;
-    normalizedTestData.save(ModelStructure.outputpath + "normalizedtestidata.txt", arma::file_type::raw_ascii);
+        if (!ModelStructure.GA)
+            qInfo() << "[SaveParams] Saved normalization parameters →"
+                    << QString::fromStdString(ModelStructure.outputpath + "scaling_params_all.txt");
 
-    // Writing normalized data to matrices
-    TrainInputData = normalizedTrainData;
-    TestInputData = normalizedTestData;
+        // Reload parameters for both train and test
+        CTransformation traintransformer, testtransformer;
+        traintransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
+        testtransformer.loadParameters(ModelStructure.outputpath + "scaling_params_all.txt");
 
-    // --- Post-transform stats ---
-    //PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
-    //PrintDataStats(TrainInputData, TrainOutputData, "Train (final normalized)");
+        if (!ModelStructure.GA) {
+            qInfo() << "[LoadParams] Loaded scaling parameters for TRAIN and TEST ←"
+                    << QString::fromStdString(ModelStructure.outputpath + "scaling_params_all.txt");
+        }
 
-    return true;
+        // ───────────────────────────────────────────────
+        // 3️⃣ Apply normalization to Train and Test separately
+        // ───────────────────────────────────────────────
+        if (!ModelStructure.GA)
+            qInfo() << "[Transform] Applying stored normalization parameters to TRAIN data...";
+
+        arma::mat normalizedTrainData = traintransformer.transform(TrainInputData);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[Transform] Done (TRAIN). Saving...";
+
+        normalizedTrainData.save(ModelStructure.outputpath + "normalizedtrainidata.txt",
+                                 arma::file_type::raw_ascii);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[SaveData] Saved normalized train data →"
+                    << QString::fromStdString(ModelStructure.outputpath + "normalizedtrainidata.txt");
+
+        if (!ModelStructure.GA)
+            qInfo() << "[Transform] Applying stored normalization parameters to TEST data...";
+
+        arma::mat normalizedTestData = testtransformer.transform(TestInputData);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[Transform] Done (TEST). Saving...";
+
+        normalizedTestData.save(ModelStructure.outputpath + "normalizedtestidata.txt",
+                                arma::file_type::raw_ascii);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[SaveData] Saved normalized test data →"
+                    << QString::fromStdString(ModelStructure.outputpath + "normalizedtestidata.txt");
+
+        // ───────────────────────────────────────────────
+        // 4️⃣ Assign back normalized matrices
+        // ───────────────────────────────────────────────
+        TrainInputData = normalizedTrainData;
+        TestInputData  = normalizedTestData;
+
+        // ───────────────────────────────────────────────
+        // 5️⃣ Summary statistics
+        // ───────────────────────────────────────────────
+        if (!ModelStructure.GA) {
+            qInfo() << "[Transformation] ✅ Completed successfully.";
+            qInfo() << "  Train normalized size: " << TrainInputData.n_rows << "×" << TrainInputData.n_cols;
+            qInfo() << "  Test normalized size:  " << TestInputData.n_rows  << "×" << TestInputData.n_cols;
+        }
+
+        return true;
+    }
+    catch (const std::exception& e)
+    {
+        if (!ModelStructure.GA)
+            qCritical() << "[Transformation] ❌ Exception occurred:" << e.what();
+        return false;
+    }
 }
 
 
