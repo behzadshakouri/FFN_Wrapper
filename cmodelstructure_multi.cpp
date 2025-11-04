@@ -33,6 +33,7 @@ CModelStructure_Multi::CModelStructure_Multi(const CModelStructure_Multi &rhs) /
     log_output = rhs.log_output;
     seed_number = rhs.seed_number;
     GA = rhs.GA;
+    preTransformed = rhs.preTransformed;
 
 }
 CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_Multi &rhs) // Operator =
@@ -61,6 +62,7 @@ CModelStructure_Multi& CModelStructure_Multi::operator = (const CModelStructure_
     log_output = rhs.log_output;
     seed_number = rhs.seed_number;
     GA = rhs.GA;
+    preTransformed = rhs.preTransformed;
 
     return *this;
 }

@@ -74,7 +74,8 @@ public:
         return false;
     }
 
-    bool GA = true;
+    bool GA = true; // GA switch
+    bool preTransformed = false;  // set flag for PreTransform()
 
 };
 

@@ -156,12 +156,62 @@ bool FFNWrapper_Multi::Initiate(bool dataprocess)
 
 bool FFNWrapper_Multi::DataProcess()
 {
-
-    Shifter(datacategory::Train);
+    PreTransform();                 // Normalize raw data first
+    Shifter(datacategory::Train);   // Load + lag normalized data
     Shifter(datacategory::Test);
-    Transformation();
-
     return true;
+}
+
+
+
+bool FFNWrapper_Multi::PreTransform()
+{
+    if (!ModelStructure.GA)
+        qInfo() << "\n[PreTransform] Starting normalization of raw (non-lagged) data...";
+
+    try {
+        // Load raw train and test
+        arma::mat RawTrain, RawTest;
+        for (auto& addr : ModelStructure.trainaddress)
+            RawTrain = arma::join_rows(RawTrain, CTimeSeriesSet<double>(addr, true).ToArmaMat(ModelStructure.inputcolumns));
+        for (auto& addr : ModelStructure.testaddress)
+            RawTest = arma::join_rows(RawTest, CTimeSeriesSet<double>(addr, true).ToArmaMat(ModelStructure.inputcolumns));
+
+        arma::mat AllData = arma::join_rows(RawTrain, RawTest);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[PreTransform] Input size:" << AllData.n_rows << "×" << AllData.n_cols;
+
+        CTransformation transformer;
+        arma::mat normalized = transformer.normalize(AllData);
+        transformer.saveParameters(ModelStructure.outputpath + "scaling_params_raw.txt");
+
+        if (!ModelStructure.GA)
+            qInfo() << "[PreTransform] Saved normalization parameters.";
+
+        // Split back into normalized train/test and overwrite temporary files
+        RawTrain = normalized.cols(0, RawTrain.n_cols - 1);
+        RawTest  = normalized.cols(RawTrain.n_cols, normalized.n_cols - 1);
+
+        RawTrain.save(ModelStructure.outputpath + "normalized_raw_train.txt", arma::file_type::raw_ascii);
+        RawTest.save(ModelStructure.outputpath + "normalized_raw_test.txt", arma::file_type::raw_ascii);
+
+        if (!ModelStructure.GA)
+            qInfo() << "[PreTransform] ✅ Completed. Normalized raw data written.";
+
+        // Optionally reassign normalized addresses
+        ModelStructure.trainaddress = { ModelStructure.outputpath + "normalized_raw_train.txt" };
+        ModelStructure.testaddress  = { ModelStructure.outputpath + "normalized_raw_test.txt" };
+
+        ModelStructure.preTransformed = true;
+
+        return true;
+    }
+    catch (const std::exception& e) {
+        if (!ModelStructure.GA)
+            qCritical() << "[PreTransform] ❌ Exception:" << e.what();
+        return false;
+    }
 }
 
 
@@ -174,7 +224,6 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         qInfo() << "\n[Shifter] Starting data lag shifting for"
                 << ((DataCategory == datacategory::Train) ? "TRAIN" : "TEST");
 
-    // Choose appropriate references
     arma::mat& InputDataRef  = (DataCategory == datacategory::Train) ? TrainInputData : TestInputData;
     arma::mat& OutputDataRef = (DataCategory == datacategory::Train) ? TrainOutputData : TestOutputData;
 
@@ -192,6 +241,30 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         return false;
     }
 
+    // ───────────────────────────────────────────────
+    // Optional pre-transform step (if PreTransform used)
+    // ───────────────────────────────────────────────
+    CTransformation pretransformer;
+    bool usePreTransform = ModelStructure.preTransformed;  // <— Flag set by PreTransform()
+
+    if (usePreTransform)
+    {
+        try {
+            std::string scaleFile = ModelStructure.outputpath + "scaling_params_raw.txt";
+            pretransformer.loadParameters(scaleFile);
+            if (!ModelStructure.GA)
+                qInfo() << "[Shifter] Using pre-transformed normalization (loaded from)"
+                        << QString::fromStdString(scaleFile);
+        }
+        catch (const std::exception& e) {
+            qWarning() << "[Shifter] ⚠️ Could not load pre-transform parameters:" << e.what();
+            usePreTransform = false;  // fallback
+        }
+    }
+
+    // ───────────────────────────────────────────────
+    // Main shifting loop
+    // ───────────────────────────────────────────────
     for (unsigned int i = 0; i < addressList.size(); ++i)
     {
         const QString filePath = QString::fromStdString(addressList[i]);
@@ -199,15 +272,19 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             qInfo() << "[Shifter]" << ((DataCategory == datacategory::Train) ? "Train" : "Test")
                     << "segment" << i + 1 << "→ Loading:" << filePath;
 
-        try
-        {
+        try {
             CTimeSeriesSet<double> InputTimeSeries(addressList[i], true);
 
-            // ───────────────────────────────────────────────
-            // Shift inputs and outputs based on lag structure
-            // ───────────────────────────────────────────────
+            // Convert file → matrix
             arma::mat InputMatrix  = InputTimeSeries.ToArmaMatShifter(ModelStructure.inputcolumns, ModelStructure.lags);
             arma::mat OutputMatrix = InputTimeSeries.ToArmaMatShifterOutput(ModelStructure.outputcolumns, ModelStructure.lags);
+
+            if (usePreTransform)
+            {
+                if (!ModelStructure.GA)
+                    qInfo() << "[Shifter] Applying pre-transform scaling to input matrix...";
+                InputMatrix = pretransformer.transform(InputMatrix);
+            }
 
             if (ModelStructure.log_output) {
                 if (!ModelStructure.GA)
@@ -220,61 +297,32 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 qInfo() << QString("  OutputMatrix: %1 × %2").arg(OutputMatrix.n_rows).arg(OutputMatrix.n_cols);
             }
 
-            // Sanity check
-            if (InputMatrix.is_empty() || OutputMatrix.is_empty()) {
-                if (!ModelStructure.GA)
-                    qWarning() << "[Shifter] ⚠️ Empty matrix generated from file:" << filePath;
-                continue;
-            }
-
-            // Check column alignment
+            // Merge matrices
             if (i == 0) {
                 InputDataRef = InputMatrix;
                 OutputDataRef = OutputMatrix;
             } else {
-                if (InputDataRef.n_rows != InputMatrix.n_rows) {
-                    if (!ModelStructure.GA)
-                        qWarning() << "[Shifter] ⚠️ Input row mismatch ("
-                                   << InputDataRef.n_rows << " vs " << InputMatrix.n_rows
-                                   << ") — skipping join!";
-                } else {
-                    InputDataRef = arma::join_rows(InputDataRef, InputMatrix);
-                }
-
-                if (OutputDataRef.n_rows != OutputMatrix.n_rows) {
-                    if (!ModelStructure.GA)
-                        qWarning() << "[Shifter] ⚠️ Output row mismatch ("
-                                   << OutputDataRef.n_rows << " vs " << OutputMatrix.n_rows
-                                   << ") — skipping join!";
-                } else {
-                    OutputDataRef = arma::join_rows(OutputDataRef, OutputMatrix);
-                }
+                InputDataRef  = arma::join_rows(InputDataRef, InputMatrix);
+                OutputDataRef = arma::join_rows(OutputDataRef, OutputMatrix);
             }
 
             segment_sizes.push_back(InputMatrix.n_cols);
-
             if (!ModelStructure.GA)
                 qInfo() << QString("  → Segment %1 added. Current total columns: %2")
                            .arg(i + 1).arg(InputDataRef.n_cols);
         }
-        catch (const std::exception& e)
-        {
-            if (!ModelStructure.GA)
-                qCritical() << "[Shifter] ❌ Exception while processing file" << filePath
-                            << ":" << e.what();
+        catch (const std::exception& e) {
+            qCritical() << "[Shifter] ❌ Exception while processing file" << filePath
+                        << ":" << e.what();
             return false;
         }
     }
 
     // ───────────────────────────────────────────────
-    // Export shifted data for inspection
+    // Export shifted data (for inspection)
     // ───────────────────────────────────────────────
-    const std::string prefix = (DataCategory == datacategory::Train)
-        ? "Train"
-        : "Test";
-
-    try
-    {
+    const std::string prefix = (DataCategory == datacategory::Train) ? "Train" : "Test";
+    try {
         CTimeSeriesSet<double> ShiftedInputs(InputDataRef, ModelStructure.dt, ModelStructure.lags);
         ShiftedInputs.writetofile(ModelStructure.outputpath + "ShiftedInputs" + prefix + ".txt");
 
@@ -282,8 +330,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             CTimeSeriesSet<double>::OutputShifter(OutputDataRef, ModelStructure.dt, ModelStructure.lags);
         ShiftedOutputs.writetofile(ModelStructure.outputpath + "ShiftedOutputs" + prefix + ".txt");
     }
-    catch (const std::exception& e)
-    {
+    catch (const std::exception& e) {
         if (!ModelStructure.GA)
             qWarning() << "[Shifter] ⚠️ Could not write shifted files:" << e.what();
     }

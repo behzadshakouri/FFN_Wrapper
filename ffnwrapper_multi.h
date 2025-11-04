@@ -23,6 +23,7 @@ public:
 
     bool Initiate(bool dataprocess = true);
     bool DataProcess();
+    bool PreTransform();
     bool Shifter(datacategory);
     bool Transformation();
     bool Train();

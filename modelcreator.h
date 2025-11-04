@@ -55,7 +55,6 @@ public:
         return (!operator==(m2));
     }
 
-
 private:
     vector<long int> parameters;
     gsl_rng * r = gsl_rng_alloc (gsl_rng_taus);
