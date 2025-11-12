@@ -271,6 +271,7 @@ bool FFNWrapper_Multi::PreTransform()
     }
     catch (const std::exception& e)
     {
+        if (!ModelStructure.GA)
         qCritical() << "[PreTransform] ❌ Exception occurred:" << e.what();
         return false;
     }
@@ -330,6 +331,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                         << QString::fromStdString(scaleFile);
         }
         catch (const std::exception& e) {
+            if (!ModelStructure.GA)
             qWarning() << "[Shifter] ⚠️ Could not load pre-transform parameters:" << e.what();
             usePreTransform = false;
         }
@@ -338,15 +340,14 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     // ───────────────────────────────────────────────
     // Helper lambdas
     // ───────────────────────────────────────────────
-    auto sanitizeMatrix = [](arma::mat& M, const QString& tag) {
-        if (M.has_inf() || M.has_nan()) {
+    auto sanitizeMatrix = [this](arma::mat& M, const QString& tag) {
+        if (!ModelStructure.GA)
             qWarning() << "[Shifter] ⚠️" << tag << "contains Inf/NaN — replacing with 0.";
-            M.replace(arma::datum::nan, 0.0);
-            M.elem(arma::find_nonfinite(M)).fill(0.0);
-        }
+        M.replace(arma::datum::nan, 0.0);
+        M.elem(arma::find_nonfinite(M)).fill(0.0);
     };
 
-    auto trim_by_maxlag = [&](arma::mat& X, arma::mat& Y, int lag) {
+    auto trim_by_maxlag = [this](arma::mat& X, arma::mat& Y, int lag) {
         if (lag > 0 && X.n_cols > lag && Y.n_cols > lag) {
             X = X.cols(lag, X.n_cols - 1);
             Y = Y.cols(lag, Y.n_cols - 1);
@@ -400,6 +401,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
             }
 
             if (InputMatrix.is_empty() || OutputMatrix.is_empty()) {
+                if (!ModelStructure.GA)
                 qWarning() << "[Shifter] ⚠️ Empty matrix generated from file:" << filePath;
                 continue;
             }
@@ -412,11 +414,13 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
                 if (InputDataRef.n_rows == InputMatrix.n_rows)
                     InputDataRef = arma::join_rows(InputDataRef, InputMatrix);
                 else
+                    if (!ModelStructure.GA)
                     qWarning() << "[Shifter] ⚠️ Input row mismatch, skipping join for:" << filePath;
 
                 if (OutputDataRef.n_rows == OutputMatrix.n_rows)
                     OutputDataRef = arma::join_rows(OutputDataRef, OutputMatrix);
                 else
+                    if (!ModelStructure.GA)
                     qWarning() << "[Shifter] ⚠️ Output row mismatch, skipping join for:" << filePath;
             }
 
@@ -427,6 +431,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
         }
         catch (const std::exception& e)
         {
+            if (!ModelStructure.GA)
             qCritical() << "[Shifter] ❌ Exception while processing file" << filePath << ":" << e.what();
             return false;
         }
@@ -447,6 +452,7 @@ bool FFNWrapper_Multi::Shifter(datacategory DataCategory)
     }
     catch (const std::exception& e)
     {
+        if (!ModelStructure.GA)
         qWarning() << "[Shifter] ⚠️ Could not write shifted files:" << e.what();
     }
 

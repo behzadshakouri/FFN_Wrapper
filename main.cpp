@@ -54,12 +54,12 @@ int main()
     number_of_outputs = 2; // Number of Outputs
     }
 
-    string data_name = "NO"; // NO, NH, sCOD, TKN, VSS, ND
+    string data_name = "NH"; // NO, NH, sCOD, TKN, VSS, ND
     bool log_output_d = false; // true for log output data and false for normal output data
 
     double Seed_number = 42; // 42 is a random number
 
-    bool GA_switch = false;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
+    bool GA_switch = true;  // true for Genetic Alghorithm usage and false for no Genetic Alghorithm usage
     const double GA_Nsim = 100; // Number of GA simulations ???
     bool MSE_Test = true; // true for MSE_Test minimization and false for (MSE_Test + MSE_Train) minimization
     bool optimized_structure = true; // true for GA optimized network structures and false for my own structure
