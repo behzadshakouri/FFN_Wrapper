@@ -64,10 +64,13 @@ SOURCES += \
     $$OHQPATH/Utilities.cpp \
     cmodelstructure.cpp \
     cmodelstructure_multi.cpp \
+    config.cpp \
     ffnwrapper.cpp \
     ffnwrapper_multi.cpp \
+    modelbuilder.cpp \
     modelcreator.cpp \
-    main.cpp
+    main.cpp \
+    trainer.cpp
 
 # ---------------- Header Files ----------------
 HEADERS += \
@@ -77,6 +80,7 @@ HEADERS += \
     ../Utilities/BTCSet.hpp \
     Binary.h \
     CTransformation.h \
+    config.h \
     ga.h \
     ga.hpp \
     individual.h \
@@ -84,8 +88,10 @@ HEADERS += \
     cmodelstructure_multi.h \
     ffnwrapper.h \
     ffnwrapper_multi.h \
+    modelbuilder.h \
     modelcreator.h \
-    pch.h
+    pch.h \
+    trainer.h
 
 # ---------------- Build Notes ----------------
 # To build under Qt Creator:
