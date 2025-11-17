@@ -65,108 +65,84 @@
 
 int main()
 {
-    /**
-     * @brief Global configuration object.
-     * @details
-     * All settings must be explicitly assigned below.
-     */
-    Config cfg;
+    Config cfg;  ///< Global configuration object.
 
     // =====================================================================
     // 1. MODEL SELECTION & DATA SETTINGS
     // =====================================================================
 
-    /**
-     * @brief Model selection.
-     * @details
-     * Set true for ASM (wastewater treatment),
-     * or false for simple settling model.
-     */
-    cfg.ASM = true;
+    cfg.ASM          = true;        ///< true = ASM, false = simple settling.
+    cfg.data_name    = "NO";       ///< Constituent ("NO","NH","sCOD","TKN","VSS","ND").
+    cfg.log_output_d = false;       ///< Log-transform output?
+    cfg.Seed_number  = 42;          ///< Random seed.
+    cfg.Realization  = 1;           ///< Number of realizations.
 
-    /**
-     * @brief Target constituent for ASM prediction.
-     * @details
-     * Allowed: "NO", "NH", "sCOD", "TKN", "VSS", "ND"
-     */
-    cfg.data_name = "NO";
-
-    /**
-     * @brief Apply log-transform to output.
-     */
-    cfg.log_output_d = false;
-
-    /**
-     * @brief Random seed for reproducibility.
-     */
-    cfg.Seed_number = 42;
-
-    /**
-     * @brief Number of model realizations to run.
-     * @details Paths and outputs will be duplicated for each realization.
-     */
-    cfg.Realization = 1;
-
-
-    // Set dataset input/output sizes based on model type
-    if (cfg.ASM) {
-        cfg.total_data_cols   = 10;   ///< Inputs + outputs for ASM
-        cfg.number_of_outputs = 1;    ///< ASM uses 1 output
+    if (cfg.ASM)
+    {
+        cfg.total_data_cols   = 10; ///< Inputs + outputs for ASM.
+        cfg.number_of_outputs = 1;  ///< ASM uses 1 output.
     }
-    else {
-        cfg.total_data_cols   = 4;    ///< Simple settling model
-        cfg.number_of_outputs = 2;    ///< 2-output settling model
+    else
+    {
+        cfg.total_data_cols   = 4;  ///< Simple model.
+        cfg.number_of_outputs = 2;  ///< 2 outputs.
     }
 
+    // =====================================================================
+    // 2. ARCHITECTURE SET SWITCH
+    // =====================================================================
+    /**
+     * @brief Architecture set selector.
+     *
+     * 0 → original/old architectures
+     * 1 → new architectures
+     */
+    cfg.architecture_set = 1;   // CONTROL THIS LINE TO SWITCH SET
 
     // =====================================================================
-    // 2. K-FOLD SETTINGS
+    // 3. K-FOLD SETTINGS
     // =====================================================================
 
-    cfg.kfold          = false;  ///< Enable/disable K-fold
-    cfg.kfold_num      = 10;     ///< K-fold value (e.g., 10 = 90/10 split)
-    cfg.kfold_splitMode = 2;     ///< 0=random, 1=expanding, 2=fixed window
-
+    cfg.kfold          = false;
+    cfg.kfold_num      = 10;
+    cfg.kfold_splitMode = 2;
 
     // =====================================================================
-    // 3. GENETIC ALGORITHM SETTINGS
+    // 4. GENETIC ALGORITHM SETTINGS
     // =====================================================================
 
-    cfg.GA_switch       = true; ///< true = enable GA optimization
-    cfg.GA_Nsim         = 1000;    ///< Number of GA generations
-    cfg.MSE_Test        = true;  ///< Optimize GA using only MSE-Test
+    cfg.GA_switch          = false;
+    cfg.GA_Nsim            = 100;
+    cfg.MSE_Test           = true;
     cfg.optimized_structure = true;
 
+    // =====================================================================
+    // 5. RANDOM MODEL STRUCTURE SEARCH
+    // =====================================================================
+
+    cfg.randommodelstructure = false;
+    cfg.Random_Nsim          = 1000;
 
     // =====================================================================
-    // 4. RANDOM MODEL STRUCTURE SEARCH
-    // =====================================================================
-
-    cfg.randommodelstructure = false; ///< true = random search
-    cfg.Random_Nsim          = 1000;  ///< Number of random models
-
-
-    // =====================================================================
-    // 5. FILESYSTEM PATHS
+    // 6. FILESYSTEM PATHS
     // =====================================================================
 
 #ifdef PowerEdge
-    cfg.path        = "/mnt/3rd900/Projects/FFN_Wrapper/";
-    cfg.path_ASM    = "/mnt/3rd900/Projects/FFN_Wrapper/ASM/";
+    cfg.path     = "/mnt/3rd900/Projects/FFN_Wrapper/";
+    cfg.path_ASM = "/mnt/3rd900/Projects/FFN_Wrapper/ASM/";
 #elif defined(Arash)
-    cfg.path        = "/home/arash/Projects/FFNWrapper/";
-    cfg.path_ASM    = "/home/arash/Projects/FFNWrapper/ASM/";
+    cfg.path     = "/home/arash/Projects/FFNWrapper/";
+    cfg.path_ASM = "/home/arash/Projects/FFNWrapper/ASM/";
 #else
-    cfg.path        = "/home/behzad/Projects/FFNWrapper2/";
-    cfg.path_ASM    = "/home/behzad/Projects/FFNWrapper2/ASM/";
+    cfg.path     = "/home/behzad/Projects/FFNWrapper2/";
+    cfg.path_ASM = "/home/behzad/Projects/FFNWrapper2/ASM/";
 #endif
 
     cfg.datapath     = cfg.path;
     cfg.datapath_ASM = cfg.path_ASM;
 
-
     // =====================================================================
-    // 6. MODELCREATOR SETTINGS (for Random or GA modes)
+    // 7. MODELCREATOR SETTINGS (for GA/RMS)
     // =====================================================================
 
     cfg.modelCreator.lag_frequency               = 3;
@@ -178,22 +154,17 @@ int main()
     cfg.modelCreator.max_lag_multiplier           = 10;
     cfg.modelCreator.max_number_of_nodes_in_layers = 40;
 
-
     // =====================================================================
-    // 7. CONSTRUCT MODEL STRUCTURE AND PATHS
+    // 8. BUILD MODEL STRUCTURE AND PATHS
     // =====================================================================
 
     CModelStructure_Multi ms;
 
-    // Build NN structure (layers, nodes, inputs, outputs, lags)
-    BuildModelStructure(ms, cfg);
-
-    // Build dataset and output file paths
-    BuildAddresses(ms, cfg);
-
+    BuildModelStructure(ms, cfg);   ///< Build layers, nodes, lags, IO columns.
+    BuildAddresses(ms, cfg);        ///< Build input/output file paths.
 
     // =====================================================================
-    // 8. SELECT AND EXECUTE TRAINING MODE
+    // 9. SELECT AND EXECUTE TRAINING MODE
     // =====================================================================
 
     if (cfg.GA_switch)
