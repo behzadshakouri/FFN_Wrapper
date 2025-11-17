@@ -132,7 +132,7 @@ int main()
     // 3. GENETIC ALGORITHM SETTINGS
     // =====================================================================
 
-    cfg.GA_switch       = false; ///< true = enable GA optimization
+    cfg.GA_switch       = true; ///< true = enable GA optimization
     cfg.GA_Nsim         = 1000;    ///< Number of GA generations
     cfg.MSE_Test        = true;  ///< Optimize GA using only MSE-Test
     cfg.optimized_structure = true;
